@@ -59,15 +59,11 @@ export default function Bookings() {
     // New Booking Modal state
     const [showNewModal, setShowNewModal] = useState(false);
     const [services, setServices] = useState([]);
-    const [clientsList, setClientsList] = useState([]);
     const [loadingModalData, setLoadingModalData] = useState(false);
     const [formSubmitting, setFormSubmitting] = useState(false);
     const [formError, setFormError] = useState('');
-    const [clientSearchFilter, setClientSearchFilter] = useState('');
 
     const defaultForm = {
-        clientMode: 'existing', // 'existing' | 'new'
-        clientId: '',
         name: '',
         contactNumber: '',
         email: '',
@@ -97,7 +93,7 @@ export default function Bookings() {
         }
     }, [location.state]);
 
-    // Load available services & clients whenever the modal is opened
+    // Load services whenever the modal is opened
     useEffect(() => {
         if (showNewModal) {
             loadModalData();
@@ -129,16 +125,9 @@ export default function Bookings() {
         setLoadingModalData(true);
         setFormError('');
         try {
-            const [svcRes, clientRes] = await Promise.all([
-                api.get('/services').catch(() => ({ data: [] })),
-                api.get('/clients', { params: { per_page: 100 } }).catch(() => ({ data: { data: [] } })),
-            ]);
-
+            const svcRes = await api.get('/services').catch(() => ({ data: [] }));
             const svcData = Array.isArray(svcRes.data) ? svcRes.data : (svcRes.data.data || []);
             setServices(svcData);
-
-            const clData = Array.isArray(clientRes.data) ? clientRes.data : (clientRes.data.data || []);
-            setClientsList(clData);
 
             // Pre-select first service if none selected
             if (svcData.length > 0 && !form.serviceId) {
@@ -149,7 +138,7 @@ export default function Bookings() {
                 }));
             }
         } catch (err) {
-            console.error('Failed to load services or clients:', err);
+            console.error('Failed to load services:', err);
         } finally {
             setLoadingModalData(false);
         }
@@ -164,33 +153,18 @@ export default function Bookings() {
         }));
     };
 
-    const handleExistingClientSelect = (clId) => {
-        const found = clientsList.find(c => String(c.id) === String(clId));
-        setForm(prev => ({
-            ...prev,
-            clientId: clId,
-            address: found?.address ? found.address : prev.address,
-        }));
-    };
-
     const handleCreateBooking = async (e) => {
         e.preventDefault();
         setFormError('');
 
-        if (form.clientMode === 'existing' && !form.clientId) {
-            setFormError('Please select an existing client or switch to New Client tab.');
+        if (!form.name.trim()) {
+            setFormError('Client name is required.');
             return;
         }
 
-        if (form.clientMode === 'new') {
-            if (!form.name.trim()) {
-                setFormError('Client name is required.');
-                return;
-            }
-            if (!form.contactNumber.trim()) {
-                setFormError('Contact phone number is required.');
-                return;
-            }
+        if (!form.contactNumber.trim()) {
+            setFormError('Contact phone number is required.');
+            return;
         }
 
         if (!form.serviceId) {
@@ -217,6 +191,8 @@ export default function Bookings() {
             const fullNotes = [timeDesc, form.notes.trim()].filter(Boolean).join(' | ') || null;
 
             const payload = {
+                name: form.name.trim(),
+                contact_number: form.contactNumber.trim(),
                 service_id: Number(form.serviceId),
                 preferred_date: form.preferredDate,
                 address: form.address.trim(),
@@ -227,12 +203,8 @@ export default function Bookings() {
                 notes: fullNotes,
             };
 
-            if (form.clientMode === 'existing') {
-                payload.client_id = Number(form.clientId);
-            } else {
-                payload.name = form.name.trim();
-                payload.contact_number = form.contactNumber.trim();
-                if (form.email.trim()) payload.email = form.email.trim();
+            if (form.email.trim()) {
+                payload.email = form.email.trim();
             }
 
             const res = await api.post('/bookings', payload);
@@ -241,7 +213,6 @@ export default function Bookings() {
             showToast(`Booking ${refStr} created successfully!`, 'success');
             setShowNewModal(false);
             setForm(defaultForm);
-            setClientSearchFilter('');
             fetchBookings();
         } catch (err) {
             console.error('Error creating booking:', err);
@@ -265,18 +236,6 @@ export default function Bookings() {
         completed: bookings.filter(b => b.status === 'completed').length,
         cancelled: bookings.filter(b => b.status === 'cancelled').length,
     };
-
-    const filteredClients = clientsList.filter(c => {
-        if (!clientSearchFilter.trim()) return true;
-        const q = clientSearchFilter.toLowerCase();
-        return (
-            c.name?.toLowerCase().includes(q) ||
-            c.contact_number?.toLowerCase().includes(q) ||
-            c.email?.toLowerCase().includes(q)
-        );
-    });
-
-    const selectedClientObj = clientsList.find(c => String(c.id) === String(form.clientId));
 
     return (
         <div style={{ fontFamily: fonts.body }}>
@@ -651,149 +610,51 @@ export default function Bookings() {
                                     </div>
                                 )}
 
-                                {/* SECTION 1: Client Selection */}
+                                {/* SECTION 1: Client Information */}
                                 <div style={{ background: '#f8fafc', border: `1px solid ${brand.border}`, borderRadius: 16, padding: '18px 20px' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke={brand.navy} strokeWidth="2.2">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                            </svg>
-                                            <span style={{ fontSize: 13, fontWeight: 800, color: brand.navy, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                                                Client Information
-                                            </span>
-                                        </div>
-
-                                        {/* Client Mode Switcher */}
-                                        <div style={{ display: 'inline-flex', background: '#e2e8f0', borderRadius: 10, padding: 3 }}>
-                                            <button
-                                                type="button"
-                                                onClick={() => setForm(prev => ({ ...prev, clientMode: 'existing' }))}
-                                                style={{
-                                                    padding: '5px 12px',
-                                                    borderRadius: 8,
-                                                    border: 'none',
-                                                    background: form.clientMode === 'existing' ? '#fff' : 'transparent',
-                                                    color: form.clientMode === 'existing' ? brand.navy : '#64748b',
-                                                    fontSize: 12,
-                                                    fontWeight: form.clientMode === 'existing' ? 700 : 500,
-                                                    cursor: 'pointer',
-                                                    boxShadow: form.clientMode === 'existing' ? '0 2px 5px rgba(0,0,0,0.08)' : 'none',
-                                                    transition: 'all 0.15s',
-                                                }}
-                                            >
-                                                Existing Client
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => setForm(prev => ({ ...prev, clientMode: 'new', clientId: '' }))}
-                                                style={{
-                                                    padding: '5px 12px',
-                                                    borderRadius: 8,
-                                                    border: 'none',
-                                                    background: form.clientMode === 'new' ? '#fff' : 'transparent',
-                                                    color: form.clientMode === 'new' ? brand.navy : '#64748b',
-                                                    fontSize: 12,
-                                                    fontWeight: form.clientMode === 'new' ? 700 : 500,
-                                                    cursor: 'pointer',
-                                                    boxShadow: form.clientMode === 'new' ? '0 2px 5px rgba(0,0,0,0.08)' : 'none',
-                                                    transition: 'all 0.15s',
-                                                }}
-                                            >
-                                                + New Client
-                                            </button>
-                                        </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+                                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke={brand.navy} strokeWidth="2.2">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                        <span style={{ fontSize: 13, fontWeight: 800, color: brand.navy, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                                            Client Information
+                                        </span>
                                     </div>
 
-                                    {form.clientMode === 'existing' ? (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr', gap: 10 }}>
-                                                <input
-                                                    type="text"
-                                                    placeholder="Filter clients..."
-                                                    value={clientSearchFilter}
-                                                    onChange={e => setClientSearchFilter(e.target.value)}
-                                                    style={{ ...inputStyleBase, padding: '9px 12px', fontSize: 13, background: '#fff' }}
-                                                />
-                                                <select
-                                                    value={form.clientId}
-                                                    onChange={e => handleExistingClientSelect(e.target.value)}
-                                                    required={form.clientMode === 'existing'}
-                                                    style={{ ...selectStyleBase, padding: '9px 12px', fontSize: 13, background: '#fff' }}
-                                                >
-                                                    <option value="">-- Select Client ({filteredClients.length}) --</option>
-                                                    {filteredClients.map(c => (
-                                                        <option key={c.id} value={c.id}>
-                                                            {c.name} ({c.contact_number || 'No phone'})
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </div>
-
-                                            {selectedClientObj && (
-                                                <div style={{
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'space-between',
-                                                    padding: '10px 14px',
-                                                    background: '#fff',
-                                                    borderRadius: 10,
-                                                    border: '1px solid #cbd5e1',
-                                                }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                                        <div style={avatar('#2563eb', 32)}>
-                                                            {selectedClientObj.name.slice(0, 2).toUpperCase()}
-                                                        </div>
-                                                        <div>
-                                                            <div style={{ fontSize: 13, fontWeight: 700, color: brand.navy }}>
-                                                                {selectedClientObj.name}
-                                                            </div>
-                                                            <div style={{ fontSize: 11, color: '#64748b' }}>
-                                                                {selectedClientObj.contact_number} {selectedClientObj.email ? `• ${selectedClientObj.email}` : ''}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <span style={{ fontSize: 11, fontWeight: 700, color: '#059669', background: '#d1fae5', padding: '3px 8px', borderRadius: 6 }}>
-                                                        Profile Selected
-                                                    </span>
-                                                </div>
-                                            )}
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: 12 }}>
+                                        <div>
+                                            <FormLabel required>Full Name</FormLabel>
+                                            <input
+                                                type="text"
+                                                placeholder="e.g. Sarah Jenkins"
+                                                value={form.name}
+                                                onChange={e => setForm(prev => ({ ...prev, name: e.target.value }))}
+                                                required
+                                                style={{ ...inputStyleBase, background: '#fff' }}
+                                            />
                                         </div>
-                                    ) : (
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: 12 }}>
-                                            <div>
-                                                <FormLabel required>Full Name</FormLabel>
-                                                <input
-                                                    type="text"
-                                                    placeholder="Client name"
-                                                    value={form.name}
-                                                    onChange={e => setForm(prev => ({ ...prev, name: e.target.value }))}
-                                                    required={form.clientMode === 'new'}
-                                                    style={{ ...inputStyleBase, background: '#fff' }}
-                                                />
-                                            </div>
-                                            <div>
-                                                <FormLabel required>Phone Number</FormLabel>
-                                                <input
-                                                    type="text"
-                                                    placeholder="+971 50 000 0000"
-                                                    value={form.contactNumber}
-                                                    onChange={e => setForm(prev => ({ ...prev, contactNumber: e.target.value }))}
-                                                    required={form.clientMode === 'new'}
-                                                    style={{ ...inputStyleBase, background: '#fff' }}
-                                                />
-                                            </div>
-                                            <div>
-                                                <FormLabel>Email (Optional)</FormLabel>
-                                                <input
-                                                    type="email"
-                                                    placeholder="client@mail.com"
-                                                    value={form.email}
-                                                    onChange={e => setForm(prev => ({ ...prev, email: e.target.value }))}
-                                                    style={{ ...inputStyleBase, background: '#fff' }}
-                                                />
-                                            </div>
+                                        <div>
+                                            <FormLabel required>Contact Number</FormLabel>
+                                            <input
+                                                type="text"
+                                                placeholder="+971 50 000 0000"
+                                                value={form.contactNumber}
+                                                onChange={e => setForm(prev => ({ ...prev, contactNumber: e.target.value }))}
+                                                required
+                                                style={{ ...inputStyleBase, background: '#fff' }}
+                                            />
                                         </div>
-                                    )}
+                                        <div>
+                                            <FormLabel>Email (Optional)</FormLabel>
+                                            <input
+                                                type="email"
+                                                placeholder="client@mail.com"
+                                                value={form.email}
+                                                onChange={e => setForm(prev => ({ ...prev, email: e.target.value }))}
+                                                style={{ ...inputStyleBase, background: '#fff' }}
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {/* SECTION 2: Service & Schedule */}
@@ -870,26 +731,7 @@ export default function Bookings() {
 
                                 {/* SECTION 4: Service Address */}
                                 <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                                        <FormLabel required>Service Address</FormLabel>
-                                        {form.clientMode === 'existing' && selectedClientObj?.address && (
-                                            <button
-                                                type="button"
-                                                onClick={() => setForm(prev => ({ ...prev, address: selectedClientObj.address }))}
-                                                style={{
-                                                    background: 'none',
-                                                    border: 'none',
-                                                    color: brand.royal,
-                                                    fontSize: 11.5,
-                                                    fontWeight: 600,
-                                                    cursor: 'pointer',
-                                                    padding: 0,
-                                                }}
-                                            >
-                                                Use Saved Client Address
-                                            </button>
-                                        )}
-                                    </div>
+                                    <FormLabel required>Service Address</FormLabel>
                                     <textarea
                                         rows={2}
                                         placeholder="Apartment/Villa #, Street, District/Area, Abu Dhabi/Dubai"
