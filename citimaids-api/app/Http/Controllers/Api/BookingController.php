@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Client;
+use App\Models\Service;
 use Illuminate\Http\Request;
 
 class BookingController extends Controller
@@ -29,42 +30,67 @@ class BookingController extends Controller
         return response()->json($query->latest()->paginate(15));
     }
 
-    // Public: customer submits a booking inquiry
+    // Public & Admin: submit/create a booking
     public function store(Request $request)
     {
+        $user = auth('sanctum')->user() ?? $request->user();
+        $isAdmin = (bool) $user;
+
         $validated = $request->validate([
-            'name'           => 'required|string|max:255',
-            'contact_number' => 'required|string|max:50',
+            'client_id'      => 'nullable|exists:clients,id',
+            'name'           => 'required_without:client_id|nullable|string|max:255',
+            'contact_number' => 'required_without:client_id|nullable|string|max:50',
             'email'          => 'nullable|email|max:255',
             'service_id'     => 'required|exists:services,id',
-            'preferred_date' => 'required|date|after_or_equal:today',
-            'address'        => 'required|string',
+            'preferred_date' => $isAdmin ? 'required|date' : 'required|date|after_or_equal:today',
+            'address'        => 'nullable|string',
             'notes'          => 'nullable|string',
+            'status'         => 'nullable|in:pending,confirmed,completed,cancelled',
+            'total_amount'   => 'nullable|numeric|min:0',
+            'payment_status' => 'nullable|in:unpaid,partial,paid,refunded',
+            'payment_method' => 'nullable|string|max:100',
         ]);
 
-        // Find or create client by contact number
-        $client = Client::firstOrCreate(
-            ['contact_number' => $validated['contact_number']],
-            [
-                'name'    => $validated['name'],
-                'email'   => $validated['email'] ?? null,
-                'address' => $validated['address'],
-            ]
-        );
+        // Find existing client or create new client record
+        if ($request->filled('client_id')) {
+            $client = Client::findOrFail($validated['client_id']);
+        } else {
+            $client = Client::firstOrCreate(
+                ['contact_number' => $validated['contact_number']],
+                [
+                    'name'    => $validated['name'],
+                    'email'   => $validated['email'] ?? null,
+                    'address' => $validated['address'] ?? null,
+                ]
+            );
+        }
+
+        $address = !empty($validated['address']) ? $validated['address'] : ($client->address ?? '');
+
+        // Resolve service to check base price if total_amount is omitted
+        $service = Service::find($validated['service_id']);
+        $totalAmount = $request->filled('total_amount')
+            ? (float) $validated['total_amount']
+            : ($service?->base_price ? (float) $service->base_price : null);
 
         $booking = Booking::create([
-            'client_id'      => $client->id,
-            'service_id'     => $validated['service_id'],
-            'preferred_date' => $validated['preferred_date'],
-            'address'        => $validated['address'],
-            'notes'          => $validated['notes'] ?? null,
-            'status'         => 'pending',
+            'client_id'            => $client->id,
+            'service_id'           => $validated['service_id'],
+            'processed_by_user_id' => $user?->id,
+            'preferred_date'       => $validated['preferred_date'],
+            'address'              => $address,
+            'notes'                => $validated['notes'] ?? null,
+            'status'               => $validated['status'] ?? 'pending',
+            'total_amount'         => $totalAmount,
+            'payment_status'       => $validated['payment_status'] ?? 'unpaid',
+            'payment_method'       => $validated['payment_method'] ?? 'Cash on Completion',
         ]);
 
         return response()->json([
-            'message'    => 'Booking request submitted successfully.',
+            'message'    => 'Booking created successfully.',
             'booking_id' => $booking->id,
             'reference'  => 'CM-' . str_pad($booking->id, 5, '0', STR_PAD_LEFT),
+            'booking'    => $booking->load(['client', 'service', 'processedBy']),
         ], 201);
     }
 

@@ -244,7 +244,7 @@ export default function Dashboard() {
                         </div>
 
                         <button
-                            onClick={() => navigate('/admin/bookings')}
+                            onClick={() => navigate('/admin/bookings', { state: { openNewBooking: true } })}
                             style={{
                                 display: 'inline-flex',
                                 alignItems: 'center',
