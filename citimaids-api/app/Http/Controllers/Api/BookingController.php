@@ -51,6 +51,22 @@ class BookingController extends Controller
             'payment_method' => 'nullable|string|max:100',
         ]);
 
+        // For public customer bookings, ensure the selected service is currently active
+        if (! $isAdmin) {
+            $service = Service::where('id', $validated['service_id'])
+                ->where('status', 'active')
+                ->first();
+
+            if (! $service) {
+                return response()->json([
+                    'message' => 'The selected service is currently unavailable for booking.',
+                    'errors'  => ['service_id' => ['The selected service is currently inactive.']],
+                ], 422);
+            }
+        } else {
+            $service = Service::find($validated['service_id']);
+        }
+
         // Find existing client or create new client record
         if ($request->filled('client_id')) {
             $client = Client::findOrFail($validated['client_id']);
@@ -67,8 +83,7 @@ class BookingController extends Controller
 
         $address = !empty($validated['address']) ? $validated['address'] : ($client->address ?? '');
 
-        // Resolve service to check base price if total_amount is omitted
-        $service = Service::find($validated['service_id']);
+        // Resolve base price if total_amount is omitted
         $totalAmount = $request->filled('total_amount')
             ? (float) $validated['total_amount']
             : ($service?->base_price ? (float) $service->base_price : null);

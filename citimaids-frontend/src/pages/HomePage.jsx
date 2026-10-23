@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { services } from '../data/services';
+import { useServices } from '../hooks/useServices';
 import { useSettings } from '../hooks/useSettings';
 import Reveal from '../components/Reveal';
 import BeforeAfterSlider from '../components/BeforeAfterSlider';
@@ -189,6 +189,7 @@ function FAQCard({ q, a, index }) {
 
 export default function HomePage() {
   const { settings } = useSettings();
+  const { services } = useServices();
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   const [reviewForm, setReviewForm] = useState({ name: '', location: '', stars: 5, text: '' });

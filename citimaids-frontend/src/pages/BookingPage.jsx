@@ -128,7 +128,9 @@ export default function BookingPage() {
   // Once services load, pick the preselected one (or first active)
   useEffect(() => {
     if (services.length === 0) return;
-    if (data.serviceId !== null) return; // already set
+    // Check if the current serviceId is valid in the loaded active services
+    const currentValid = data.serviceId !== null && services.some((s) => s.id === data.serviceId || String(s.id) === String(data.serviceId));
+    if (currentValid) return; // already set to a valid active service
 
     let picked = services[0];
 
@@ -142,10 +144,12 @@ export default function BookingPage() {
       }
     }
 
-    setData((prev) => ({ ...prev, serviceId: picked.id }));
-    // Auto-expand the initially selected card
-    setExpandedServiceId(picked.id);
-  }, [services]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (picked) {
+      setData((prev) => ({ ...prev, serviceId: picked.id }));
+      // Auto-expand the initially selected card
+      setExpandedServiceId(picked.id);
+    }
+  }, [services, preselectedServiceId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const categoryCounts = useMemo(() => {
     const counts = { all: services.length, residential: 0, commercial: 0, specialized: 0, maintenance: 0 };
@@ -457,8 +461,13 @@ export default function BookingPage() {
                   <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.45} }`}</style>
                 </div>
               ) : filteredServices.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '36px 16px', background: '#f8fafc', borderRadius: 16, border: '1px dashed #cbd5e1' }}>
-                  <p style={{ color: '#64748b', fontSize: 13, margin: 0 }}>No services currently available in this category.</p>
+                <div style={{
+                  padding: '36px 20px', borderRadius: 14,
+                  background: '#f8fafc', border: '1.5px dashed #cbd5e1',
+                  textAlign: 'center',
+                }}>
+                  <p style={{ color: '#0A2342', fontWeight: 700, fontSize: 15, margin: '0 0 6px' }}>No Services Available</p>
+                  <p style={{ color: '#64748b', fontSize: 13, margin: 0 }}>No services currently available in this category. Please check back later or contact support.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
