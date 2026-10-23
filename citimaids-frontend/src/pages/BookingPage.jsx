@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { services as localServices } from '../data/services';
+import { useServices } from '../hooks/useServices';
 import api from '../api/axios';
+import { formatUAEPhone } from '../utils/formatters';
 
 const STEPS = [
   { key: 'service', label: 'Service', icon: StepServiceIcon },
@@ -70,19 +71,45 @@ export const uaeDistricts = {
   ],
 };
 
+const CATEGORY_TABS = [
+  { key: 'all', label: 'All Services' },
+  { key: 'residential', label: 'Residential' },
+  { key: 'commercial', label: 'Commercial' },
+  { key: 'specialized', label: 'Specialized & Deep Care' },
+  { key: 'maintenance', label: 'Outdoor Maintenance' },
+];
+
+function getCategoryBadge(category) {
+  switch (category) {
+    case 'residential':
+      return { label: 'Residential', bg: '#ecfdf5', color: '#047857' };
+    case 'commercial':
+      return { label: 'Commercial', bg: '#eff6ff', color: '#1d4ed8' };
+    case 'specialized':
+      return { label: 'Specialized', bg: '#fffbeb', color: '#b45309' };
+    case 'maintenance':
+      return { label: 'Maintenance', bg: '#ecfeff', color: '#0e7490' };
+    default:
+      return { label: 'Service', bg: '#f1f5f9', color: '#475569' };
+  }
+}
+
 export default function BookingPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const preselected = location.state?.preselectedServiceId || 'home-cleaning';
+
+  // preselectedServiceId may be a DB integer id passed from ServiceDetailPage
+  const preselectedServiceId = location.state?.preselectedServiceId;
+
+  const { services, loading: servicesLoading } = useServices();
 
   const [step, setStep] = useState(0);
-  const [loading, setLoading] = useState(false);
-  // Map from local service id (string) → DB service id (integer)
-  const [serviceDbIdMap, setServiceDbIdMap] = useState({});
-  const [services, setServices] = useState(localServices);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [expandedServiceId, setExpandedServiceId] = useState(null);
+  const [submitLoading, setSubmitLoading] = useState(false);
   const [contactErrors, setContactErrors] = useState({});
   const [data, setData] = useState({
-    serviceId: preselected,
+    serviceId: null,          // will be set once services load (DB integer id)
     propertyType: 'Apartment',
     rooms: '2',
     bathrooms: '2',
@@ -98,27 +125,46 @@ export default function BookingPage() {
     notes: '',
   });
 
+  // Once services load, pick the preselected one (or first active)
+  useEffect(() => {
+    if (services.length === 0) return;
+    if (data.serviceId !== null) return; // already set
+
+    let picked = services[0];
+
+    if (preselectedServiceId !== undefined) {
+      // Try matching by numeric DB id first, then by slug fallback
+      const byId   = services.find((s) => s.id === preselectedServiceId || String(s.id) === String(preselectedServiceId));
+      const bySlug = services.find((s) => s.slug === preselectedServiceId || s.id === preselectedServiceId);
+      picked = byId || bySlug || services[0];
+      if (picked?.category) {
+        setSelectedCategory(picked.category);
+      }
+    }
+
+    setData((prev) => ({ ...prev, serviceId: picked.id }));
+    // Auto-expand the initially selected card
+    setExpandedServiceId(picked.id);
+  }, [services]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const categoryCounts = useMemo(() => {
+    const counts = { all: services.length, residential: 0, commercial: 0, specialized: 0, maintenance: 0 };
+    services.forEach((s) => {
+      if (counts[s.category] !== undefined) counts[s.category]++;
+      else counts[s.category] = 1;
+    });
+    return counts;
+  }, [services]);
+
+  const filteredServices = useMemo(() => {
+    if (selectedCategory === 'all') return services;
+    return services.filter((s) => s.category === selectedCategory);
+  }, [services, selectedCategory]);
+
   const set = (field, value) => setData((prev) => ({ ...prev, [field]: value }));
 
-  // Fetch real services from API and map by name to local service entries
-  useEffect(() => {
-    api.get('/services').then((res) => {
-      const apiServices = res.data?.data || res.data || [];
-      if (Array.isArray(apiServices) && apiServices.length > 0) {
-        // Build a map: localService.id → apiService.id (by name similarity)
-        const map = {};
-        localServices.forEach((local) => {
-          const match = apiServices.find(
-            (api) => api.name?.toLowerCase().includes(local.title?.toLowerCase().split(' ')[0])
-          );
-          if (match) map[local.id] = match.id;
-        });
-        setServiceDbIdMap(map);
-      }
-    }).catch(() => { /* API offline — use local services */ });
-  }, []);
-
-  const selectedService = services.find((s) => s.id === data.serviceId) || services[0];
+  // Resolve selected service — safe even while loading
+  const selectedService = services.find((s) => s.id === data.serviceId) || services[0] || null;
 
   const handleCityChange = (newCity) => {
     setData((prev) => ({
@@ -129,6 +175,7 @@ export default function BookingPage() {
   };
 
   const estimate = useMemo(() => {
+    if (!selectedService) return { hours: '—', total: 0, note: '' };
     if (selectedService.rateUnit === 'flat') {
       return { hours: 'Full Day', total: selectedService.basePrice, note: 'Guaranteed Flat Handover Rate' };
     }
@@ -178,14 +225,14 @@ export default function BookingPage() {
 
 
   const handleConfirm = async () => {
-    setLoading(true);
+    setSubmitLoading(true);
     let bookingId = 'CM-' + Date.now().toString().slice(-5);
     try {
       const res = await api.post('/bookings', {
         name: data.name,
         contact_number: data.phone,
         email: data.email || null,
-        service_id: serviceDbIdMap[data.serviceId] || null,
+        service_id: data.serviceId,   // already the DB integer id
         preferred_date: data.date,
         address: `${data.district ? data.district + ', ' : ''}${data.streetAddress}${data.city ? ', ' + data.city : ''}${data.zipCode ? ' ' + data.zipCode : ''}`,
         notes: `Property: ${data.propertyType}, ${data.rooms} Bed, ${data.bathrooms} Bath | Time: ${data.time} | Est: AED ${estimate.total} | Notes: ${data.notes || 'None'}`,
@@ -200,7 +247,7 @@ export default function BookingPage() {
     } catch (err) {
       console.warn('Backend API notification skipped or offline:', err);
     } finally {
-      setLoading(false);
+      setSubmitLoading(false);
       navigate('/booking-confirmation', {
         state: { data, bookingId, service: selectedService, estimate },
       });
@@ -220,6 +267,7 @@ export default function BookingPage() {
   };
 
   const freshnessIndex = useMemo(() => {
+    if (!selectedService) return 'S4';
     const base = selectedService.basePrice;
     if (base >= 300) return 'S+';
     if (base >= 60) return 'S4';
@@ -232,7 +280,7 @@ export default function BookingPage() {
       {/* ═══ Hero Banner ═══ */}
       <div style={{
         background: 'linear-gradient(135deg, #061429 0%, #0A2342 50%, #1E3A8A 100%)',
-        padding: '120px 24px 48px',
+        padding: 'clamp(72px, 10vw, 96px) 20px clamp(48px, 7vw, 56px)',
         textAlign: 'center',
       }}>
         <div style={{ maxWidth: 560, margin: '0 auto' }}>
@@ -256,30 +304,32 @@ export default function BookingPage() {
       </div>
 
       {/* ═══ Step Progress Bar ═══ */}
-      <div style={{ maxWidth: 720, margin: '-24px auto 0', padding: '0 24px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 720, margin: '-24px auto 0', padding: '0 12px', position: 'relative', zIndex: 10 }}>
         <div style={{
-          background: '#fff', borderRadius: 20, padding: '20px 28px',
+          background: '#fff', borderRadius: 20, padding: 'clamp(14px, 3vw, 20px) clamp(12px, 4vw, 28px)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           boxShadow: '0 8px 32px rgba(10,35,66,0.08)',
           border: '1px solid #e2e8f0',
           gap: 0,
+          overflow: 'hidden',
         }}>
           {STEPS.map((s, i) => {
             const isDone = i < step;
             const isCurrent = i === step;
             return (
-              <div key={s.key} style={{ display: 'flex', alignItems: 'center', flex: i < STEPS.length - 1 ? 1 : 'none' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 56 }}>
+              <div key={s.key} style={{ display: 'flex', alignItems: 'center', flex: i < STEPS.length - 1 ? 1 : 'none', minWidth: 0 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 0, width: 'clamp(40px, 10vw, 56px)' }}>
                   <div style={{
-                    width: 36, height: 36, borderRadius: '50%',
+                    width: 'clamp(28px, 6vw, 36px)', height: 'clamp(28px, 6vw, 36px)', borderRadius: '50%',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0,
                     background: isDone ? '#0A2342' : isCurrent ? '#0A2342' : '#e2e8f0',
                     color: isDone || isCurrent ? '#fff' : '#94a3b8',
                     transition: 'all 0.3s',
                     boxShadow: isCurrent ? '0 4px 12px rgba(10,35,66,0.25)' : 'none',
                   }}>
                     {isDone ? (
-                      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
                     ) : (
@@ -287,17 +337,22 @@ export default function BookingPage() {
                     )}
                   </div>
                   <span style={{
-                    fontSize: 10, fontWeight: 700, marginTop: 6, textAlign: 'center',
+                    fontSize: 'clamp(8px, 1.8vw, 10px)', fontWeight: 700, marginTop: 4, textAlign: 'center',
                     color: isDone ? '#0A2342' : isCurrent ? '#0A2342' : '#94a3b8',
                     letterSpacing: 0.2,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    maxWidth: '100%',
                   }}>{s.label}</span>
                 </div>
                 {i < STEPS.length - 1 && (
                   <div style={{
-                    flex: 1, height: 2, margin: '0 6px',
+                    flex: 1, height: 2, margin: '0 3px',
                     background: isDone ? '#0A2342' : '#e2e8f0',
                     borderRadius: 1, transition: 'background 0.3s',
                     marginBottom: 20,
+                    minWidth: 4,
                   }} />
                 )}
               </div>
@@ -308,15 +363,18 @@ export default function BookingPage() {
 
       {/* ═══ Main Content (Form + Order Reflection Sidebar) ═══ */}
       <div className="booking-grid" style={{
-        maxWidth: 1080, margin: '32px auto 64px', padding: '0 24px',
+        maxWidth: 1080, margin: '32px auto 64px', padding: '0 clamp(12px, 4vw, 24px)',
         display: 'grid', gap: 28,
         alignItems: 'start',
+        width: '100%',
       }}>
         {/* ── Left: Form Card ── */}
         <div style={{
-          background: '#fff', borderRadius: 20, padding: '36px 32px',
+          background: '#fff', borderRadius: 20, padding: 'clamp(20px, 5vw, 36px) clamp(16px, 5vw, 32px)',
           border: '1px solid #e2e8f0',
           boxShadow: '0 4px 24px rgba(10,35,66,0.04)',
+          minWidth: 0,
+          overflow: 'hidden',
         }}>
           {/* Step Label */}
           <div style={{ marginBottom: 8 }}>
@@ -329,40 +387,201 @@ export default function BookingPage() {
           {step === 0 && (
             <div>
               <h2 style={{ fontSize: 26, fontWeight: 800, color: '#0A2342', margin: '0 0 4px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                What do you need cleaned?
+                Select Your Service
               </h2>
-              <p style={{ color: '#64748b', fontSize: 13, margin: '0 0 24px' }}>
-                Select the service that best fits your property.
+              <p style={{ color: '#64748b', fontSize: 13, margin: '0 0 20px' }}>
+                Choose from our certified residential, commercial, and outdoor maintenance services across Abu Dhabi.
               </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                {services.map((s) => {
-                  const isSelected = data.serviceId === s.id;
+              {/* Category Filter Pills */}
+              <div style={{
+                display: 'flex',
+                gap: 8,
+                overflowX: 'auto',
+                paddingBottom: 8,
+                marginBottom: 20,
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+              }}>
+                {CATEGORY_TABS.map((tab) => {
+                  const isActive = selectedCategory === tab.key;
+                  const count = categoryCounts[tab.key] || 0;
                   return (
-                    <label key={s.id} style={{
-                      display: 'flex', alignItems: 'flex-start', gap: 12,
-                      padding: '16px 16px', borderRadius: 14,
-                      border: isSelected ? '2px solid #0A2342' : '1.5px solid #e2e8f0',
-                      background: isSelected ? '#eff6ff' : '#fff',
-                      cursor: 'pointer', transition: 'all 0.2s',
-                    }}>
-                      <input
-                        type="radio" name="service" value={s.id}
-                        checked={isSelected}
-                        onChange={() => set('serviceId', s.id)}
-                        style={{ marginTop: 3, accentColor: '#0A2342' }}
-                      />
-                      <div>
-                        <div style={{ fontWeight: 700, fontSize: 14, color: '#0A2342' }}>{s.title}</div>
-                        <div style={{ fontSize: 12, fontWeight: 800, color: '#2563eb', marginTop: 2 }}>{s.startingPrice}</div>
-                        <div style={{ fontSize: 11, color: '#64748b', marginTop: 3, lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                          {s.description}
-                        </div>
-                      </div>
-                    </label>
+                    <button
+                      key={tab.key}
+                      type="button"
+                      onClick={() => setSelectedCategory(tab.key)}
+                      style={{
+                        padding: '8px 16px',
+                        borderRadius: 20,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        whiteSpace: 'nowrap',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 7,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        border: isActive ? '1.5px solid #0A2342' : '1.5px solid #e2e8f0',
+                        background: isActive ? '#0A2342' : '#f8fafc',
+                        color: isActive ? '#ffffff' : '#475569',
+                        boxShadow: isActive ? '0 4px 12px rgba(10,35,66,0.15)' : 'none',
+                      }}
+                    >
+                      <span>{tab.label}</span>
+                      <span style={{
+                        fontSize: 10,
+                        fontWeight: 800,
+                        padding: '1px 7px',
+                        borderRadius: 10,
+                        background: isActive ? 'rgba(255,255,255,0.22)' : '#e2e8f0',
+                        color: isActive ? '#ffffff' : '#64748b',
+                      }}>
+                        {count}
+                      </span>
+                    </button>
                   );
                 })}
               </div>
+
+              {/* Service Cards */}
+              {servicesLoading ? (
+                /* Skeleton loader while services fetch */
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  {[1, 2, 3, 4, 5, 6].map((n) => (
+                    <div key={n} style={{
+                      height: 110, borderRadius: 16, background: '#f1f5f9',
+                      animation: 'pulse 1.5s ease-in-out infinite',
+                    }} />
+                  ))}
+                  <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.45} }`}</style>
+                </div>
+              ) : filteredServices.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '36px 16px', background: '#f8fafc', borderRadius: 16, border: '1px dashed #cbd5e1' }}>
+                  <p style={{ color: '#64748b', fontSize: 13, margin: 0 }}>No services currently available in this category.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  {filteredServices.map((s) => {
+                    const isSelected = data.serviceId === s.id;
+                    const isExpanded = expandedServiceId === s.id;
+                    const catBadge = getCategoryBadge(s.category);
+
+                    const handleCardClick = () => {
+                      // Select this service
+                      set('serviceId', s.id);
+                      // Toggle expand: if already expanded+selected, collapse; otherwise expand
+                      setExpandedServiceId(isExpanded ? null : s.id);
+                    };
+
+                    return (
+                      <div
+                        key={s.id}
+                        onClick={handleCardClick}
+                        style={{
+                          position: 'relative',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          padding: '14px 16px',
+                          borderRadius: 16,
+                          border: isSelected ? '2px solid #0A2342' : '1.5px solid #e2e8f0',
+                          background: isSelected ? '#f0f7ff' : '#ffffff',
+                          boxShadow: isSelected
+                            ? '0 6px 20px rgba(10,35,66,0.10)'
+                            : '0 1px 3px rgba(0,0,0,0.02)',
+                          cursor: 'pointer',
+                          transition: 'border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease',
+                        }}
+                      >
+                        {/* ── Always-visible header row ── */}
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                          {/* Left: badge + title */}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <span style={{
+                              fontSize: 10,
+                              fontWeight: 800,
+                              textTransform: 'uppercase',
+                              letterSpacing: 0.5,
+                              padding: '2px 7px',
+                              borderRadius: 5,
+                              background: catBadge.bg,
+                              color: catBadge.color,
+                              display: 'inline-block',
+                              marginBottom: 6,
+                            }}>
+                              {catBadge.label}
+                            </span>
+                            <div style={{
+                              fontWeight: 800,
+                              fontSize: 14,
+                              color: '#0A2342',
+                              lineHeight: 1.3,
+                            }}>
+                              {s.title}
+                            </div>
+                          </div>
+
+                          {/* Right: radio + chevron */}
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                            <div style={{
+                              width: 18, height: 18, borderRadius: '50%',
+                              border: isSelected ? '5px solid #0A2342' : '2px solid #cbd5e1',
+                              background: '#fff',
+                              transition: 'border 0.2s',
+                            }} />
+                            {/* Chevron */}
+                            <svg
+                              width="14" height="14" viewBox="0 0 24 24" fill="none"
+                              stroke={isExpanded ? '#0A2342' : '#94a3b8'} strokeWidth="2.5"
+                              style={{
+                                transition: 'transform 0.3s cubic-bezier(0.16,1,0.3,1), stroke 0.2s',
+                                transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                              }}
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </div>
+                        </div>
+
+                        {/* ── Collapsible description (CSS grid animation) ── */}
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateRows: isExpanded ? '1fr' : '0fr',
+                          transition: 'grid-template-rows 0.35s cubic-bezier(0.16,1,0.3,1)',
+                        }}>
+                          <div style={{ overflow: 'hidden' }}>
+                            <div style={{
+                              fontSize: 12,
+                              color: '#64748b',
+                              lineHeight: 1.5,
+                              paddingTop: 10,
+                            }}>
+                              {s.description}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* ── Rate footer ── */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          paddingTop: 10,
+                          marginTop: 8,
+                          borderTop: isSelected ? '1px solid rgba(10,35,66,0.08)' : '1px solid #f1f5f9',
+                        }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>
+                            Starting Rate
+                          </span>
+                          <span style={{ fontSize: 13, fontWeight: 800, color: '#2563eb' }}>
+                            {s.startingPrice}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
@@ -528,7 +747,7 @@ export default function BookingPage() {
                   <span style={labelStyle}>Phone</span>
                   <input
                     type="tel" value={data.phone}
-                    onChange={(e) => { set('phone', e.target.value); if (contactErrors.phone) setContactErrors((p) => ({ ...p, phone: '' })); }}
+                    onChange={(e) => { set('phone', formatUAEPhone(e.target.value)); if (contactErrors.phone) setContactErrors((p) => ({ ...p, phone: '' })); }}
                     placeholder="+971 50 000 0000"
                     style={{ ...inputStyle, ...(contactErrors.phone ? { borderColor: '#fca5a5', background: '#fff5f5' } : {}) }}
                   />
@@ -695,21 +914,21 @@ export default function BookingPage() {
             ) : (
               <button
                 type="button"
-                disabled={loading}
+                disabled={submitLoading}
                 onClick={handleConfirm}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 8,
                   padding: '14px 32px', borderRadius: 12,
                   background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)',
                   color: '#fff', border: 'none', fontSize: 14, fontWeight: 800,
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  opacity: loading ? 0.7 : 1,
+                  cursor: submitLoading ? 'not-allowed' : 'pointer',
+                  opacity: submitLoading ? 0.7 : 1,
                   boxShadow: '0 6px 20px rgba(10,35,66,0.3)',
                   transition: 'all 0.15s',
                 }}
               >
-                {loading ? 'Submitting...' : 'Confirm Appointment'}
-                {!loading && (
+                {submitLoading ? 'Submitting...' : 'Confirm Appointment'}
+                {!submitLoading && (
                   <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
@@ -720,7 +939,7 @@ export default function BookingPage() {
         </div>
 
         {/* ── Right: Order Reflection Sidebar ── */}
-        <div style={{ position: 'sticky', top: 100 }}>
+        <div style={{ position: 'sticky', top: 100, minWidth: 0 }}>
           <div style={{
             background: '#fff', borderRadius: 20, overflow: 'hidden',
             border: '1px solid #e2e8f0',
@@ -743,22 +962,28 @@ export default function BookingPage() {
             </div>
 
             {/* Service Image */}
-            <div style={{ height: 160, overflow: 'hidden', position: 'relative' }}>
-              <img
-                src={selectedService.image}
-                alt={selectedService.title}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&auto=format&fit=crop&q=80';
-                }}
-              />
+            <div style={{ height: 160, overflow: 'hidden', position: 'relative',
+              background: selectedService ? 'transparent' : '#e2e8f0'
+            }}>
+              {selectedService && (
+                <img
+                  src={selectedService.image}
+                  alt={selectedService.title}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&auto=format&fit=crop&q=80';
+                  }}
+                />
+              )}
               <div style={{
                 position: 'absolute', bottom: 0, left: 0, right: 0,
                 background: 'linear-gradient(transparent, rgba(0,0,0,0.6))',
                 padding: '24px 16px 12px',
               }}>
-                <div style={{ color: '#fff', fontSize: 15, fontWeight: 800 }}>{selectedService.title}</div>
+                <div style={{ color: '#fff', fontSize: 15, fontWeight: 800 }}>
+                  {selectedService?.title || 'Select a service'}
+                </div>
                 <div style={{ color: '#93c5fd', fontSize: 11, fontWeight: 600 }}>Freshness Index {freshnessIndex}</div>
               </div>
             </div>
@@ -818,11 +1043,17 @@ export default function BookingPage() {
         .booking-grid {
           grid-template-columns: 1fr 340px;
         }
-        @media (max-width: 768px) {
+        @media (max-width: 860px) {
           .booking-grid {
             grid-template-columns: 1fr !important;
           }
         }
+        @media (max-width: 480px) {
+          .booking-grid {
+            padding: 0 12px !important;
+          }
+        }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.45} }
       `}</style>
     </div>
   );

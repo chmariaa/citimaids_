@@ -1,27 +1,63 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import api from '../../api/axios';
 import { brand, fonts, pageTitle, pageSubtitle, card, solidBtn as solidBtnToken, outlineBtn as outlineBtnToken, statusBadge, inputStyle as inputStyleToken, selectStyle as selectStyleToken } from './adminStyles';
 
 const serviceColors = {
+    'Home Cleaning Abu Dhabi': '#059669',
     'Home Cleaning': '#059669',
     'Office Cleaning': '#2563eb',
+    'Apartment Cleaning Services': '#0284c7',
+    'Villa Cleaning Abu Dhabi': '#7c3aed',
     'Villa Cleaning': '#7c3aed',
-    'Deep Cleaning': '#d97706',
-    'Carpet & Sofa Cleaning': '#ec4899',
-    'Window & Glass Cleaning': '#0891b2',
+    'Move In and Move Out Cleaning': '#dc2626',
     'Move-in / Move-out Cleaning': '#dc2626',
+    'General Cleaning': '#10b981',
+    'Deep Cleaning Services': '#d97706',
+    'Deep Cleaning': '#d97706',
+    'Carpet Cleaning': '#ec4899',
+    'Sofa Cleaning': '#be185d',
+    'Carpet & Sofa Cleaning': '#ec4899',
+    'Window Cleaning Abu Dhabi': '#0891b2',
+    'Glass Cleaning': '#06b6d4',
+    'Window & Glass Cleaning': '#0891b2',
+    'Ironing & Baby Sitting': '#f59e0b',
+    'Baby & Pet Sitting': '#8b5cf6',
+    'Ironing & Baby Setting': '#f59e0b',
+    'Baby & Pet Setting': '#8b5cf6',
+    'Building Cleaning Services': '#334155',
+    'Landscape Contractor': '#15803d',
+    'Garden Maintenance': '#16a34a',
+    'Swimming Pool Maintenance': '#0284c7',
 };
 
 /* SVG icon generator per service name */
 function ServiceIcon({ name, size = 20 }) {
     const icons = {
+        'Home Cleaning Abu Dhabi': <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />,
         'Home Cleaning': <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />,
         'Office Cleaning': <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />,
+        'Apartment Cleaning Services': <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />,
+        'Villa Cleaning Abu Dhabi': <><path strokeLinecap="round" strokeLinejoin="round" d="M3 21h18M9 21V8l3-5 3 5v13M5 21V14l4-3M19 21V14l-4-3" /></>,
         'Villa Cleaning': <><path strokeLinecap="round" strokeLinejoin="round" d="M3 21h18M9 21V8l3-5 3 5v13M5 21V14l4-3M19 21V14l-4-3" /></>,
+        'Deep Cleaning Services': <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />,
         'Deep Cleaning': <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />,
+        'General Cleaning': <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />,
+        'Carpet Cleaning': <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4-8h8l4 8M6 16h12M8 20H4v-4M16 20h4v-4" />,
+        'Sofa Cleaning': <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4-8h8l4 8M6 16h12M8 20H4v-4M16 20h4v-4" />,
         'Carpet & Sofa Cleaning': <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4-8h8l4 8M6 16h12M8 20H4v-4M16 20h4v-4" />,
+        'Window Cleaning Abu Dhabi': <><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M12 3v18M3 12h18" /></>,
+        'Glass Cleaning': <><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M12 3v18M3 12h18" /></>,
         'Window & Glass Cleaning': <><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M12 3v18M3 12h18" /></>,
+        'Move In and Move Out Cleaning': <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />,
         'Move-in / Move-out Cleaning': <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />,
+        'Building Cleaning Services': <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />,
+        'Ironing & Baby Sitting': <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />,
+        'Baby & Pet Sitting': <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />,
+        'Ironing & Baby Setting': <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />,
+        'Baby & Pet Setting': <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />,
+        'Landscape Contractor': <path strokeLinecap="round" strokeLinejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />,
+        'Garden Maintenance': <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />,
+        'Swimming Pool Maintenance': <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />,
     };
     return (
         <svg width={size} height={size} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
@@ -38,6 +74,10 @@ export default function Services() {
     const [formModal, setFormModal] = useState(null);
     const [form, setForm] = useState({ name: '', description: '', base_price: '', status: 'active' });
     const [formLoading, setFormLoading] = useState(false);
+    const [reorderMode, setReorderMode] = useState(false);
+    const [reordering, setReordering] = useState(false);
+    const dragItem = useRef(null);
+    const dragOverItem = useRef(null);
 
     useEffect(() => { fetchServices(); }, []);
 
@@ -102,6 +142,41 @@ export default function Services() {
             fetchServices();
         } catch {
             showToast('Failed to delete service.', 'error');
+        }
+    };
+
+    // ── Drag-and-drop reorder handlers ──────────────────────────────────────
+    const handleDragStart = (index) => { dragItem.current = index; };
+    const handleDragEnter = (index) => { dragOverItem.current = index; };
+
+    const handleDragEnd = async () => {
+        const from = dragItem.current;
+        const to   = dragOverItem.current;
+        if (from === null || to === null || from === to) {
+            dragItem.current = null;
+            dragOverItem.current = null;
+            return;
+        }
+        // Optimistic local reorder
+        const reordered = [...services];
+        const [moved] = reordered.splice(from, 1);
+        reordered.splice(to, 0, moved);
+        setServices(reordered);
+        dragItem.current = null;
+        dragOverItem.current = null;
+
+        // Persist to backend
+        setReordering(true);
+        try {
+            await api.post('/services/reorder', {
+                order: reordered.map((s) => ({ id: s.id })),
+            });
+            showToast('Service order saved.', 'success');
+        } catch {
+            showToast('Failed to save order — please refresh.', 'error');
+            fetchServices(); // revert
+        } finally {
+            setReordering(false);
         }
     };
 
@@ -200,12 +275,30 @@ export default function Services() {
                     <h1 style={pageTitle}>Services</h1>
                     <p style={pageSubtitle}>Manage cleaning services and pricing</p>
                 </div>
-                <button onClick={openAdd} style={solidBtnToken}>
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Add Service
-                </button>
+                <div style={{ display: 'flex', gap: 10 }}>
+                    <button
+                        onClick={() => setReorderMode((v) => !v)}
+                        style={{
+                            ...outlineBtnToken,
+                            background: reorderMode ? '#eff6ff' : '#fff',
+                            borderColor: reorderMode ? '#2563eb' : brand.border,
+                            color: reorderMode ? '#2563eb' : '#334155',
+                        }}
+                        title="Drag rows to reorder how services appear on the booking page"
+                    >
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        {reorderMode ? 'Exit Reorder' : 'Reorder Services'}
+                        {reordering && <span style={{ marginLeft: 6, fontSize: 11, color: '#94a3b8' }}>Saving...</span>}
+                    </button>
+                    <button onClick={openAdd} style={solidBtnToken}>
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Add Service
+                    </button>
+                </div>
             </div>
 
             {/* Summary Cards */}
@@ -229,7 +322,22 @@ export default function Services() {
 
             {/* Table */}
             <div style={{ ...card, overflow: 'hidden' }}>
-                <div style={thRow}>
+                {/* Reorder hint banner */}
+                {reorderMode && (
+                    <div style={{
+                        padding: '10px 24px', background: '#eff6ff',
+                        borderBottom: `1px solid ${brand.border}`,
+                        fontSize: 12, color: '#2563eb', fontWeight: 600,
+                        display: 'flex', alignItems: 'center', gap: 8,
+                    }}>
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Drag the ⠿ handle on any row to reorder services. Changes save automatically and reflect on the booking page.
+                    </div>
+                )}
+                <div style={{ ...thRow, gridTemplateColumns: reorderMode ? '32px 1.8fr 2fr 140px 120px 110px 100px' : '1.8fr 2fr 140px 120px 110px 100px' }}>
+                    {reorderMode && <span />}
                     <Th>SERVICE</Th>
                     <Th>DESCRIPTION</Th>
                     <Th>BOOKINGS</Th>
@@ -255,7 +363,7 @@ export default function Services() {
                         <div style={{ color: '#64748b', fontSize: 13 }}>Add your first cleaning service to get started.</div>
                     </div>
                 ) : (
-                    services.map(svc => {
+                    services.map((svc, index) => {
                         const color = serviceColors[svc.name] || '#6366f1';
                         const bookings = svc.bookings_count || 0;
                         const revenue = svc.total_revenue || (bookings * (svc.base_price || 0));
@@ -263,9 +371,31 @@ export default function Services() {
                         const isActive = svc.status === 'active';
 
                         return (
-                            <div key={svc.id} style={tdRow}
+                            <div
+                                key={svc.id}
+                                draggable={reorderMode}
+                                onDragStart={() => handleDragStart(index)}
+                                onDragEnter={() => handleDragEnter(index)}
+                                onDragEnd={handleDragEnd}
+                                onDragOver={(e) => e.preventDefault()}
+                                style={{
+                                    ...tdRow,
+                                    gridTemplateColumns: reorderMode ? '32px 1.8fr 2fr 140px 120px 110px 100px' : '1.8fr 2fr 140px 120px 110px 100px',
+                                    cursor: reorderMode ? 'grab' : 'default',
+                                    userSelect: reorderMode ? 'none' : 'auto',
+                                }}
                                 onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
                                 onMouseLeave={e => e.currentTarget.style.background = '#fff'}>
+
+                                {/* Drag handle */}
+                                {reorderMode && (
+                                    <div style={{
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        color: '#94a3b8', fontSize: 18, letterSpacing: 1, cursor: 'grab',
+                                        userSelect: 'none',
+                                    }} title="Drag to reorder">⠿</div>
+                                )}
+
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                                     <div style={{
                                         width: 42, height: 42, borderRadius: 12,
@@ -274,7 +404,7 @@ export default function Services() {
                                     }}><ServiceIcon name={svc.name} /></div>
                                     <div>
                                         <div style={{ fontSize: 14, fontWeight: 600, color: brand.navy }}>{svc.name}</div>
-                                        <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>SVC-{String(svc.id).padStart(3, '0')}</div>
+                                        <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>SVC-{String(svc.id).padStart(3, '0')} · Order #{svc.display_order || index + 1}</div>
                                     </div>
                                 </div>
                                 <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.5, paddingRight: 12 }}>

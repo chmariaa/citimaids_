@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\ClientController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\ReportsController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\TransactionController;
@@ -19,8 +20,11 @@ Route::post('/bookings', [BookingController::class, 'store']);
 // Public booking tracking
 Route::get('/bookings/track', [BookingController::class, 'track']);
 
-// Public services list (customer-facing, active only)
+// Public services list (customer-facing; active only unless auth token present)
 Route::get('/services', [ServiceController::class, 'index']);
+
+// Public settings (business info, etc)
+Route::get('/settings', [SettingController::class, 'index']);
 
 // ─── Protected Routes (Sanctum Auth Required) ─────────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {
@@ -31,6 +35,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Dashboard
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
+
+    // Reports (live DB calculations)
+    Route::get('/reports/overview', [ReportsController::class, 'overview']);
+    Route::get('/reports/bookings', [ReportsController::class, 'bookings']);
+    Route::get('/reports/clients',  [ReportsController::class, 'clients']);
+    Route::get('/reports/services', [ReportsController::class, 'services']);
+    Route::get('/reports/revenue',  [ReportsController::class, 'revenue']);
 
     // Bookings (admin)
     Route::get('/bookings', [BookingController::class, 'index']);
@@ -43,15 +54,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/clients', [ClientController::class, 'index']);
     Route::get('/clients/{id}', [ClientController::class, 'show']);
     Route::post('/clients', [ClientController::class, 'store']);
+    Route::put('/clients/{id}', [ClientController::class, 'update']);
     Route::delete('/clients/{id}', [ClientController::class, 'destroy']);
 
-    // Services (admin CRUD — uses ?public for public listing override)
+    // Services (admin CRUD)
     Route::post('/services', [ServiceController::class, 'store']);
     Route::put('/services/{id}', [ServiceController::class, 'update']);
     Route::delete('/services/{id}', [ServiceController::class, 'destroy']);
+    Route::post('/services/reorder', [ServiceController::class, 'reorder']);
 
-    // Settings
-    Route::get('/settings', [SettingController::class, 'index']);
+
+    // Settings (admin CRUD)
     Route::put('/settings', [SettingController::class, 'update']);
 
     // Payments
