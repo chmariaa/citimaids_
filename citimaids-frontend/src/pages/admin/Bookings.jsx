@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../../api/axios';
 import {
@@ -11,7 +11,6 @@ import {
     outlineBtn as outlineBtnBase,
     searchBar,
     searchInput,
-    tabBtn,
     idBadge,
     statusBadge,
     avatar,
@@ -20,7 +19,119 @@ import {
 } from './adminStyles';
 import { getAdminDispatchWALink } from '../../utils/whatsapp';
 
-const STATUS_TABS = ['all', 'pending', 'confirmed', 'completed', 'cancelled'];
+/**
+ * ── Status Tab Filter Box Configurations ──
+ * Provides distinct visual color themes (background, border, text, badge, and indicator dot)
+ * for each status box (All, Pending, Confirmed, Completed, Cancelled).
+ * Both inactive and active states are clearly styled so users can immediately distinguish them.
+ */
+const STATUS_TABS_CONFIG = {
+    all: {
+        label: 'All',
+        dotColor: '#0A2342',
+        // Inactive: Crisp slate-tinted box so it is visible and defined
+        inactive: {
+            bg: '#f8fafc',
+            border: '#cbd5e1',
+            text: '#1e293b',
+            badgeBg: '#e2e8f0',
+            badgeText: '#0f172a',
+        },
+        // Active: Citimaids signature navy brand gradient
+        active: {
+            bg: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)',
+            border: '#0A2342',
+            text: '#ffffff',
+            badgeBg: 'rgba(255, 255, 255, 0.22)',
+            badgeText: '#ffffff',
+            shadow: '0 4px 14px rgba(10, 35, 66, 0.25)',
+        },
+    },
+    pending: {
+        label: 'Pending',
+        dotColor: '#d97706',
+        // Inactive: Warm soft amber/yellow box so the user can easily see it
+        inactive: {
+            bg: '#fffbeb',
+            border: '#fcd34d',
+            text: '#b45309',
+            badgeBg: '#fef3c7',
+            badgeText: '#92400e',
+        },
+        // Active: Vibrant amber gradient with glow
+        active: {
+            bg: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)',
+            border: '#d97706',
+            text: '#ffffff',
+            badgeBg: 'rgba(255, 255, 255, 0.28)',
+            badgeText: '#ffffff',
+            shadow: '0 4px 14px rgba(217, 119, 6, 0.35)',
+        },
+    },
+    confirmed: {
+        label: 'Confirmed',
+        dotColor: '#2563eb',
+        // Inactive: Soft royal blue box
+        inactive: {
+            bg: '#eff6ff',
+            border: '#93c5fd',
+            text: '#1d4ed8',
+            badgeBg: '#dbeafe',
+            badgeText: '#1e40af',
+        },
+        // Active: Royal blue gradient with glow
+        active: {
+            bg: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+            border: '#2563eb',
+            text: '#ffffff',
+            badgeBg: 'rgba(255, 255, 255, 0.28)',
+            badgeText: '#ffffff',
+            shadow: '0 4px 14px rgba(37, 99, 235, 0.35)',
+        },
+    },
+    completed: {
+        label: 'Completed',
+        dotColor: '#059669',
+        // Inactive: Soft emerald green box
+        inactive: {
+            bg: '#ecfdf5',
+            border: '#86efac',
+            text: '#047857',
+            badgeBg: '#d1fae5',
+            badgeText: '#065f46',
+        },
+        // Active: Emerald green gradient with glow
+        active: {
+            bg: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+            border: '#059669',
+            text: '#ffffff',
+            badgeBg: 'rgba(255, 255, 255, 0.28)',
+            badgeText: '#ffffff',
+            shadow: '0 4px 14px rgba(5, 150, 105, 0.35)',
+        },
+    },
+    cancelled: {
+        label: 'Cancelled',
+        dotColor: '#dc2626',
+        // Inactive: Soft rose-red box
+        inactive: {
+            bg: '#fef2f2',
+            border: '#fca5a5',
+            text: '#b91c1c',
+            badgeBg: '#fee2e2',
+            badgeText: '#991b1b',
+        },
+        // Active: Crimson red gradient with glow
+        active: {
+            bg: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+            border: '#dc2626',
+            text: '#ffffff',
+            badgeBg: 'rgba(255, 255, 255, 0.28)',
+            badgeText: '#ffffff',
+            shadow: '0 4px 14px rgba(220, 38, 38, 0.35)',
+        },
+    },
+};
 
 const serviceColors = {
     'Home Cleaning': '#059669',
@@ -50,8 +161,10 @@ export default function Bookings() {
     const [meta, setMeta] = useState({});
     const [activeTab, setActiveTab] = useState('all');
     const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
+    const searchTimerRef = useRef(null);
 
     // Toast notification
     const [toast, setToast] = useState(null);
@@ -81,9 +194,27 @@ export default function Bookings() {
 
     const [form, setForm] = useState(defaultForm);
 
+    /**
+     * Debounce search input changes by 350ms so user typing doesn't trigger
+     * rapid, redundant requests to the backend server.
+     */
+    useEffect(() => {
+        clearTimeout(searchTimerRef.current);
+        searchTimerRef.current = setTimeout(() => {
+            setDebouncedSearch(search.trim());
+        }, 350);
+        return () => clearTimeout(searchTimerRef.current);
+    }, [search]);
+
+    /**
+     * Fetch bookings whenever:
+     * - Status filter tab changes ('all', 'pending', 'confirmed', 'completed', 'cancelled')
+     * - Debounced search keyword changes (matches client name, service name, or booking ID)
+     * - Current pagination page changes
+     */
     useEffect(() => {
         fetchBookings();
-    }, [activeTab, search, page]);
+    }, [activeTab, debouncedSearch, page]);
 
     // Handle incoming navigation with openNewBooking flag (e.g. from Dashboard)
     useEffect(() => {
@@ -105,12 +236,19 @@ export default function Bookings() {
         setTimeout(() => setToast(null), 3500);
     };
 
+    /**
+     * Fetch bookings from API with pagination, status filtering, and multi-field search parameters.
+     * The backend queries across:
+     * - Client name, email, and contact number
+     * - Service name (e.g., Home Cleaning, Deep Cleaning)
+     * - Booking ID (e.g., #0001, 1, 0001)
+     */
     const fetchBookings = async () => {
         setLoading(true);
         try {
             const params = { page };
             if (activeTab !== 'all') params.status = activeTab;
-            if (search) params.search = search;
+            if (debouncedSearch) params.search = debouncedSearch;
             const res = await api.get('/bookings', { params });
             setBookings(res.data.data || []);
             setMeta(res.data);
@@ -229,12 +367,17 @@ export default function Bookings() {
         }
     };
 
+    /**
+     * Tab badge counts:
+     * Uses backend status_counts calculated by the API to ensure accurate counts
+     * even when a specific status filter is active. Falls back to client-filtered list or meta.total.
+     */
     const tabCounts = {
-        all: meta.total || bookings.length,
-        pending: bookings.filter(b => b.status === 'pending').length,
-        confirmed: bookings.filter(b => b.status === 'confirmed').length,
-        completed: bookings.filter(b => b.status === 'completed').length,
-        cancelled: bookings.filter(b => b.status === 'cancelled').length,
+        all: meta.status_counts?.all ?? meta.total ?? bookings.length,
+        pending: meta.status_counts?.pending ?? bookings.filter(b => b.status === 'pending').length,
+        confirmed: meta.status_counts?.confirmed ?? bookings.filter(b => b.status === 'confirmed').length,
+        completed: meta.status_counts?.completed ?? bookings.filter(b => b.status === 'completed').length,
+        cancelled: meta.status_counts?.cancelled ?? bookings.filter(b => b.status === 'cancelled').length,
     };
 
     return (
@@ -293,37 +436,197 @@ export default function Bookings() {
                 </button>
             </div>
 
-            {/* Search & Toolbar */}
-            <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
-                <div style={searchBar}>
-                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#94a3b8" strokeWidth="2">
+            {/* ── Search Toolbar ──
+              * Search box functional for:
+              * 1. Client Name (e.g., "Sarah")
+              * 2. Service Name (e.g., "Deep Cleaning", "Home Cleaning")
+              * 3. Booking ID (e.g., "#0001", "0001", or "1")
+              */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+                <div style={{
+                    ...searchBar,
+                    maxWidth: 500,
+                    position: 'relative',
+                    borderColor: search ? brand.royal : brand.border,
+                    boxShadow: search ? '0 0 0 3px rgba(37,99,235,0.1)' : '0 2px 6px rgba(10,35,66,0.02)',
+                    transition: 'border-color 0.2s, box-shadow 0.2s',
+                }}>
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke={search ? brand.royal : '#94a3b8'} strokeWidth="2.2">
                         <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
                     </svg>
                     <input
                         type="text"
-                        placeholder="Search by name, service, or booking ID..."
+                        placeholder="Search by name, service, or booking ID (e.g. Sarah, Deep Cleaning, #0001)..."
                         value={search}
-                        onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                        onChange={(e) => {
+                            setSearch(e.target.value);
+                            setPage(1); // Reset page to 1 on each search stroke
+                        }}
                         style={searchInput}
                     />
+                    {/* Clear button when search text is active */}
+                    {search && (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setSearch('');
+                                setDebouncedSearch('');
+                                setPage(1);
+                            }}
+                            title="Clear search"
+                            style={{
+                                background: '#f1f5f9',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: 22,
+                                height: 22,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                color: '#64748b',
+                                transition: 'all 0.15s',
+                                padding: 0,
+                                flexShrink: 0,
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = '#e2e8f0'; e.currentTarget.style.color = '#0f172a'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#64748b'; }}
+                        >
+                            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    )}
                 </div>
+
+                {/* Search query active badge pill */}
+                {debouncedSearch && (
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        padding: '6px 12px',
+                        background: '#eff6ff',
+                        border: '1px solid #bfdbfe',
+                        borderRadius: 10,
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: '#1d4ed8',
+                    }}>
+                        <span>Searching: <strong>"{debouncedSearch}"</strong></span>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setSearch('');
+                                setDebouncedSearch('');
+                                setPage(1);
+                            }}
+                            style={{
+                                background: 'transparent',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: '#1d4ed8',
+                                display: 'flex',
+                                alignItems: 'center',
+                                padding: 0,
+                            }}
+                            title="Clear search filter"
+                        >
+                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                )}
             </div>
 
-            {/* Status Tabs */}
-            <div style={{ display: 'flex', gap: 6, marginBottom: 22 }}>
-                {STATUS_TABS.map(tab => (
-                    <button
-                        key={tab}
-                        onClick={() => { setActiveTab(tab); setPage(1); }}
-                        style={tabBtn(activeTab === tab)}
-                    >
-                        {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                        <span style={{
-                            fontSize: 10, fontWeight: 800, marginLeft: 4,
-                            opacity: activeTab === tab ? 0.8 : 0.5,
-                        }}>{tabCounts[tab] || 0}</span>
-                    </button>
-                ))}
+            {/* ── Status Tab Filter Buttons with Distinct Box Colors ──
+              * Color-coded boxes so users can clearly see each category:
+              * - "All": Slate / Navy
+              * - "Pending": Amber / Yellow
+              * - "Confirmed": Royal Blue
+              * - "Completed": Emerald Green
+              * - "Cancelled": Rose Red
+              * Each button has a colored box background, colored border, status dot, label, and counter badge.
+              */}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 22, flexWrap: 'wrap' }}>
+                {Object.keys(STATUS_TABS_CONFIG).map(tabKey => {
+                    const cfg = STATUS_TABS_CONFIG[tabKey];
+                    const isActive = activeTab === tabKey;
+                    const styleTheme = isActive ? cfg.active : cfg.inactive;
+                    const count = tabCounts[tabKey] ?? 0;
+
+                    return (
+                        <button
+                            key={tabKey}
+                            type="button"
+                            onClick={() => {
+                                setActiveTab(tabKey);
+                                setPage(1); // Reset page to 1 when switching status tab
+                            }}
+                            style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 8,
+                                padding: '9px 18px',
+                                borderRadius: 12,
+                                border: `1.5px solid ${styleTheme.border}`,
+                                background: styleTheme.bg,
+                                color: styleTheme.text,
+                                fontSize: 13,
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                transition: 'all 0.18s ease-in-out',
+                                boxShadow: isActive ? styleTheme.shadow : '0 1px 3px rgba(0,0,0,0.04)',
+                                transform: isActive ? 'translateY(-1px)' : 'translateY(0)',
+                            }}
+                            onMouseEnter={e => {
+                                if (!isActive) {
+                                    e.currentTarget.style.transform = 'translateY(-1px)';
+                                    e.currentTarget.style.boxShadow = '0 3px 8px rgba(0,0,0,0.08)';
+                                }
+                            }}
+                            onMouseLeave={e => {
+                                if (!isActive) {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)';
+                                }
+                            }}
+                        >
+                            {/* Color-coded status indicator dot */}
+                            <span
+                                style={{
+                                    width: 8,
+                                    height: 8,
+                                    borderRadius: '50%',
+                                    backgroundColor: isActive ? '#ffffff' : cfg.dotColor,
+                                    boxShadow: isActive ? '0 0 6px rgba(255,255,255,0.8)' : 'none',
+                                    flexShrink: 0,
+                                }}
+                            />
+
+                            {/* Status label */}
+                            <span>{cfg.label}</span>
+
+                            {/* Count pill badge showing total items in this status */}
+                            <span
+                                style={{
+                                    fontSize: 11,
+                                    fontWeight: 800,
+                                    padding: '2px 8px',
+                                    borderRadius: 999,
+                                    background: styleTheme.badgeBg,
+                                    color: styleTheme.badgeText,
+                                    minWidth: 18,
+                                    textAlign: 'center',
+                                    lineHeight: '14px',
+                                }}
+                            >
+                                {count}
+                            </span>
+                        </button>
+                    );
+                })}
             </div>
 
             {/* Bookings Table */}
@@ -358,17 +661,35 @@ export default function Bookings() {
                                 <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
                             </svg>
                         </div>
-                        <div style={{ fontWeight: 700, color: brand.navy, fontSize: 15, marginBottom: 4 }}>No bookings found</div>
-                        <div style={{ color: '#64748b', fontSize: 13, marginBottom: 16 }}>Click "New Booking" to create your first booking dispatch.</div>
-                        <button
-                            onClick={() => setShowNewModal(true)}
-                            style={{ ...solidBtnBase, fontSize: 12, padding: '8px 18px' }}
-                        >
-                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                            </svg>
-                            Create Booking Now
-                        </button>
+                        <div style={{ fontWeight: 700, color: brand.navy, fontSize: 15, marginBottom: 4 }}>
+                            {debouncedSearch ? `No bookings matching "${debouncedSearch}"` : 'No bookings found'}
+                        </div>
+                        <div style={{ color: '#64748b', fontSize: 13, marginBottom: 16 }}>
+                            {debouncedSearch
+                                ? 'Try searching with another client name, service title, or booking ID.'
+                                : 'Click "New Booking" to create your first booking dispatch.'}
+                        </div>
+                        {debouncedSearch ? (
+                            <button
+                                onClick={() => { setSearch(''); setDebouncedSearch(''); setPage(1); }}
+                                style={{ ...outlineBtnBase, fontSize: 12, padding: '8px 18px', gap: 6 }}
+                            >
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                Clear Search Filter
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => setShowNewModal(true)}
+                                style={{ ...solidBtnBase, fontSize: 12, padding: '8px 18px' }}
+                            >
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Create Booking Now
+                            </button>
+                        )}
                     </div>
                 ) : (
                     bookings.map((booking) => {
