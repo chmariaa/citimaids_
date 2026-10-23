@@ -18,6 +18,7 @@ import {
     selectStyle as selectStyleBase,
 } from './adminStyles';
 import { getAdminDispatchWALink } from '../../utils/whatsapp';
+import PrintManifestModal from './PrintManifestModal';
 
 /**
  * ── Status Tab Filter Box Configurations ──
@@ -194,6 +195,23 @@ export default function Bookings() {
 
     const [form, setForm] = useState(defaultForm);
 
+    // Edit Booking Modal state
+    const [editBooking, setEditBooking] = useState(null);
+    const [editForm, setEditForm] = useState(defaultForm);
+    const [editSubmitting, setEditSubmitting] = useState(false);
+    const [editError, setEditError] = useState('');
+
+    // Delete Booking Modal state
+    const [deleteBooking, setDeleteBooking] = useState(null);
+    const [deleting, setDeleting] = useState(false);
+
+    // Print Manifest Modal state
+    const [printManifestBooking, setPrintManifestBooking] = useState(null);
+
+    // Sort & Filters Modal state
+    const [filterModal, setFilterModal] = useState(false);
+    const [filters, setFilters] = useState({ sort_by: 'created_at', sort_dir: 'desc', payment_status: 'all', service_id: 'all' });
+
     /**
      * Debounce search input changes by 350ms so user typing doesn't trigger
      * rapid, redundant requests to the backend server.
@@ -214,7 +232,7 @@ export default function Bookings() {
      */
     useEffect(() => {
         fetchBookings();
-    }, [activeTab, debouncedSearch, page]);
+    }, [activeTab, debouncedSearch, page, filters]);
 
     // Handle incoming navigation with openNewBooking flag (e.g. from Dashboard)
     useEffect(() => {
@@ -230,6 +248,18 @@ export default function Bookings() {
             loadModalData();
         }
     }, [showNewModal]);
+
+    // Load services on mount for the filter dropdown
+    useEffect(() => {
+        const loadServicesForFilter = async () => {
+            try {
+                const svcRes = await api.get('/services').catch(() => ({ data: [] }));
+                const svcData = Array.isArray(svcRes.data) ? svcRes.data : (svcRes.data.data || []);
+                if (svcData.length > 0 && services.length === 0) setServices(svcData);
+            } catch {}
+        };
+        loadServicesForFilter();
+    }, []);
 
     const showToast = (msg, type = 'success') => {
         setToast({ msg, type });
@@ -249,6 +279,11 @@ export default function Bookings() {
             const params = { page };
             if (activeTab !== 'all') params.status = activeTab;
             if (debouncedSearch) params.search = debouncedSearch;
+            // Sort & Filter params
+            if (filters.sort_by !== 'created_at') params.sort_by = filters.sort_by;
+            if (filters.sort_dir !== 'desc') params.sort_dir = filters.sort_dir;
+            if (filters.payment_status !== 'all') params.payment_status = filters.payment_status;
+            if (filters.service_id !== 'all') params.service_id = filters.service_id;
             const res = await api.get('/bookings', { params });
             setBookings(res.data.data || []);
             setMeta(res.data);
@@ -368,6 +403,152 @@ export default function Bookings() {
     };
 
     /**
+     * Open Edit Modal with booking data pre-filled.
+     */
+    const openEditModal = (b) => {
+        if (services.length === 0) {
+            loadModalData();
+        }
+
+        // Parse time slot / custom time from notes if stored as "Slot: ... | notes" or "Time: ... | notes"
+        let initialSlot = 'Morning (08:00 - 12:00)';
+        let initialCustomTime = '';
+        let cleanedNotes = b.notes || '';
+
+        if (cleanedNotes.startsWith('Slot: ')) {
+            const parts = cleanedNotes.split(' | ');
+            const slotPart = parts[0].replace('Slot: ', '').trim();
+            if (TIME_SLOTS.includes(slotPart)) {
+                initialSlot = slotPart;
+            } else {
+                initialSlot = 'Custom Time';
+                initialCustomTime = slotPart;
+            }
+            cleanedNotes = parts.slice(1).join(' | ');
+        } else if (cleanedNotes.startsWith('Time: ')) {
+            const parts = cleanedNotes.split(' | ');
+            initialSlot = 'Custom Time';
+            initialCustomTime = parts[0].replace('Time: ', '').trim();
+            cleanedNotes = parts.slice(1).join(' | ');
+        }
+
+        setEditForm({
+            name: b.client?.name || '',
+            contactNumber: b.client?.contact_number || '',
+            email: b.client?.email || '',
+            serviceId: b.service_id || b.service?.id || '',
+            preferredDate: b.preferred_date ? b.preferred_date.slice(0, 10) : new Date().toISOString().split('T')[0],
+            timeSlot: initialSlot,
+            customTime: initialCustomTime,
+            address: b.address || b.client?.address || '',
+            status: b.status || 'pending',
+            totalAmount: b.total_amount ? String(b.total_amount) : (b.service?.base_price ? String(b.service.base_price) : ''),
+            paymentStatus: b.payment_status || 'unpaid',
+            paymentMethod: b.payment_method || 'Cash on Completion',
+            notes: cleanedNotes,
+        });
+        setEditError('');
+        setEditBooking(b);
+    };
+
+    const handleEditServiceChange = (svcId) => {
+        const found = services.find(s => String(s.id) === String(svcId));
+        setEditForm(prev => ({
+            ...prev,
+            serviceId: svcId,
+            totalAmount: found?.base_price ? String(found.base_price) : prev.totalAmount,
+        }));
+    };
+
+    const handleUpdateBooking = async (e) => {
+        e.preventDefault();
+        setEditError('');
+
+        if (!editForm.name.trim()) {
+            setEditError('Client name is required.');
+            return;
+        }
+        if (!editForm.contactNumber.trim()) {
+            setEditError('Contact phone number is required.');
+            return;
+        }
+        if (!editForm.serviceId) {
+            setEditError('Please select a service.');
+            return;
+        }
+        if (!editForm.preferredDate) {
+            setEditError('Preferred booking date is required.');
+            return;
+        }
+        if (!editForm.address.trim()) {
+            setEditError('Service address is required.');
+            return;
+        }
+
+        setEditSubmitting(true);
+        try {
+            const timeDesc = editForm.timeSlot === 'Custom Time'
+                ? (editForm.customTime.trim() ? `Time: ${editForm.customTime.trim()}` : '')
+                : (editForm.timeSlot ? `Slot: ${editForm.timeSlot}` : '');
+
+            const fullNotes = [timeDesc, editForm.notes.trim()].filter(Boolean).join(' | ') || null;
+
+            const payload = {
+                name: editForm.name.trim(),
+                contact_number: editForm.contactNumber.trim(),
+                service_id: Number(editForm.serviceId),
+                preferred_date: editForm.preferredDate,
+                address: editForm.address.trim(),
+                status: editForm.status,
+                total_amount: editForm.totalAmount ? Number(editForm.totalAmount) : undefined,
+                payment_status: editForm.paymentStatus,
+                payment_method: editForm.paymentMethod,
+                notes: fullNotes,
+            };
+
+            if (editForm.email.trim()) {
+                payload.email = editForm.email.trim();
+            }
+
+            const res = await api.put(`/bookings/${editBooking.id}`, payload);
+            const refStr = `#${String(editBooking.id).padStart(4, '0')}`;
+
+            showToast(`Booking ${refStr} updated successfully!`, 'success');
+            setEditBooking(null);
+            fetchBookings();
+        } catch (err) {
+            console.error('Error updating booking:', err);
+            const errData = err.response?.data;
+            let errMsg = 'Failed to update booking. Please check the inputs and try again.';
+            if (errData?.errors) {
+                errMsg = Object.values(errData.errors).flat().join(' ');
+            } else if (errData?.message) {
+                errMsg = errData.message;
+            }
+            setEditError(errMsg);
+        } finally {
+            setEditSubmitting(false);
+        }
+    };
+
+    const handleDeleteBooking = async () => {
+        if (!deleteBooking) return;
+        setDeleting(true);
+        try {
+            await api.delete(`/bookings/${deleteBooking.id}`);
+            const refStr = `#${String(deleteBooking.id).padStart(4, '0')}`;
+            showToast(`Booking ${refStr} deleted successfully!`, 'success');
+            setDeleteBooking(null);
+            fetchBookings();
+        } catch (err) {
+            console.error('Error deleting booking:', err);
+            showToast('Failed to delete booking. Please try again.', 'error');
+        } finally {
+            setDeleting(false);
+        }
+    };
+
+    /**
      * Tab badge counts:
      * Uses backend status_counts calculated by the API to ensure accurate counts
      * even when a specific status filter is active. Falls back to client-filtered list or meta.total.
@@ -456,7 +637,7 @@ export default function Bookings() {
                     </svg>
                     <input
                         type="text"
-                        placeholder="Search by name, service, or booking ID (e.g. Sarah, Deep Cleaning, #0001)..."
+                        placeholder="Search by client name, service, booking ID (#0010), or status (e.g. Confirmed)..."
                         value={search}
                         onChange={(e) => {
                             setSearch(e.target.value);
@@ -499,6 +680,12 @@ export default function Bookings() {
                     )}
                 </div>
 
+                {/* Sort & Filters Button */}
+                <SortFilterBtn
+                    onClick={() => setFilterModal(true)}
+                    hasActiveFilters={filters.sort_by !== 'created_at' || filters.sort_dir !== 'desc' || filters.payment_status !== 'all' || filters.service_id !== 'all'}
+                />
+
                 {/* Search query active badge pill */}
                 {debouncedSearch && (
                     <div style={{
@@ -531,6 +718,46 @@ export default function Bookings() {
                                 padding: 0,
                             }}
                             title="Clear search filter"
+                        >
+                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                )}
+
+                {/* Active filter indicator pills */}
+                {(filters.sort_by !== 'created_at' || filters.sort_dir !== 'desc' || filters.payment_status !== 'all' || filters.service_id !== 'all') && (
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        padding: '6px 12px',
+                        background: '#faf5ff',
+                        border: '1px solid #d8b4fe',
+                        borderRadius: 10,
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: '#7c3aed',
+                    }}>
+                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M3 4h18M7 8h10M10 12h4" /></svg>
+                        <span>Filters active</span>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setFilters({ sort_by: 'created_at', sort_dir: 'desc', payment_status: 'all', service_id: 'all' });
+                                setPage(1);
+                            }}
+                            style={{
+                                background: 'transparent',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: '#7c3aed',
+                                display: 'flex',
+                                alignItems: 'center',
+                                padding: 0,
+                            }}
+                            title="Clear all filters"
                         >
                             <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -634,7 +861,7 @@ export default function Bookings() {
                 {/* Table Header */}
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: '100px 1fr 1fr 1fr 130px 90px',
+                    gridTemplateColumns: '95px 1.25fr 1.15fr 1.1fr 125px 155px',
                     padding: '14px 24px',
                     borderBottom: `1px solid ${brand.border}`,
                     background: brand.softBg,
@@ -703,7 +930,7 @@ export default function Bookings() {
                         return (
                             <div key={booking.id} style={{
                                 display: 'grid',
-                                gridTemplateColumns: '100px 1fr 1fr 1fr 130px 90px',
+                                gridTemplateColumns: '95px 1.25fr 1.15fr 1.1fr 125px 155px',
                                 padding: '16px 24px',
                                 borderBottom: '1px solid #f1f5f9',
                                 alignItems: 'center',
@@ -757,7 +984,8 @@ export default function Bookings() {
                                 </div>
 
                                 {/* Actions */}
-                                <div style={{ display: 'flex', gap: 6 }} onClick={e => e.stopPropagation()}>
+                                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }} onClick={e => e.stopPropagation()}>
+                                    {/* WhatsApp Client */}
                                     <a
                                         href={getAdminDispatchWALink(booking, booking.status === 'completed' ? 'completed' : 'confirmed')}
                                         target="_blank"
@@ -770,18 +998,100 @@ export default function Bookings() {
                                             background: '#f0fdf4',
                                             textDecoration: 'none',
                                         }}
+                                        onMouseEnter={e => {
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                            e.currentTarget.style.background = '#dcfce7';
+                                            e.currentTarget.style.boxShadow = '0 4px 10px rgba(22, 163, 74, 0.2)';
+                                        }}
+                                        onMouseLeave={e => {
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                            e.currentTarget.style.background = '#f0fdf4';
+                                            e.currentTarget.style.boxShadow = 'none';
+                                        }}
                                     >
                                         <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
                                             <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2z" />
                                         </svg>
                                     </a>
+
+                                    {/* View Details */}
                                     <button
+                                        type="button"
                                         title="View Details"
                                         onClick={() => navigate(`/admin/bookings/${booking.id}`)}
-                                        style={actionBtn}
+                                        style={{
+                                            ...actionBtn,
+                                            color: '#1d4ed8',
+                                            borderColor: '#bfdbfe',
+                                            background: '#eff6ff',
+                                        }}
+                                        onMouseEnter={e => {
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                            e.currentTarget.style.background = '#dbeafe';
+                                            e.currentTarget.style.boxShadow = '0 4px 10px rgba(29, 78, 216, 0.2)';
+                                        }}
+                                        onMouseLeave={e => {
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                            e.currentTarget.style.background = '#eff6ff';
+                                            e.currentTarget.style.boxShadow = 'none';
+                                        }}
                                     >
                                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
+                                        </svg>
+                                    </button>
+
+                                    {/* Edit Booking */}
+                                    <button
+                                        type="button"
+                                        title="Edit Booking"
+                                        onClick={() => openEditModal(booking)}
+                                        style={{
+                                            ...actionBtn,
+                                            color: '#b45309',
+                                            borderColor: '#fde68a',
+                                            background: '#fffbeb',
+                                        }}
+                                        onMouseEnter={e => {
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                            e.currentTarget.style.background = '#fef3c7';
+                                            e.currentTarget.style.boxShadow = '0 4px 10px rgba(180, 83, 9, 0.2)';
+                                        }}
+                                        onMouseLeave={e => {
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                            e.currentTarget.style.background = '#fffbeb';
+                                            e.currentTarget.style.boxShadow = 'none';
+                                        }}
+                                    >
+                                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+
+                                    {/* Delete Booking */}
+                                    <button
+                                        type="button"
+                                        title="Delete Booking"
+                                        onClick={() => setDeleteBooking(booking)}
+                                        style={{
+                                            ...actionBtn,
+                                            color: '#dc2626',
+                                            borderColor: '#fecaca',
+                                            background: '#fef2f2',
+                                        }}
+                                        onMouseEnter={e => {
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                            e.currentTarget.style.background = '#fee2e2';
+                                            e.currentTarget.style.boxShadow = '0 4px 10px rgba(220, 38, 38, 0.2)';
+                                        }}
+                                        onMouseLeave={e => {
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                            e.currentTarget.style.background = '#fef2f2';
+                                            e.currentTarget.style.boxShadow = 'none';
+                                        }}
+                                    >
+                                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>
                                     </button>
                                 </div>
@@ -1211,6 +1521,655 @@ export default function Bookings() {
                     </div>
                 </div>
             )}
+
+            {/* ── EDIT BOOKING MODAL ──────────────────────────────── */}
+            {editBooking && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        backgroundColor: 'rgba(6, 20, 41, 0.65)',
+                        backdropFilter: 'blur(5px)',
+                        zIndex: 1000,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '20px',
+                        animation: 'fadeIn 0.2s ease-out',
+                    }}
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget && !editSubmitting) setEditBooking(null);
+                    }}
+                >
+                    <div
+                        style={{
+                            background: '#fff',
+                            borderRadius: 22,
+                            width: '100%',
+                            maxWidth: 680,
+                            maxHeight: '90vh',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            boxShadow: '0 25px 60px rgba(10, 35, 66, 0.25)',
+                            border: `1px solid ${brand.border}`,
+                            overflow: 'hidden',
+                        }}
+                    >
+                        {/* Header */}
+                        <div style={{
+                            padding: '22px 28px',
+                            borderBottom: `1px solid ${brand.border}`,
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            background: brand.softBg,
+                        }}>
+                            <div>
+                                <h2 style={{ fontSize: 18, fontWeight: 800, color: brand.navy, margin: 0 }}>
+                                    Edit Booking #{String(editBooking.id).padStart(4, '0')}
+                                </h2>
+                                <p style={{ fontSize: 13, color: '#64748b', margin: '3px 0 0' }}>
+                                    Update dispatch schedule, client contact, or booking status
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setEditBooking(null)}
+                                disabled={editSubmitting}
+                                style={{
+                                    background: '#fff',
+                                    border: `1px solid ${brand.border}`,
+                                    borderRadius: '50%',
+                                    width: 32,
+                                    height: 32,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    color: '#64748b',
+                                    transition: 'all 0.15s',
+                                }}
+                                onMouseEnter={e => {
+                                    e.currentTarget.style.transform = 'translateY(-1px)';
+                                    e.currentTarget.style.background = '#f1f5f9';
+                                    e.currentTarget.style.color = '#0f172a';
+                                }}
+                                onMouseLeave={e => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.background = '#fff';
+                                    e.currentTarget.style.color = '#64748b';
+                                }}
+                            >
+                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        {/* Form */}
+                        <form onSubmit={handleUpdateBooking} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+                            <div style={{ padding: '24px 28px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 18 }}>
+                                {editError && (
+                                    <div style={{
+                                        padding: '12px 16px',
+                                        background: '#fef2f2',
+                                        border: '1px solid #fecaca',
+                                        borderRadius: 12,
+                                        color: '#b91c1c',
+                                        fontSize: 13,
+                                        fontWeight: 500,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 8,
+                                    }}>
+                                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span>{editError}</span>
+                                    </div>
+                                )}
+
+                                {/* Row 1: Client Name & Contact */}
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                                    <div>
+                                        <FormLabel required>Client Full Name</FormLabel>
+                                        <input
+                                            type="text"
+                                            value={editForm.name}
+                                            onChange={e => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                                            placeholder="E.g., Sarah Al Mansoori"
+                                            style={inputStyleBase}
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <FormLabel required>Contact Phone Number</FormLabel>
+                                        <input
+                                            type="text"
+                                            value={editForm.contactNumber}
+                                            onChange={e => setEditForm(prev => ({ ...prev, contactNumber: e.target.value }))}
+                                            placeholder="+971 50 123 4567"
+                                            style={inputStyleBase}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Row 2: Email & Service */}
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                                    <div>
+                                        <FormLabel>Client Email</FormLabel>
+                                        <input
+                                            type="email"
+                                            value={editForm.email}
+                                            onChange={e => setEditForm(prev => ({ ...prev, email: e.target.value }))}
+                                            placeholder="client@example.com"
+                                            style={inputStyleBase}
+                                        />
+                                    </div>
+                                    <div>
+                                        <FormLabel required>Service Type</FormLabel>
+                                        <select
+                                            value={editForm.serviceId}
+                                            onChange={e => handleEditServiceChange(e.target.value)}
+                                            style={selectStyleBase}
+                                            required
+                                        >
+                                            <option value="">Select a service...</option>
+                                            {services.map(svc => (
+                                                <option key={svc.id} value={svc.id}>
+                                                    {svc.name} {svc.base_price ? `(AED ${svc.base_price})` : ''}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {/* Row 3: Preferred Date & Time Slot */}
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                                    <div>
+                                        <FormLabel required>Preferred Date</FormLabel>
+                                        <input
+                                            type="date"
+                                            value={editForm.preferredDate}
+                                            onChange={e => setEditForm(prev => ({ ...prev, preferredDate: e.target.value }))}
+                                            style={inputStyleBase}
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <FormLabel>Preferred Time Slot</FormLabel>
+                                        <select
+                                            value={editForm.timeSlot}
+                                            onChange={e => setEditForm(prev => ({ ...prev, timeSlot: e.target.value }))}
+                                            style={selectStyleBase}
+                                        >
+                                            {TIME_SLOTS.map(slot => (
+                                                <option key={slot} value={slot}>{slot}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {editForm.timeSlot === 'Custom Time' && (
+                                    <div>
+                                        <FormLabel>Specify Custom Dispatch Time</FormLabel>
+                                        <input
+                                            type="text"
+                                            placeholder="E.g., 10:30 AM or 02:15 PM sharp"
+                                            value={editForm.customTime}
+                                            onChange={e => setEditForm(prev => ({ ...prev, customTime: e.target.value }))}
+                                            style={inputStyleBase}
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Row 4: Service Address */}
+                                <div>
+                                    <FormLabel required>Service Location / Address</FormLabel>
+                                    <input
+                                        type="text"
+                                        placeholder="Apartment/Villa No., Building, Street, Area, Dubai"
+                                        value={editForm.address}
+                                        onChange={e => setEditForm(prev => ({ ...prev, address: e.target.value }))}
+                                        style={inputStyleBase}
+                                        required
+                                    />
+                                </div>
+
+                                {/* Row 5: Status (with color preview badge) & Total Amount */}
+                                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 16, alignItems: 'flex-start' }}>
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                                            <FormLabel>Booking Status</FormLabel>
+                                            <span style={statusBadge(editForm.status)}>
+                                                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'currentColor' }} />
+                                                {editForm.status.toUpperCase()}
+                                            </span>
+                                        </div>
+                                        <select
+                                            value={editForm.status}
+                                            onChange={e => setEditForm(prev => ({ ...prev, status: e.target.value }))}
+                                            style={selectStyleBase}
+                                        >
+                                            <option value="pending">Pending (Awaiting Dispatch)</option>
+                                            <option value="confirmed">Confirmed (Scheduled)</option>
+                                            <option value="completed">Completed (Finished)</option>
+                                            <option value="cancelled">Cancelled</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <FormLabel>Total Due (AED)</FormLabel>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            placeholder="35.00"
+                                            value={editForm.totalAmount}
+                                            onChange={e => setEditForm(prev => ({ ...prev, totalAmount: e.target.value }))}
+                                            style={inputStyleBase}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Row 6: Payment Status & Method */}
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                                    <div>
+                                        <FormLabel>Payment Status</FormLabel>
+                                        <select
+                                            value={editForm.paymentStatus}
+                                            onChange={e => setEditForm(prev => ({ ...prev, paymentStatus: e.target.value }))}
+                                            style={selectStyleBase}
+                                        >
+                                            <option value="unpaid">Unpaid</option>
+                                            <option value="partial">Partial</option>
+                                            <option value="paid">Paid</option>
+                                            <option value="refunded">Refunded</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <FormLabel>Payment Method</FormLabel>
+                                        <select
+                                            value={editForm.paymentMethod}
+                                            onChange={e => setEditForm(prev => ({ ...prev, paymentMethod: e.target.value }))}
+                                            style={selectStyleBase}
+                                        >
+                                            <option value="Cash on Completion">Cash on Completion</option>
+                                            <option value="Credit / Debit Card">Credit / Debit Card</option>
+                                            <option value="Bank Transfer">Bank Transfer</option>
+                                            <option value="Online Payment Link">Online Payment Link</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {/* Notes */}
+                                <div>
+                                    <FormLabel>Special Notes & Dispatch Instructions</FormLabel>
+                                    <textarea
+                                        rows={2}
+                                        placeholder="E.g., Gate code, key with reception, focus on living room..."
+                                        value={editForm.notes}
+                                        onChange={e => setEditForm(prev => ({ ...prev, notes: e.target.value }))}
+                                        style={{ ...inputStyleBase, resize: 'vertical' }}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Modal Footer */}
+                            <div style={{
+                                padding: '16px 28px',
+                                borderTop: `1px solid ${brand.border}`,
+                                display: 'flex',
+                                justifyContent: 'flex-end',
+                                gap: 12,
+                                background: '#fff',
+                            }}>
+                                <button
+                                    type="button"
+                                    onClick={() => setEditBooking(null)}
+                                    disabled={editSubmitting}
+                                    style={{
+                                        ...outlineBtnBase,
+                                        padding: '11px 22px',
+                                        fontSize: 13,
+                                        cursor: 'pointer',
+                                        transition: 'all 0.15s',
+                                    }}
+                                    onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
+                                    onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={editSubmitting}
+                                    style={{
+                                        ...solidBtnBase,
+                                        padding: '11px 26px',
+                                        fontSize: 13,
+                                        opacity: editSubmitting ? 0.7 : 1,
+                                        cursor: editSubmitting ? 'not-allowed' : 'pointer',
+                                        transition: 'all 0.15s',
+                                    }}
+                                    onMouseEnter={e => !editSubmitting && (e.currentTarget.style.transform = 'translateY(-2px)')}
+                                    onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}
+                                >
+                                    {editSubmitting ? (
+                                        <>
+                                            <svg style={{ animation: 'spin 1s linear infinite' }} width="14" height="14" fill="none" viewBox="0 0 24 24">
+                                                <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                                            </svg>
+                                            Saving Changes...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            Save Changes
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* ── DELETE BOOKING CONFIRMATION MODAL ──────────────── */}
+            {deleteBooking && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        backgroundColor: 'rgba(6, 20, 41, 0.65)',
+                        backdropFilter: 'blur(5px)',
+                        zIndex: 1000,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '20px',
+                        animation: 'fadeIn 0.2s ease-out',
+                    }}
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget && !deleting) setDeleteBooking(null);
+                    }}
+                >
+                    <div
+                        style={{
+                            background: '#fff',
+                            borderRadius: 22,
+                            width: '100%',
+                            maxWidth: 480,
+                            padding: '30px',
+                            boxShadow: '0 25px 60px rgba(10, 35, 66, 0.25)',
+                            border: `1px solid ${brand.border}`,
+                            textAlign: 'center',
+                        }}
+                    >
+                        <div style={{
+                            width: 56,
+                            height: 56,
+                            borderRadius: '50%',
+                            background: '#fef2f2',
+                            border: '1px solid #fecaca',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            margin: '0 auto 18px',
+                            color: '#dc2626',
+                        }}>
+                            <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </div>
+
+                        <h3 style={{ fontSize: 20, fontWeight: 800, color: brand.navy, margin: '0 0 8px' }}>
+                            Delete Booking #{String(deleteBooking.id).padStart(4, '0')}?
+                        </h3>
+
+                        <p style={{ fontSize: 13, color: '#64748b', margin: '0 0 24px', lineHeight: 1.6 }}>
+                            Are you sure you want to permanently delete this booking for{' '}
+                            <strong style={{ color: brand.navy }}>{deleteBooking.client?.name || 'this client'}</strong>?
+                            This will remove the dispatch record and cannot be undone.
+                        </p>
+
+                        <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+                            <button
+                                type="button"
+                                onClick={() => setDeleteBooking(null)}
+                                disabled={deleting}
+                                style={{
+                                    ...outlineBtnBase,
+                                    padding: '11px 24px',
+                                    fontSize: 13,
+                                    cursor: 'pointer',
+                                    transition: 'all 0.15s',
+                                }}
+                                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
+                                onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleDeleteBooking}
+                                disabled={deleting}
+                                style={{
+                                    ...solidBtnBase,
+                                    background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                                    padding: '11px 26px',
+                                    fontSize: 13,
+                                    boxShadow: '0 4px 14px rgba(220, 38, 38, 0.3)',
+                                    opacity: deleting ? 0.7 : 1,
+                                    cursor: deleting ? 'not-allowed' : 'pointer',
+                                    transition: 'all 0.15s',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 6,
+                                }}
+                                onMouseEnter={e => !deleting && (e.currentTarget.style.transform = 'translateY(-2px)')}
+                                onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}
+                            >
+                                {deleting ? (
+                                    <>
+                                        <svg style={{ animation: 'spin 1s linear infinite' }} width="14" height="14" fill="none" viewBox="0 0 24 24">
+                                            <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                            <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                                        </svg>
+                                        Deleting...
+                                    </>
+                                ) : (
+                                    <>
+                                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                        Delete Booking
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── SORT & FILTERS MODAL ───────────────────────── */}
+            {filterModal && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        backgroundColor: 'rgba(6, 20, 41, 0.55)',
+                        backdropFilter: 'blur(4px)',
+                        zIndex: 1000,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '20px',
+                        animation: 'fadeIn 0.2s ease-out',
+                    }}
+                    onClick={(e) => { if (e.target === e.currentTarget) setFilterModal(false); }}
+                >
+                    <div style={{
+                        position: 'relative',
+                        background: '#fff',
+                        borderRadius: 20,
+                        padding: 32,
+                        width: 460,
+                        maxWidth: '90vw',
+                        boxShadow: '0 25px 60px rgba(10,35,66,0.2)',
+                        border: `1px solid ${brand.border}`,
+                    }}>
+                        {/* Close button */}
+                        <button
+                            type="button"
+                            onClick={() => setFilterModal(false)}
+                            style={{
+                                position: 'absolute', top: 20, right: 20,
+                                width: 32, height: 32, borderRadius: 10,
+                                border: 'none', background: 'transparent',
+                                color: '#94a3b8',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                cursor: 'pointer', transition: 'all 0.15s',
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#0f172a'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8'; }}
+                        >
+                            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+
+                        <h3 style={{ margin: '0 0 22px', fontSize: 20, fontWeight: 800, color: brand.navy, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Sort & Filter Bookings</h3>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                            {/* Sort By */}
+                            <div>
+                                <FormLabel>Sort By</FormLabel>
+                                <select
+                                    value={filters.sort_by}
+                                    onChange={e => setFilters(prev => ({ ...prev, sort_by: e.target.value }))}
+                                    style={{
+                                        ...inputStyleBase,
+                                        width: '100%',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    <option value="created_at">Date Created (Default)</option>
+                                    <option value="id">Booking ID</option>
+                                    <option value="preferred_date">Preferred Date</option>
+                                    <option value="client_name">Client Name</option>
+                                    <option value="service_name">Service Name</option>
+                                    <option value="total_amount">Total Amount</option>
+                                    <option value="status">Status</option>
+                                </select>
+                            </div>
+
+                            {/* Sort Direction */}
+                            <div>
+                                <FormLabel>Sort Direction</FormLabel>
+                                <select
+                                    value={filters.sort_dir}
+                                    onChange={e => setFilters(prev => ({ ...prev, sort_dir: e.target.value }))}
+                                    style={{
+                                        ...inputStyleBase,
+                                        width: '100%',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    <option value="desc">Descending (Newest / Highest First)</option>
+                                    <option value="asc">Ascending (Oldest / Lowest First)</option>
+                                </select>
+                            </div>
+
+                            {/* Payment Status Filter */}
+                            <div>
+                                <FormLabel>Payment Status</FormLabel>
+                                <select
+                                    value={filters.payment_status}
+                                    onChange={e => setFilters(prev => ({ ...prev, payment_status: e.target.value }))}
+                                    style={{
+                                        ...inputStyleBase,
+                                        width: '100%',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    <option value="all">All Payment Statuses</option>
+                                    <option value="unpaid">Unpaid</option>
+                                    <option value="partial">Partial</option>
+                                    <option value="paid">Paid</option>
+                                    <option value="refunded">Refunded</option>
+                                </select>
+                            </div>
+
+                            {/* Service Filter */}
+                            <div>
+                                <FormLabel>Service Type</FormLabel>
+                                <select
+                                    value={filters.service_id}
+                                    onChange={e => setFilters(prev => ({ ...prev, service_id: e.target.value }))}
+                                    style={{
+                                        ...inputStyleBase,
+                                        width: '100%',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    <option value="all">All Services</option>
+                                    {services.map(svc => (
+                                        <option key={svc.id} value={svc.id}>{svc.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setFilters({ sort_by: 'created_at', sort_dir: 'desc', payment_status: 'all', service_id: 'all' });
+                                        setPage(1);
+                                    }}
+                                    style={{
+                                        ...outlineBtnBase,
+                                        flex: 1,
+                                        justifyContent: 'center',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.15s',
+                                    }}
+                                    onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = brand.border; e.currentTarget.style.transform = 'translateY(0)'; }}
+                                >
+                                    Reset All
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setFilterModal(false)}
+                                    style={{
+                                        ...solidBtnBase,
+                                        flex: 1,
+                                        justifyContent: 'center',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.15s',
+                                    }}
+                                    onMouseEnter={e => { e.currentTarget.style.opacity = '0.88'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                                >
+                                    Apply Filters
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── PRINT MANIFEST MODAL ───────────────────────────── */}
+            {printManifestBooking && (
+                <PrintManifestModal
+                    booking={printManifestBooking}
+                    onClose={() => setPrintManifestBooking(null)}
+                />
+            )}
         </div>
     );
 }
@@ -1254,5 +2213,53 @@ function PaginationBtn({ label, active, disabled, onClick }) {
                 boxShadow: active ? '0 2px 8px rgba(10,35,66,0.2)' : 'none',
             }}
         >{label}</button>
+    );
+}
+
+function SortFilterBtn({ onClick, hasActiveFilters }) {
+    const [hovered, setHovered] = useState(false);
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+            style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '10px 20px',
+                borderRadius: 12,
+                border: `1.5px solid ${hovered ? '#cbd5e1' : (hasActiveFilters ? '#7c3aed' : brand.border)}`,
+                background: hovered ? '#f1f5f9' : (hasActiveFilters ? '#faf5ff' : '#fff'),
+                color: hovered ? brand.navy : (hasActiveFilters ? '#7c3aed' : '#334155'),
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+                transform: hovered ? 'translateY(-1px)' : 'translateY(0)',
+                boxShadow: hovered ? '0 4px 10px rgba(0,0,0,0.06)' : 'none',
+                position: 'relative',
+                flexShrink: 0,
+            }}
+        >
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path d="M3 4h18M7 8h10M10 12h4" />
+            </svg>
+            Sort & Filters
+            {hasActiveFilters && (
+                <span style={{
+                    position: 'absolute',
+                    top: -4,
+                    right: -4,
+                    width: 10,
+                    height: 10,
+                    borderRadius: '50%',
+                    background: '#7c3aed',
+                    border: '2px solid #fff',
+                    boxShadow: '0 0 6px rgba(124,58,237,0.5)',
+                }} />
+            )}
+        </button>
     );
 }

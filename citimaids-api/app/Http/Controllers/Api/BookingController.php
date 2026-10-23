@@ -20,14 +20,77 @@ class BookingController extends Controller
         }
 
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->whereHas('client', function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+            $search = trim($request->search);
+            $cleanId = preg_replace('/[^0-9]/', '', $search);
+
+            $query->where(function ($q) use ($search, $cleanId) {
+                // 1. Client Name, Email, Contact Number
+                $q->whereHas('client', function ($cq) use ($search) {
+                    $cq->where('name', 'like', "%{$search}%")
+                       ->orWhere('email', 'like', "%{$search}%")
+                       ->orWhere('contact_number', 'like', "%{$search}%");
+                })
+                // 2. Service Name
+                ->orWhereHas('service', function ($sq) use ($search) {
+                    $sq->where('name', 'like', "%{$search}%");
+                })
+                // 3. Status
+                ->orWhere('status', 'like', "%{$search}%");
+
+                // 4. Booking ID
+                if (!empty($cleanId)) {
+                    $q->orWhere('id', (int) $cleanId);
+                }
             });
         }
 
-        return response()->json($query->latest()->paginate(15));
+        // Filter by payment status if specified
+        if ($request->filled('payment_status') && $request->payment_status !== 'all') {
+            $query->where('payment_status', $request->payment_status);
+        }
+
+        // Filter by service if specified
+        if ($request->filled('service_id') && $request->service_id !== 'all') {
+            $query->where('service_id', $request->service_id);
+        }
+
+        // Sorting options
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortDir = strtolower($request->input('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+
+        if ($sortBy === 'id') {
+            $query->orderBy('bookings.id', $sortDir);
+        } elseif ($sortBy === 'preferred_date') {
+            $query->orderBy('bookings.preferred_date', $sortDir);
+        } elseif ($sortBy === 'total_amount') {
+            $query->orderBy('bookings.total_amount', $sortDir);
+        } elseif ($sortBy === 'status') {
+            $query->orderBy('bookings.status', $sortDir);
+        } elseif ($sortBy === 'client_name') {
+            $query->join('clients', 'bookings.client_id', '=', 'clients.id')
+                  ->select('bookings.*')
+                  ->orderBy('clients.name', $sortDir);
+        } elseif ($sortBy === 'service_name') {
+            $query->join('services', 'bookings.service_id', '=', 'services.id')
+                  ->select('bookings.*')
+                  ->orderBy('services.name', $sortDir);
+        } else {
+            $query->orderBy('bookings.created_at', $sortDir);
+        }
+
+        $paginated = $query->paginate(15);
+        $paginatedData = $paginated->toArray();
+
+        // Calculate total counts per status across the entire database for filter badge tabs
+        $paginatedData['status_counts'] = [
+            'all'       => Booking::count(),
+            'pending'   => Booking::where('status', 'pending')->count(),
+            'confirmed' => Booking::where('status', 'confirmed')->count(),
+            'completed' => Booking::where('status', 'completed')->count(),
+            'cancelled' => Booking::where('status', 'cancelled')->count(),
+        ];
+
+        return response()->json($paginatedData);
     }
 
     // Public & Admin: submit/create a booking
@@ -239,6 +302,55 @@ class BookingController extends Controller
         return response()->json($booking);
     }
 
+    public function update(Request $request, $id)
+    {
+        $booking = Booking::with('client')->findOrFail($id);
+
+        $validated = $request->validate([
+            'name'           => 'sometimes|string|max:255',
+            'contact_number' => 'sometimes|string|max:50',
+            'email'          => 'nullable|email|max:255',
+            'service_id'     => 'sometimes|exists:services,id',
+            'preferred_date' => 'sometimes|date',
+            'address'        => 'sometimes|string',
+            'notes'          => 'nullable|string',
+            'status'         => 'sometimes|in:pending,confirmed,completed,cancelled',
+            'total_amount'   => 'nullable|numeric|min:0',
+            'payment_status' => 'nullable|in:unpaid,partial,paid,refunded',
+            'payment_method' => 'nullable|string|max:100',
+        ]);
+
+        // Update associated client details if provided
+        if ($booking->client) {
+            $clientUpdates = [];
+            if (isset($validated['name'])) $clientUpdates['name'] = $validated['name'];
+            if (isset($validated['contact_number'])) $clientUpdates['contact_number'] = $validated['contact_number'];
+            if (array_key_exists('email', $validated)) $clientUpdates['email'] = $validated['email'];
+            if (isset($validated['address'])) $clientUpdates['address'] = $validated['address'];
+            if (!empty($clientUpdates)) {
+                $booking->client->update($clientUpdates);
+            }
+        }
+
+        // Update booking details
+        $bookingUpdates = [];
+        $fields = ['service_id', 'preferred_date', 'address', 'notes', 'status', 'total_amount', 'payment_status', 'payment_method'];
+        foreach ($fields as $field) {
+            if (array_key_exists($field, $validated)) {
+                $bookingUpdates[$field] = $validated[$field];
+            }
+        }
+
+        if (!empty($bookingUpdates)) {
+            $booking->update($bookingUpdates);
+        }
+
+        return response()->json([
+            'message' => 'Booking updated successfully.',
+            'booking' => $booking->fresh(['client', 'service', 'processedBy']),
+        ]);
+    }
+
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
@@ -246,9 +358,10 @@ class BookingController extends Controller
         ]);
 
         $booking = Booking::findOrFail($id);
+        $userId = $request->user()?->id ?? $booking->processed_by_user_id;
         $booking->update([
             'status'               => $request->status,
-            'processed_by_user_id' => $request->user()->id,
+            'processed_by_user_id' => $userId,
         ]);
 
         return response()->json(['message' => 'Status updated.', 'booking' => $booking->load(['client', 'service'])]);
