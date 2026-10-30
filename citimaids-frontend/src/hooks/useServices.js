@@ -172,9 +172,12 @@ export function useServices() {
       // Fetch public active services from backend API
       const res = await api.get('/services');
       const raw = Array.isArray(res.data) ? res.data : (res.data?.data || []);
-      
-      // Always map real active services from database
-      setServices(raw.map(enrichService));
+
+      if (raw.length > 0) {
+        setServices(raw.map(enrichService));
+      } else {
+        setServices(fallbackServices);
+      }
     } catch (err) {
       console.warn('useServices fetch error (using fallback):', err);
       setError(err);
