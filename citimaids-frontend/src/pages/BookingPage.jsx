@@ -202,13 +202,15 @@ export default function BookingPage() {
   // Once services load, pick the preselected one (or first active)
   useEffect(() => {
     if (services.length === 0) return;
-    if (data.serviceId !== null) return; // already set
+    // Check if the current serviceId is valid in the loaded active services
+    const currentValid = data.serviceId !== null && services.some((s) => s.id === data.serviceId || String(s.id) === String(data.serviceId));
+    if (currentValid) return; // already set to a valid active service
 
     let picked = services[0];
 
     if (preselectedServiceId !== undefined) {
       // Try matching by numeric DB id first, then by slug fallback
-      const byId   = services.find((s) => s.id === preselectedServiceId || String(s.id) === String(preselectedServiceId));
+      const byId = services.find((s) => s.id === preselectedServiceId || String(s.id) === String(preselectedServiceId));
       const bySlug = services.find((s) => s.slug === preselectedServiceId || s.id === preselectedServiceId);
       picked = byId || bySlug || services[0];
       if (picked?.category) {
@@ -216,10 +218,12 @@ export default function BookingPage() {
       }
     }
 
-    setData((prev) => ({ ...prev, serviceId: picked.id }));
-    // Auto-expand the initially selected card
-    setExpandedServiceId(picked.id);
-  }, [services]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (picked) {
+      setData((prev) => ({ ...prev, serviceId: picked.id }));
+      // Auto-expand the initially selected card
+      setExpandedServiceId(picked.id);
+    }
+  }, [services, preselectedServiceId, data.serviceId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const categoryCounts = useMemo(() => {
     const counts = { all: services.length, residential: 0, commercial: 0, specialized: 0, maintenance: 0 };

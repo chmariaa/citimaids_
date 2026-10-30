@@ -18,7 +18,7 @@ class ServiceController extends Controller
         $query = Service::withCount('bookings')->orderBy('display_order');
 
         // Allow authenticated admin to view all only if explicitly requesting ?all=1
-        $user = $request->user('sanctum') ?? auth('sanctum')->user();
+        $user = $request->user('sanctum') ?? auth('sanctum')->user() ?? $request->user();
         if (! ($user && $request->boolean('all'))) {
             $query->where('status', 'active');
         }

@@ -190,6 +190,9 @@ function FAQCard({ q, a, index }) {
 export default function HomePage() {
   const { settings } = useSettings();
   const { services } = useServices();
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ name: '', location: '', stars: 5, text: '' });
   
   // Safely extract city from the address or default to 'Abu Dhabi'
   const addressParts = settings?.business_address ? settings.business_address.split(',') : [];
@@ -197,15 +200,6 @@ export default function HomePage() {
   
   const businessName = settings?.business_name || 'CitiMaids';
   const description = settings?.description || "From luxury villas and private apartments to corporate offices across Abu Dhabi, CitiMaids delivers hospital-grade sanitization and spotless finishing tailored to your schedule.";
-
-  const [showReviewModal, setShowReviewModal] = useState(false);
-  const [reviewSubmitted, setReviewSubmitted] = useState(false);
-  const [reviewForm, setReviewForm] = useState({
-    stars: 5,
-    name: '',
-    location: '',
-    text: '',
-  });
 
   return (
     <div>
