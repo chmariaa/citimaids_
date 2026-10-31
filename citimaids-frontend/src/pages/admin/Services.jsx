@@ -254,6 +254,7 @@ export default function Services() {
         if (index === activeIndex) {
             return `translateY(${offsetY}px)`;
         }
+
         if (activeIndex === targetIndex) {
             return 'translateY(0px)';
         }

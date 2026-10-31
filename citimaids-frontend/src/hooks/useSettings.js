@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import api from "../api/axios";
 
 const DEFAULT_SETTINGS = {
   business_name: "CitiMaids Cleaning Services",
@@ -30,20 +31,8 @@ export function useSettings() {
     }
 
     if (!globalSettingsPromise) {
-      globalSettingsPromise = fetch(
-        `${import.meta.env.VITE_API_URL}/settings`,
-        {
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-        },
-      ).then(async (res) => {
-        if (!res.ok) {
-          throw new Error(`API returned ${res.status}`);
-        }
-        const data = await res.json();
-        const merged = { ...DEFAULT_SETTINGS, ...data };
+      globalSettingsPromise = api.get('/settings').then((res) => {
+        const merged = { ...DEFAULT_SETTINGS, ...res.data };
         globalSettings = merged;
         return merged;
       });

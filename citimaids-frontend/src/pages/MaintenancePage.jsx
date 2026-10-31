@@ -1,12 +1,64 @@
 import { Link } from 'react-router-dom';
-import { useServices } from '../hooks/useServices';
 import Reveal from '../components/Reveal';
+import { useServices } from '../hooks/useServices';
+
+const defaultMaintenanceServices = [
+  {
+    id: 'landscape',
+    title: 'Landscape Contractor',
+    description:
+      'Turnkey landscaping solutions for residential villas and commercial facilities. We design, install, and care for lush outdoor environments that endure the UAE climate.',
+    features: [
+      'Custom garden architecture & design',
+      'Artificial & natural turf installation',
+      'Smart automated irrigation systems',
+      'Desert-tolerant flora & date palms',
+      'Outdoor paving, pergolas & lighting',
+      'Seasonal plant health rejuvenation',
+    ],
+    image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&h=600&fit=crop&auto=format',
+    startingPrice: 'Contact for pricing',
+  },
+  {
+    id: 'garden',
+    title: 'Garden Maintenance',
+    description:
+      'Keep your villa garden thriving and pristine throughout the year. Our skilled horticulturists handle precision trimming, edging, organic fertilization, and weed suppression.',
+    features: [
+      'Weekly or bi-weekly scheduled care',
+      'Lawn aeration, mowing & precision edging',
+      'Hedge shaping & palm frond pruning',
+      'Eco-friendly pest & fungal defense',
+      'Soil nutrient enrichment & mulching',
+      'Irrigation system flow monitoring',
+    ],
+    image: 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&h=600&fit=crop&auto=format',
+    startingPrice: 'Contact for pricing',
+  },
+  {
+    id: 'pool',
+    title: 'Swimming Pool Maintenance',
+    description:
+      'Ensure your private pool is crystal-clear, sanitized, and perfectly balanced for your family. We conduct thorough chemical water testing, backwashing, and pump inspections.',
+    features: [
+      'Digital pH & chlorine balance checks',
+      'Surface skim & underwater vacuuming',
+      'Filter backwash & sand inspection',
+      'Skimmer basket & lint trap cleaning',
+      'Algae eradication & water clarifying',
+      'Pump, timer & light safety inspection',
+    ],
+    image: 'https://images.unsplash.com/photo-1575429198097-0414ec08e8cd?w=800&h=600&fit=crop&auto=format',
+    startingPrice: 'Contact for pricing',
+  },
+];
 
 export default function MaintenancePage() {
   const { services, loading, error, refetch } = useServices();
 
-  // Dynamic filter: only active maintenance services managed from Admin
-  const maintenanceServices = services.filter((s) => s.category === 'maintenance');
+  // Dynamic filter: active maintenance services from API or fallback to defaults
+  const fromApi = services.filter((s) => s.category === 'maintenance');
+  const maintenanceServices = fromApi.length > 0 ? fromApi : defaultMaintenanceServices;
 
   const getFeatures = (s) => {
     if (Array.isArray(s.included) && s.included.length > 0) return s.included;
@@ -68,7 +120,7 @@ export default function MaintenancePage() {
                 </div>
               ))}
             </div>
-          ) : error ? (
+          ) : error && maintenanceServices.length === 0 ? (
             /* Error State */
             <div className="bg-white rounded-2xl p-12 text-center max-w-md mx-auto border border-slate-200 shadow-sm">
               <div className="w-12 h-12 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-xl">
@@ -82,23 +134,6 @@ export default function MaintenancePage() {
               >
                 Try Again
               </button>
-            </div>
-          ) : maintenanceServices.length === 0 ? (
-            /* Empty State */
-            <div className="bg-white rounded-2xl p-12 text-center max-w-md mx-auto border border-slate-200 shadow-sm">
-              <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-xl">
-                🌿
-              </div>
-              <h3 className="font-extrabold text-slate-900 text-lg mb-2">No Maintenance Services Listed</h3>
-              <p className="text-slate-500 text-sm mb-6">
-                Outdoor maintenance services are currently being updated. Contact our team directly for custom quotations.
-              </p>
-              <Link
-                to="/contact"
-                className="px-6 py-2.5 rounded-xl bg-blue-950 text-white font-bold text-sm shadow hover:bg-blue-900 transition-all"
-              >
-                Contact CitiMaids
-              </Link>
             </div>
           ) : (
             maintenanceServices.map((s, i) => {

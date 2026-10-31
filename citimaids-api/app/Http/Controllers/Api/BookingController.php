@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\BookingDetail;
 use App\Models\Client;
 use App\Models\Service;
 use Illuminate\Http\Request;
@@ -20,155 +21,118 @@ class BookingController extends Controller
         }
 
         if ($request->filled('search')) {
-            $search = trim($request->search);
-            $cleanId = preg_replace('/[^0-9]/', '', $search);
-
-            $query->where(function ($q) use ($search, $cleanId) {
-                // 1. Client Name, Email, Contact Number
-                $q->whereHas('client', function ($cq) use ($search) {
-                    $cq->where('name', 'like', "%{$search}%")
-                       ->orWhere('email', 'like', "%{$search}%")
-                       ->orWhere('contact_number', 'like', "%{$search}%");
-                })
-                // 2. Service Name
-                ->orWhereHas('service', function ($sq) use ($search) {
-                    $sq->where('name', 'like', "%{$search}%");
-                })
-                // 3. Status
-                ->orWhere('status', 'like', "%{$search}%");
-
-                // 4. Booking ID
-                if (!empty($cleanId)) {
-                    $q->orWhere('id', (int) $cleanId);
-                }
+            $search = $request->search;
+            $query->whereHas('client', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
-        // Filter by payment status if specified
-        if ($request->filled('payment_status') && $request->payment_status !== 'all') {
-            $query->where('payment_status', $request->payment_status);
-        }
-
-        // Filter by service if specified
-        if ($request->filled('service_id') && $request->service_id !== 'all') {
-            $query->where('service_id', $request->service_id);
-        }
-
-        // Sorting options
-        $sortBy = $request->input('sort_by', 'created_at');
-        $sortDir = strtolower($request->input('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
-
-        if ($sortBy === 'id') {
-            $query->orderBy('bookings.id', $sortDir);
-        } elseif ($sortBy === 'preferred_date') {
-            $query->orderBy('bookings.preferred_date', $sortDir);
-        } elseif ($sortBy === 'total_amount') {
-            $query->orderBy('bookings.total_amount', $sortDir);
-        } elseif ($sortBy === 'status') {
-            $query->orderBy('bookings.status', $sortDir);
-        } elseif ($sortBy === 'client_name') {
-            $query->join('clients', 'bookings.client_id', '=', 'clients.id')
-                  ->select('bookings.*')
-                  ->orderBy('clients.name', $sortDir);
-        } elseif ($sortBy === 'service_name') {
-            $query->join('services', 'bookings.service_id', '=', 'services.id')
-                  ->select('bookings.*')
-                  ->orderBy('services.name', $sortDir);
-        } else {
-            $query->orderBy('bookings.created_at', $sortDir);
-        }
-
-        $paginated = $query->paginate(15);
-        $paginatedData = $paginated->toArray();
-
-        // Calculate total counts per status across the entire database for filter badge tabs
-        $paginatedData['status_counts'] = [
-            'all'       => Booking::count(),
-            'pending'   => Booking::where('status', 'pending')->count(),
-            'confirmed' => Booking::where('status', 'confirmed')->count(),
-            'completed' => Booking::where('status', 'completed')->count(),
-            'cancelled' => Booking::where('status', 'cancelled')->count(),
-        ];
-
-        return response()->json($paginatedData);
+        return response()->json($query->latest()->paginate(15));
     }
 
-    // Public & Admin: submit/create a booking
+    // Public: customer submits a booking inquiry
     public function store(Request $request)
     {
-        $user = auth('sanctum')->user() ?? $request->user();
-        $isAdmin = (bool) $user;
-
         $validated = $request->validate([
-            'client_id'      => 'nullable|exists:clients,id',
-            'name'           => 'required_without:client_id|nullable|string|max:255',
-            'contact_number' => 'required_without:client_id|nullable|string|max:50',
+            'name'           => 'required|string|max:255',
+            'contact_number' => 'nullable|string|max:50',
+            'phone'          => 'nullable|string|max:50',
             'email'          => 'nullable|email|max:255',
+            'address'        => 'required|string',
             'service_id'     => 'required|exists:services,id',
-            'preferred_date' => $isAdmin ? 'required|date' : 'required|date|after_or_equal:today',
-            'address'        => 'nullable|string',
-            'notes'          => 'nullable|string',
-            'status'         => 'nullable|in:pending,confirmed,completed,cancelled',
+            'preferred_date' => 'nullable|date',
+            'date'           => 'nullable|date',
+            'preferred_time' => 'nullable|string|max:50',
+            'time'           => 'nullable|string|max:50',
+            'rates'          => 'nullable|numeric|min:0',
             'total_amount'   => 'nullable|numeric|min:0',
-            'payment_status' => 'nullable|in:unpaid,partial,paid,refunded',
-            'payment_method' => 'nullable|string|max:100',
+            'status'         => 'nullable|string|in:pending,confirmed,completed,cancelled',
+            'notes'          => 'nullable|string',
         ]);
 
-        // For public customer bookings, ensure the selected service is currently active
-        if (! $isAdmin) {
-            $service = Service::where('id', $validated['service_id'])
-                ->where('status', 'active')
-                ->first();
-
-            if (! $service) {
-                return response()->json([
-                    'message' => 'The selected service is currently unavailable for booking.',
-                    'errors'  => ['service_id' => ['The selected service is currently inactive.']],
-                ], 422);
-            }
-        } else {
-            $service = Service::find($validated['service_id']);
+        $contactNumber = $validated['contact_number'] ?? $validated['phone'] ?? $request->input('phone');
+        if (empty($contactNumber)) {
+            return response()->json([
+                'message' => 'The contact number or phone is required.',
+                'errors'  => ['contact_number' => ['The phone number is required.']],
+            ], 422);
         }
 
-        // Find existing client or create new client record
-        if ($request->filled('client_id')) {
-            $client = Client::findOrFail($validated['client_id']);
-        } else {
-            $client = Client::firstOrCreate(
-                ['contact_number' => $validated['contact_number']],
-                [
-                    'name'    => $validated['name'],
-                    'email'   => $validated['email'] ?? null,
-                    'address' => $validated['address'] ?? null,
-                ]
-            );
+        $preferredDate = $validated['preferred_date'] ?? $validated['date'] ?? $request->input('date');
+        if (empty($preferredDate)) {
+            return response()->json([
+                'message' => 'The booking date is required.',
+                'errors'  => ['preferred_date' => ['The booking date is required.']],
+            ], 422);
         }
 
-        $address = !empty($validated['address']) ? $validated['address'] : ($client->address ?? '');
+        // Ensure the selected service is currently active and available for customer booking
+        $service = Service::where('id', $validated['service_id'])
+            ->where('status', 'active')
+            ->first();
 
-        // Resolve base price if total_amount is omitted
-        $totalAmount = $request->filled('total_amount')
-            ? (float) $validated['total_amount']
-            : ($service?->base_price ? (float) $service->base_price : null);
+        if (! $service) {
+            return response()->json([
+                'message' => 'The selected service is currently unavailable for booking.',
+                'errors'  => ['service_id' => ['The selected service is currently inactive.']],
+            ], 422);
+        }
+
+        // Create or update client record by contact number or email
+        $client = Client::where('contact_number', $contactNumber)
+            ->when(!empty($validated['email']), function ($q) use ($validated) {
+                $q->orWhere('email', $validated['email']);
+            })
+            ->first();
+
+        if ($client) {
+            $client->update([
+                'name'           => $validated['name'],
+                'contact_number' => $contactNumber,
+                'email'          => $validated['email'] ?? $client->email,
+                'address'        => $validated['address'] ?? $client->address,
+            ]);
+        } else {
+            $client = Client::create([
+                'name'           => $validated['name'],
+                'contact_number' => $contactNumber,
+                'email'          => $validated['email'] ?? null,
+                'address'        => $validated['address'],
+            ]);
+        }
+
+        $rateAmount = $validated['rates'] ?? $validated['total_amount'] ?? $service->base_price ?? 0;
+        $bookingStatus = $validated['status'] ?? 'pending';
+        $timeSlot = $validated['preferred_time'] ?? $validated['time'] ?? null;
 
         $booking = Booking::create([
-            'client_id'            => $client->id,
-            'service_id'           => $validated['service_id'],
-            'processed_by_user_id' => $user?->id,
-            'preferred_date'       => $validated['preferred_date'],
-            'address'              => $address,
-            'notes'                => $validated['notes'] ?? null,
-            'status'               => $validated['status'] ?? 'pending',
-            'total_amount'         => $totalAmount,
-            'payment_status'       => $validated['payment_status'] ?? 'unpaid',
-            'payment_method'       => $validated['payment_method'] ?? 'Cash on Completion',
+            'client_id'      => $client->id,
+            'service_id'     => $service->id,
+            'preferred_date' => $preferredDate,
+            'preferred_time' => $timeSlot,
+            'address'        => $validated['address'],
+            'notes'          => $validated['notes'] ?? null,
+            'status'         => $bookingStatus,
+            'total_amount'   => $rateAmount,
+            'payment_status' => 'unpaid',
+            'payment_method' => 'Cash on Completion',
+        ]);
+
+        // Record booking detail for line-item tracking
+        BookingDetail::create([
+            'booking_id'  => $booking->id,
+            'service_id'  => $service->id,
+            'quantity'    => 1,
+            'unit_price'  => $service->base_price,
+            'total_price' => $rateAmount,
         ]);
 
         return response()->json([
-            'message'    => 'Booking created successfully.',
+            'message'    => 'Booking request submitted successfully.',
             'booking_id' => $booking->id,
             'reference'  => 'CM-' . str_pad($booking->id, 5, '0', STR_PAD_LEFT),
-            'booking'    => $booking->load(['client', 'service', 'processedBy']),
+            'booking'    => $booking->load(['client', 'service']),
         ], 201);
     }
 
@@ -302,55 +266,6 @@ class BookingController extends Controller
         return response()->json($booking);
     }
 
-    public function update(Request $request, $id)
-    {
-        $booking = Booking::with('client')->findOrFail($id);
-
-        $validated = $request->validate([
-            'name'           => 'sometimes|string|max:255',
-            'contact_number' => 'sometimes|string|max:50',
-            'email'          => 'nullable|email|max:255',
-            'service_id'     => 'sometimes|exists:services,id',
-            'preferred_date' => 'sometimes|date',
-            'address'        => 'sometimes|string',
-            'notes'          => 'nullable|string',
-            'status'         => 'sometimes|in:pending,confirmed,completed,cancelled',
-            'total_amount'   => 'nullable|numeric|min:0',
-            'payment_status' => 'nullable|in:unpaid,partial,paid,refunded',
-            'payment_method' => 'nullable|string|max:100',
-        ]);
-
-        // Update associated client details if provided
-        if ($booking->client) {
-            $clientUpdates = [];
-            if (isset($validated['name'])) $clientUpdates['name'] = $validated['name'];
-            if (isset($validated['contact_number'])) $clientUpdates['contact_number'] = $validated['contact_number'];
-            if (array_key_exists('email', $validated)) $clientUpdates['email'] = $validated['email'];
-            if (isset($validated['address'])) $clientUpdates['address'] = $validated['address'];
-            if (!empty($clientUpdates)) {
-                $booking->client->update($clientUpdates);
-            }
-        }
-
-        // Update booking details
-        $bookingUpdates = [];
-        $fields = ['service_id', 'preferred_date', 'address', 'notes', 'status', 'total_amount', 'payment_status', 'payment_method'];
-        foreach ($fields as $field) {
-            if (array_key_exists($field, $validated)) {
-                $bookingUpdates[$field] = $validated[$field];
-            }
-        }
-
-        if (!empty($bookingUpdates)) {
-            $booking->update($bookingUpdates);
-        }
-
-        return response()->json([
-            'message' => 'Booking updated successfully.',
-            'booking' => $booking->fresh(['client', 'service', 'processedBy']),
-        ]);
-    }
-
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
@@ -358,10 +273,9 @@ class BookingController extends Controller
         ]);
 
         $booking = Booking::findOrFail($id);
-        $userId = $request->user()?->id ?? $booking->processed_by_user_id;
         $booking->update([
             'status'               => $request->status,
-            'processed_by_user_id' => $userId,
+            'processed_by_user_id' => $request->user()->id,
         ]);
 
         return response()->json(['message' => 'Status updated.', 'booking' => $booking->load(['client', 'service'])]);
