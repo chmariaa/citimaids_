@@ -121,12 +121,12 @@ export const tdRow = {
 
 export const statusBadge = (status) => {
   const map = {
-    pending:   { color: '#d97706', bg: '#fef3c7', label: 'Pending' },
-    confirmed: { color: '#2563eb', bg: '#dbeafe', label: 'Confirmed' },
-    completed: { color: '#059669', bg: '#d1fae5', label: 'Completed' },
-    cancelled: { color: '#dc2626', bg: '#fee2e2', label: 'Cancelled' },
-    active:    { color: '#059669', bg: '#d1fae5', label: 'Active' },
-    inactive:  { color: '#94a3b8', bg: '#f1f5f9', label: 'Inactive' },
+    pending:   { color: '#b45309', bg: '#fef3c7', border: '#fcd34d', label: 'Pending' },
+    confirmed: { color: '#1d4ed8', bg: '#dbeafe', border: '#93c5fd', label: 'Confirmed' },
+    completed: { color: '#047857', bg: '#d1fae5', border: '#86efac', label: 'Completed' },
+    cancelled: { color: '#b91c1c', bg: '#fee2e2', border: '#fca5a5', label: 'Cancelled' },
+    active:    { color: '#047857', bg: '#d1fae5', border: '#86efac', label: 'Active' },
+    inactive:  { color: '#64748b', bg: '#f1f5f9', border: '#cbd5e1', label: 'Inactive' },
   };
   const s = map[status] || map.pending;
   return {
@@ -135,6 +135,7 @@ export const statusBadge = (status) => {
     gap: 6,
     padding: '4px 12px',
     borderRadius: 8,
+    border: `1px solid ${s.border}`,
     fontSize: 12,
     fontWeight: 700,
     color: s.color,

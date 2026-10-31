@@ -35,7 +35,12 @@ class ClientController extends Controller
             });
         }
 
-        return response()->json($query->paginate(15));
+        if ($request->boolean('all') || $request->get('per_page') === 'all') {
+            return response()->json($query->get());
+        }
+
+        $perPage = min((int) $request->get('per_page', 15), 100);
+        return response()->json($query->paginate($perPage));
     }
 
     public function show($id)

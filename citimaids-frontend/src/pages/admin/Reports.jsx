@@ -236,6 +236,20 @@ function ClientsPanel({ d }) {
     const maxBk = Math.max(...top.map(c => c.bookings_count), 1);
     const maxGro = Math.max(...growth.map(g => g.new_clients), 1);
 
+    // Fetch approved reviews inline for this panel
+    const [reviews, setReviews] = useState([]);
+    const [revLoading, setRevLoading] = useState(true);
+    useEffect(() => {
+        api.get('/reviews')
+            .then(({ data }) => setReviews(data))
+            .catch(() => {})
+            .finally(() => setRevLoading(false));
+    }, []);
+
+    const avgStars = reviews.length
+        ? (reviews.reduce((acc, r) => acc + r.stars, 0) / reviews.length).toFixed(1)
+        : null;
+
     return (
         <Col>
             <Grid4>
@@ -282,9 +296,66 @@ function ClientsPanel({ d }) {
                     </div>
                 </Pane>
             </Grid2>
+
+            {/* ── Client Testimonials ──────────────────────────────────────── */}
+            <Pane
+                title="Client Testimonials"
+                sub={reviews.length > 0
+                    ? `${reviews.length} approved review${reviews.length !== 1 ? 's' : ''} · avg ${avgStars} ★`
+                    : 'Approved client reviews from the website'}
+            >
+                {revLoading ? (
+                    <div style={{ color: '#94a3b8', fontSize: 13, padding: '12px 0' }}>Loading reviews…</div>
+                ) : reviews.length === 0 ? (
+                    <div style={{ color: '#94a3b8', fontSize: 13, padding: '12px 0', textAlign: 'center' }}>
+                        No approved reviews yet. Approve some from the{' '}
+                        <a href="/admin/reviews" style={{ color: brand.royal, fontWeight: 700 }}>Reviews</a> page.
+                    </div>
+                ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16, marginTop: 8 }}>
+                        {reviews.map((r) => {
+                            const init = r.name.split(' ').slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join('');
+                            return (
+                                <div key={r.id} style={{
+                                    background: '#f8fafc', borderRadius: 14, padding: '16px 18px',
+                                    border: '1px solid #e2e8f0',
+                                }}>
+                                    {/* Stars */}
+                                    <div style={{ color: '#f59e0b', fontSize: 13, letterSpacing: 2, marginBottom: 8 }}>
+                                        {'★'.repeat(r.stars)}{'☆'.repeat(5 - r.stars)}
+                                    </div>
+                                    {/* Review text */}
+                                    <p style={{
+                                        fontSize: 13, color: '#475569', fontStyle: 'italic',
+                                        lineHeight: 1.6, margin: '0 0 12px',
+                                        display: '-webkit-box', WebkitLineClamp: 4,
+                                        WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                                    }}>
+                                        "{r.body}"
+                                    </p>
+                                    {/* Author */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingTop: 10, borderTop: '1px solid #e2e8f0' }}>
+                                        <div style={{
+                                            width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                                            background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)',
+                                            color: '#fff', display: 'flex', alignItems: 'center',
+                                            justifyContent: 'center', fontWeight: 800, fontSize: 11,
+                                        }}>{init}</div>
+                                        <div>
+                                            <div style={{ fontSize: 13, fontWeight: 700, color: brand.navy }}>{r.name}</div>
+                                            {r.location && <div style={{ fontSize: 11, color: '#94a3b8' }}>{r.location}</div>}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </Pane>
         </Col>
     );
 }
+
 
 /* ═══════════════════════════════════════════════════════════
    SERVICES PANEL

@@ -3,9 +3,77 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import { brand, fonts, pageTitle, pageSubtitle, card, solidBtn, outlineBtn, statusBadge, idBadge, avatar } from './adminStyles';
 import { getAdminDispatchWALink } from '../../utils/whatsapp';
+import PrintManifestModal from './PrintManifestModal';
 
 const statusFlow = ['pending', 'confirmed', 'completed', 'cancelled'];
 const avatarColors = ['#2563eb', '#7c3aed', '#ec4899', '#d97706', '#059669', '#0891b2'];
+
+const STATUS_THEMES = {
+    pending: {
+        label: 'Pending',
+        subtitle: 'Awaiting dispatch assignment',
+        dot: '#d97706',
+        // Chosen: Warm vibrant amber/orange gradient
+        activeBg: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+        activeBorder: '#d97706',
+        shadow: 'rgba(217, 119, 6, 0.35)',
+        shadowHover: 'rgba(217, 119, 6, 0.45)',
+        // When hovered (unchosen):
+        hoverBg: '#fffbeb',
+        hoverBorder: '#f59e0b',
+        hoverText: '#92400e',
+        hoverSubText: '#b45309',
+        hoverDot: '#d97706',
+    },
+    confirmed: {
+        label: 'Confirmed',
+        subtitle: 'Cleaning team scheduled',
+        dot: '#2563eb',
+        // Chosen: Royal blue gradient
+        activeBg: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+        activeBorder: '#1d4ed8',
+        shadow: 'rgba(37, 99, 235, 0.35)',
+        shadowHover: 'rgba(37, 99, 235, 0.45)',
+        // When hovered (unchosen):
+        hoverBg: '#eff6ff',
+        hoverBorder: '#3b82f6',
+        hoverText: '#1e40af',
+        hoverSubText: '#2563eb',
+        hoverDot: '#2563eb',
+    },
+    completed: {
+        label: 'Completed',
+        subtitle: 'Service finished & inspected',
+        dot: '#059669',
+        // Chosen: Emerald green gradient
+        activeBg: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+        activeBorder: '#047857',
+        shadow: 'rgba(5, 150, 105, 0.35)',
+        shadowHover: 'rgba(5, 150, 105, 0.45)',
+        // When hovered (unchosen):
+        hoverBg: '#ecfdf5',
+        hoverBorder: '#10b981',
+        hoverText: '#065f46',
+        hoverSubText: '#059669',
+        hoverDot: '#059669',
+    },
+    cancelled: {
+        label: 'Cancelled',
+        subtitle: 'Order voided or aborted',
+        dot: '#dc2626',
+        // Chosen: Crimson red gradient
+        activeBg: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+        activeBorder: '#b91c1c',
+        shadow: 'rgba(220, 38, 38, 0.35)',
+        shadowHover: 'rgba(220, 38, 38, 0.45)',
+        // When hovered (unchosen):
+        hoverBg: '#fef2f2',
+        hoverBorder: '#ef4444',
+        hoverText: '#991b1b',
+        hoverSubText: '#dc2626',
+        hoverDot: '#dc2626',
+    },
+};
 
 export default function BookingDetail() {
     const { id } = useParams();
@@ -14,7 +82,10 @@ export default function BookingDetail() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState('');
+    const [hoveredStatus, setHoveredStatus] = useState(null);
+    const [hoverSaveBtn, setHoverSaveBtn] = useState(false);
     const [toast, setToast] = useState(null);
+    const [showManifest, setShowManifest] = useState(false);
 
     useEffect(() => { fetchBooking(); }, [id]);
 
@@ -33,15 +104,25 @@ export default function BookingDetail() {
     };
 
     const handleStatusUpdate = async () => {
-        if (selectedStatus === booking.status) return;
+        if (!selectedStatus || selectedStatus === booking?.status) return;
         setSaving(true);
         try {
-            await api.patch(`/bookings/${id}/status`, { status: selectedStatus });
-            setBooking(prev => ({ ...prev, status: selectedStatus }));
+            const res = await api.patch(`/bookings/${id}/status`, { status: selectedStatus });
+            const updated = res.data?.booking;
+            if (updated) {
+                setBooking(prev => ({
+                    ...prev,
+                    ...updated,
+                    status: selectedStatus,
+                }));
+            } else {
+                setBooking(prev => ({ ...prev, status: selectedStatus }));
+            }
             showToast('Booking status updated successfully!', 'success');
         } catch (err) {
             console.error('Status update error:', err);
-            showToast('Failed to update status.', 'error');
+            const msg = err.response?.data?.message || 'Failed to update status.';
+            showToast(msg, 'error');
         } finally {
             setSaving(false);
         }
@@ -144,6 +225,15 @@ export default function BookingDetail() {
                             color: '#fff',
                             textDecoration: 'none',
                             boxShadow: '0 4px 14px rgba(22, 163, 74, 0.25)',
+                            transition: 'all 0.18s ease-in-out',
+                        }}
+                        onMouseEnter={e => {
+                            e.currentTarget.style.transform = 'translateY(-1px)';
+                            e.currentTarget.style.boxShadow = '0 6px 18px rgba(22, 163, 74, 0.35)';
+                        }}
+                        onMouseLeave={e => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = '0 4px 14px rgba(22, 163, 74, 0.25)';
                         }}
                     >
                         <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
@@ -151,7 +241,23 @@ export default function BookingDetail() {
                         </svg>
                         WhatsApp Customer
                     </a>
-                    <button onClick={() => window.print()} style={outlineBtn}>
+                    <button
+                        onClick={() => setShowManifest(true)}
+                        style={{
+                            ...outlineBtn,
+                            transition: 'all 0.18s ease-in-out',
+                        }}
+                        onMouseEnter={e => {
+                            e.currentTarget.style.transform = 'translateY(-1px)';
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(10, 35, 66, 0.08)';
+                            e.currentTarget.style.background = '#f8fafc';
+                        }}
+                        onMouseLeave={e => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = 'none';
+                            e.currentTarget.style.background = '#fff';
+                        }}
+                    >
                         <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                         </svg>
@@ -291,55 +397,180 @@ export default function BookingDetail() {
                         </p>
 
                         {/* Status flow tracker */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
-                            {statusFlow.map((s, i) => {
-                                const isCurrent = booking.status === s;
-                                const isPast = statusFlow.indexOf(booking.status) > i && s !== 'cancelled';
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+                            {statusFlow.map((s) => {
+                                const isSelected = selectedStatus === s;
+                                const isHovered = hoveredStatus === s;
+                                const theme = STATUS_THEMES[s] || STATUS_THEMES.pending;
+
+                                // Fully declarative styling based on chosen & hover states:
+                                // If chosen: rich vibrant status gradient, white text, glowing white indicator, badge
+                                // If unchosen & hovered: soft status tint, status border, status text, glowing status dot
+                                // If unchosen & unhovered (including PREVIOUS button): 100% NO COLOR (pure white, neutral border, slate text, gray dot, NO badge)
+                                let itemBg = '#ffffff';
+                                let itemBorder = '1.5px solid #e2e8f0';
+                                let itemColor = '#334155';
+                                let itemSubColor = '#94a3b8';
+                                let itemDotBg = '#cbd5e1';
+                                let itemDotGlow = 'none';
+                                let itemShadow = 'none';
+                                let itemTransform = 'translateY(0)';
+
+                                if (isSelected) {
+                                    itemBg = theme.activeBg;
+                                    itemBorder = `2px solid ${theme.activeBorder}`;
+                                    itemColor = '#ffffff';
+                                    itemSubColor = 'rgba(255, 255, 255, 0.9)';
+                                    itemDotBg = '#ffffff';
+                                    itemDotGlow = '0 0 10px rgba(255, 255, 255, 0.95)';
+                                    itemShadow = isHovered ? `0 8px 24px ${theme.shadowHover}` : `0 4px 16px ${theme.shadow}`;
+                                    itemTransform = isHovered ? 'translateY(-2px)' : 'translateY(0)';
+                                } else if (isHovered) {
+                                    itemBg = theme.hoverBg;
+                                    itemBorder = `1.5px solid ${theme.hoverBorder}`;
+                                    itemColor = theme.hoverText;
+                                    itemSubColor = theme.hoverSubText;
+                                    itemDotBg = theme.hoverDot;
+                                    itemDotGlow = `0 0 8px ${theme.hoverDot}80`;
+                                    itemShadow = '0 4px 14px rgba(0, 0, 0, 0.08)';
+                                    itemTransform = 'translateY(-2px)';
+                                }
+
                                 return (
-                                    <div
+                                    <button
                                         key={s}
+                                        type="button"
                                         onClick={() => setSelectedStatus(s)}
+                                        onMouseEnter={() => setHoveredStatus(s)}
+                                        onMouseLeave={() => setHoveredStatus(null)}
+                                        onFocus={() => setHoveredStatus(s)}
+                                        onBlur={() => setHoveredStatus(null)}
                                         style={{
-                                            display: 'flex', alignItems: 'center', gap: 12,
-                                            padding: '10px 14px', borderRadius: 12,
-                                            border: `1.5px solid ${isCurrent ? brand.navy : brand.border}`,
-                                            background: isCurrent ? '#eff6ff' : '#fff',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 12,
+                                            padding: '12px 16px',
+                                            borderRadius: 14,
+                                            width: '100%',
+                                            textAlign: 'left',
+                                            background: itemBg,
+                                            border: itemBorder,
+                                            color: itemColor,
                                             cursor: 'pointer',
-                                            transition: 'all 0.15s',
+                                            transition: 'all 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
+                                            transform: itemTransform,
+                                            boxShadow: itemShadow,
+                                            fontFamily: 'inherit',
+                                            outline: 'none',
                                         }}
                                     >
-                                        <div style={{
-                                            width: 12, height: 12, borderRadius: '50%',
-                                            background: isCurrent ? brand.navy : isPast ? '#34d399' : '#e2e8f0',
-                                        }} />
-                                        <span style={{
-                                            fontSize: 13, fontWeight: isCurrent ? 800 : 600,
-                                            color: isCurrent ? brand.navy : '#64748b',
-                                            flex: 1, textTransform: 'capitalize',
-                                        }}>{s}</span>
-                                        {isCurrent && (
-                                            <span style={{ fontSize: 10, color: brand.royal, fontWeight: 800, background: '#dbeafe', padding: '2px 8px', borderRadius: 6 }}>
-                                                CURRENT
+                                        {/* Status Dot */}
+                                        <div
+                                            style={{
+                                                width: 12,
+                                                height: 12,
+                                                borderRadius: '50%',
+                                                backgroundColor: itemDotBg,
+                                                boxShadow: itemDotGlow,
+                                                transition: 'all 0.18s ease-in-out',
+                                                flexShrink: 0,
+                                            }}
+                                        />
+
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                            <div style={{
+                                                fontSize: 13,
+                                                fontWeight: isSelected ? 800 : 600,
+                                                color: itemColor,
+                                                textTransform: 'capitalize',
+                                                lineHeight: 1.2,
+                                            }}>
+                                                {theme.label}
+                                            </div>
+                                            <div style={{
+                                                fontSize: 11,
+                                                color: itemSubColor,
+                                                marginTop: 2,
+                                            }}>
+                                                {theme.subtitle}
+                                            </div>
+                                        </div>
+
+                                        {/* ONLY show badge on the currently CHOSEN button. The previous button loses its badge and has NO color */}
+                                        {isSelected && (
+                                            <span style={{
+                                                fontSize: 10,
+                                                fontWeight: 800,
+                                                color: '#ffffff',
+                                                background: 'rgba(255, 255, 255, 0.24)',
+                                                border: '1px solid rgba(255, 255, 255, 0.4)',
+                                                padding: '3px 8px',
+                                                borderRadius: 6,
+                                                letterSpacing: 0.6,
+                                                textTransform: 'uppercase',
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: 4,
+                                                flexShrink: 0,
+                                                backdropFilter: 'blur(4px)',
+                                            }}>
+                                                <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                {s === booking?.status ? 'CURRENT' : 'CHOSEN'}
                                             </span>
                                         )}
-                                    </div>
+                                    </button>
                                 );
                             })}
                         </div>
 
                         <button
+                            type="button"
                             onClick={handleStatusUpdate}
-                            disabled={saving || selectedStatus === booking.status}
+                            disabled={saving || !selectedStatus || selectedStatus === booking?.status}
+                            onMouseEnter={() => setHoverSaveBtn(true)}
+                            onMouseLeave={() => setHoverSaveBtn(false)}
                             style={{
                                 ...solidBtn,
                                 width: '100%',
                                 justifyContent: 'center',
-                                padding: '12px',
-                                opacity: selectedStatus === booking.status ? 0.5 : 1,
-                                cursor: selectedStatus === booking.status ? 'default' : 'pointer',
+                                padding: '12px 18px',
+                                fontSize: 13,
+                                fontWeight: 700,
+                                borderRadius: 12,
+                                transition: 'all 0.18s ease-in-out',
+                                background: selectedStatus && selectedStatus !== booking?.status
+                                    ? 'linear-gradient(135deg, #0A2342 0%, #1d4ed8 100%)'
+                                    : '#f1f5f9',
+                                border: selectedStatus && selectedStatus !== booking?.status ? 'none' : '1.5px solid #e2e8f0',
+                                color: selectedStatus && selectedStatus !== booking?.status ? '#ffffff' : '#94a3b8',
+                                boxShadow: selectedStatus && selectedStatus !== booking?.status
+                                    ? (hoverSaveBtn ? '0 8px 22px rgba(10, 35, 66, 0.35)' : '0 4px 14px rgba(10, 35, 66, 0.25)')
+                                    : 'none',
+                                transform: selectedStatus && selectedStatus !== booking?.status && hoverSaveBtn ? 'translateY(-2px)' : 'translateY(0)',
+                                cursor: selectedStatus && selectedStatus !== booking?.status && !saving ? 'pointer' : 'not-allowed',
+                                opacity: saving ? 0.75 : 1,
                             }}
                         >
-                            {saving ? 'Updating...' : 'Save New Status'}
+                            {saving ? (
+                                <>
+                                    <svg style={{ animation: 'spin 1s linear infinite' }} width="14" height="14" fill="none" viewBox="0 0 24 24">
+                                        <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                        <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                                    </svg>
+                                    Updating Status...
+                                </>
+                            ) : selectedStatus && selectedStatus !== booking?.status ? (
+                                <>
+                                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    Save Status as {STATUS_THEMES[selectedStatus]?.label || selectedStatus}
+                                </>
+                            ) : (
+                                'Status Unchanged'
+                            )}
                         </button>
                     </div>
 
@@ -485,6 +716,14 @@ export default function BookingDetail() {
                     </div>
                 </div>
             </div>
+
+            {/* Redesigned Print Manifest Modal */}
+            {showManifest && (
+                <PrintManifestModal
+                    booking={booking}
+                    onClose={() => setShowManifest(false)}
+                />
+            )}
         </div>
     );
 }

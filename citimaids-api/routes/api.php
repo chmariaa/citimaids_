@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ReportsController;
 use App\Http\Controllers\Api\ServiceController;
+use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\TransactionController;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +26,10 @@ Route::get('/services', [ServiceController::class, 'index']);
 
 // Public settings (business info, etc)
 Route::get('/settings', [SettingController::class, 'index']);
+
+// Public reviews (approved only)
+Route::get('/reviews', [ReviewController::class, 'index']);
+Route::post('/reviews', [ReviewController::class, 'store']);
 
 // ─── Protected Routes (Sanctum Auth Required) ─────────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {
@@ -45,7 +50,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Bookings (admin)
     Route::get('/bookings', [BookingController::class, 'index']);
+    Route::post('/bookings', [BookingController::class, 'store']);
     Route::get('/bookings/{id}', [BookingController::class, 'show']);
+    Route::put('/bookings/{id}', [BookingController::class, 'update']);
     Route::patch('/bookings/{id}/status', [BookingController::class, 'updateStatus']);
     Route::delete('/bookings/{id}', [BookingController::class, 'destroy']);
 
@@ -56,7 +63,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/clients/{id}', [ClientController::class, 'update']);
     Route::delete('/clients/{id}', [ClientController::class, 'destroy']);
 
-    // Services (admin CRUD)
     Route::get('/admin/services', [ServiceController::class, 'adminIndex']);
     Route::post('/services', [ServiceController::class, 'store']);
     Route::put('/services/{id}', [ServiceController::class, 'update']);
@@ -67,14 +73,31 @@ Route::middleware('auth:sanctum')->group(function () {
     // Settings (admin CRUD)
     Route::put('/settings', [SettingController::class, 'update']);
 
+    // Reviews (admin management)
+    Route::get('/admin/reviews', [ReviewController::class, 'adminIndex']);
+    Route::put('/reviews/{id}', [ReviewController::class, 'update']);
+    Route::patch('/reviews/{id}/status', [ReviewController::class, 'updateStatus']);
+    Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
+
     // Payments
     Route::get('/payments', [PaymentController::class, 'index']);
     Route::get('/payments/{id}', [PaymentController::class, 'show']);
+    Route::put('/payments/{id}', [PaymentController::class, 'update']);
+    Route::patch('/payments/{id}', [PaymentController::class, 'update']);
     Route::post('/bookings/{id}/payment', [PaymentController::class, 'createForBooking']);
     Route::patch('/payments/{id}/status', [PaymentController::class, 'updateStatus']);
     Route::post('/payments/{id}/refund', [PaymentController::class, 'refund']);
+    Route::delete('/payments/{id}', [PaymentController::class, 'destroy']);
 
     // Transactions
     Route::get('/transactions', [TransactionController::class, 'index']);
+    Route::get('/transactions/{id}', [TransactionController::class, 'show']);
+    Route::put('/transactions/{id}', [TransactionController::class, 'update']);
+    Route::patch('/transactions/{id}', [TransactionController::class, 'update']);
+    Route::patch('/transactions/{id}/status', [TransactionController::class, 'updateStatus']);
+    Route::get('/transactions/{id}/receipt', [TransactionController::class, 'receipt']);
+    Route::post('/transactions/{id}/retry', [TransactionController::class, 'retry']);
+    Route::delete('/transactions/{id}', [TransactionController::class, 'destroy']);
+    Route::post('/transactions/{id}/dismiss', [TransactionController::class, 'dismiss']);
     Route::get('/payments/{id}/transactions', [TransactionController::class, 'byPayment']);
 });
