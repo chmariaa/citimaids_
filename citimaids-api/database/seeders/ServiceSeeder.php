@@ -12,6 +12,7 @@ class ServiceSeeder extends Seeder
         $services = [
             [
                 'name'          => 'Home Cleaning Abu Dhabi',
+                'category'      => 'residential',
                 'description'   => 'Complete residential cleaning tailored to your residence with trained professionals.',
                 'base_price'    => 35.00,
                 'icon'          => 'home',
@@ -20,6 +21,7 @@ class ServiceSeeder extends Seeder
             ],
             [
                 'name'          => 'Office Cleaning',
+                'category'      => 'commercial',
                 'description'   => 'Spotless, hygienic, and productive commercial workspaces across Abu Dhabi.',
                 'base_price'    => 45.00,
                 'icon'          => 'briefcase',
@@ -28,6 +30,7 @@ class ServiceSeeder extends Seeder
             ],
             [
                 'name'          => 'Apartment Cleaning Services',
+                'category'      => 'residential',
                 'description'   => 'Specialized apartment and flat cleaning for modern urban living in Abu Dhabi.',
                 'base_price'    => 35.00,
                 'icon'          => 'home',
@@ -36,6 +39,7 @@ class ServiceSeeder extends Seeder
             ],
             [
                 'name'          => 'Villa Cleaning Abu Dhabi',
+                'category'      => 'residential',
                 'description'   => 'Specialized estate cleaning designed for spacious luxury villas across Abu Dhabi.',
                 'base_price'    => 80.00,
                 'icon'          => 'building',
@@ -44,6 +48,7 @@ class ServiceSeeder extends Seeder
             ],
             [
                 'name'          => 'Move In and Move Out Cleaning',
+                'category'      => 'specialized',
                 'description'   => 'Guaranteed handover cleaning to secure tenancy deposits or prepare a fresh move.',
                 'base_price'    => 350.00,
                 'icon'          => 'truck',
@@ -52,6 +57,7 @@ class ServiceSeeder extends Seeder
             ],
             [
                 'name'          => 'General Cleaning',
+                'category'      => 'residential',
                 'description'   => 'Routine, flexible housekeeping and maintenance cleaning to keep your property tidy.',
                 'base_price'    => 35.00,
                 'icon'          => 'sparkles',
@@ -60,6 +66,7 @@ class ServiceSeeder extends Seeder
             ],
             [
                 'name'          => 'Deep Cleaning Services',
+                'category'      => 'specialized',
                 'description'   => 'Intensive restorative scrub and antibacterial mist for homes requiring detailed sanitation.',
                 'base_price'    => 60.00,
                 'icon'          => 'sparkles',
@@ -68,6 +75,7 @@ class ServiceSeeder extends Seeder
             ],
             [
                 'name'          => 'Carpet Cleaning',
+                'category'      => 'specialized',
                 'description'   => 'Industrial steam extraction and deep shampooing for rugs and wall-to-wall carpeting.',
                 'base_price'    => 40.00,
                 'icon'          => 'sofa',
@@ -76,6 +84,7 @@ class ServiceSeeder extends Seeder
             ],
             [
                 'name'          => 'Sofa Cleaning',
+                'category'      => 'specialized',
                 'description'   => 'Deep upholstery steam sanitization for fabric and leather sofas and chairs.',
                 'base_price'    => 50.00,
                 'icon'          => 'sofa',
@@ -84,6 +93,7 @@ class ServiceSeeder extends Seeder
             ],
             [
                 'name'          => 'Window Cleaning Abu Dhabi',
+                'category'      => 'specialized',
                 'description'   => 'Streak-free window washing for apartments, luxury villas, and retail fronts.',
                 'base_price'    => 40.00,
                 'icon'          => 'window',
@@ -92,6 +102,7 @@ class ServiceSeeder extends Seeder
             ],
             [
                 'name'          => 'Glass Cleaning',
+                'category'      => 'specialized',
                 'description'   => 'Specialized polishing for glass partitions, balustrades, shower cubicles, and mirrors.',
                 'base_price'    => 35.00,
                 'icon'          => 'window',
@@ -100,6 +111,7 @@ class ServiceSeeder extends Seeder
             ],
             [
                 'name'          => 'Ironing & Baby Sitting',
+                'category'      => 'residential',
                 'description'   => 'Professional garment pressing, laundry folding, and domestic child supervision.',
                 'base_price'    => 40.00,
                 'icon'          => 'sparkles',
@@ -108,6 +120,7 @@ class ServiceSeeder extends Seeder
             ],
             [
                 'name'          => 'Baby & Pet Sitting',
+                'category'      => 'residential',
                 'description'   => 'Compassionate, vetted in-home care for your children and beloved pets.',
                 'base_price'    => 45.00,
                 'icon'          => 'sparkles',
@@ -116,6 +129,7 @@ class ServiceSeeder extends Seeder
             ],
             [
                 'name'          => 'Building Cleaning Services',
+                'category'      => 'commercial',
                 'description'   => 'Turnkey facility cleaning for residential towers, lobbies, corridors, and exterior grounds.',
                 'base_price'    => 150.00,
                 'icon'          => 'building',
@@ -124,6 +138,7 @@ class ServiceSeeder extends Seeder
             ],
             [
                 'name'          => 'Landscape Contractor',
+                'category'      => 'maintenance',
                 'description'   => 'Turnkey landscaping solutions, irrigation systems, and outdoor living design for villas.',
                 'base_price'    => 200.00,
                 'icon'          => 'building',
@@ -132,6 +147,7 @@ class ServiceSeeder extends Seeder
             ],
             [
                 'name'          => 'Garden Maintenance',
+                'category'      => 'maintenance',
                 'description'   => 'Lawn care, precision hedging, palm frond pruning, and soil enrichment across Abu Dhabi.',
                 'base_price'    => 120.00,
                 'icon'          => 'sparkles',
@@ -140,6 +156,7 @@ class ServiceSeeder extends Seeder
             ],
             [
                 'name'          => 'Swimming Pool Maintenance',
+                'category'      => 'maintenance',
                 'description'   => 'Water chemistry testing, backwash, vacuuming, and mechanical inspection for pristine pools.',
                 'base_price'    => 150.00,
                 'icon'          => 'sparkles',
@@ -186,4 +203,3 @@ class ServiceSeeder extends Seeder
         }
     }
 }
-

@@ -115,9 +115,18 @@ export function enrichService(svc) {
     (f) => f.title.toLowerCase() === lowerName || f.id === slug || f.id === lowerName
   );
 
-  const price = Number(svc.base_price) || (match?.basePrice ?? 0);
+  const category = (svc.category && String(svc.category).trim())
+    ? String(svc.category).trim().toLowerCase()
+    : (match?.category || resolveByKeywords(svc.name, CATEGORY_MAP, 'residential'));
+
+  const price = (svc.base_price !== null && svc.base_price !== undefined)
+    ? Number(svc.base_price)
+    : (match?.basePrice ?? 0);
+
   const rateUnit = match?.rateUnit || resolveByKeywords(svc.name, RATE_MAP, { unit: 'hour', label: '/ hr' }).unit;
-  const rateLabel = match?.startingPrice || (price > 0 ? `AED ${price} ${rateUnit === 'hour' ? '/ hr' : rateUnit === 'flat' ? 'flat rate' : '/ session'}` : 'Contact for pricing');
+  const rateLabel = (svc.base_price !== null && svc.base_price !== undefined && Number(svc.base_price) > 0)
+    ? `AED ${Number(svc.base_price)} ${rateUnit === 'hour' ? '/ hr' : rateUnit === 'flat' ? 'flat rate' : '/ session'}`
+    : (match?.startingPrice || (price > 0 ? `AED ${price} ${rateUnit === 'hour' ? '/ hr' : rateUnit === 'flat' ? 'flat rate' : '/ session'}` : 'Contact for pricing'));
 
   if (match) {
     return {
@@ -128,8 +137,8 @@ export function enrichService(svc) {
       startingPrice: rateLabel,
       rateUnit:      match.rateUnit,
       iconName:      match.iconName,
-      category:      match.category,
-      image:         match.image,
+      category,
+      image:         svc.image || match.image,
       included:      match.included || [],
       description:   svc.description || match.description,
     };
@@ -141,10 +150,6 @@ export function enrichService(svc) {
     ? `AED ${price} ${rateInfo.label}`
     : 'Contact for pricing';
 
-  const category = (svc.category && String(svc.category).trim())
-    ? String(svc.category).trim().toLowerCase()
-    : resolveByKeywords(svc.name, CATEGORY_MAP, 'residential');
-
   return {
     ...svc,
     title:         svc.name,
@@ -154,7 +159,7 @@ export function enrichService(svc) {
     rateUnit:      rateInfo.unit,
     iconName:      resolveByKeywords(svc.name, ICON_MAP, 'sparkles'),
     category,
-    image:         getImage(svc.name),
+    image:         svc.image || getImage(svc.name),
     included:      [],
     description:   svc.description || '',
   };

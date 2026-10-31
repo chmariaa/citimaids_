@@ -110,7 +110,8 @@ export default function Services() {
     const inactiveServices = useMemo(() => filteredServices.filter(s => s.status !== 'active'), [filteredServices]);
 
     const openAdd = () => {
-        setForm({ name: '', category: 'residential', description: '', base_price: '', status: 'active' });
+        const defaultCat = categoryFilter !== 'all' ? categoryFilter : 'residential';
+        setForm({ name: '', category: defaultCat, description: '', base_price: '', status: 'active' });
         setFormModal('add');
     };
 
