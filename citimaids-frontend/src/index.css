@@ -169,6 +169,25 @@
   background: #1E3A8A;
 }
 
+/* ── Invoice Row Highlight Pulse ── */
+@keyframes invoiceHighlightPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 3px #2563eb, 0 4px 18px rgba(37,99,235,0.25);
+    background: #eff6ff;
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(37,99,235,0.35), 0 8px 32px rgba(37,99,235,0.18);
+    background: #dbeafe;
+  }
+}
+.invoice-row-highlighted {
+  animation: invoiceHighlightPulse 1.8s ease-in-out infinite;
+  border-bottom: 2px solid #2563eb !important;
+  position: relative;
+  z-index: 2;
+  transform: scale(1.002);
+}
+
 /* ── Spinner Animation ── */
 @keyframes spin {
   from {

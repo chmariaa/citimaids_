@@ -14,8 +14,13 @@ class TransactionController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Transaction::with(['payment.booking.service', 'payment.client', 'processedBy'])
-            ->orderByDesc('created_at');
+        $sortDir = strtolower($request->get('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $query = Transaction::with(['payment.booking.service', 'payment.booking.processedBy', 'payment.booking.details.service', 'payment.client', 'processedBy'])
+            ->orderBy('created_at', $sortDir);
+
+        if ($request->filled('service_id') && $request->service_id !== 'all') {
+            $query->whereHas('payment.booking', fn($bq) => $bq->where('service_id', $request->service_id));
+        }
 
         if ($request->filled('type')) {
             $query->where('type', $request->type);
@@ -43,8 +48,9 @@ class TransactionController extends Controller
                   ->orWhereHas('payment', function ($pq) use ($s) {
                       $pq->where('reference_number', 'like', "%{$s}%")
                          ->orWhere('external_reference', 'like', "%{$s}%")
-                         ->orWhereHas('client', fn($cq) => $cq->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%"))
-                         ->orWhereHas('booking', fn($bq) => $bq->where('id', 'like', "%{$s}%"));
+                         ->orWhereHas('client', fn($cq) => $cq->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%")->orWhere('contact_number', 'like', "%{$s}%"))
+                         ->orWhereHas('booking', fn($bq) => $bq->where('id', 'like', "%{$s}%"))
+                         ->orWhereHas('booking.service', fn($sq) => $sq->where('name', 'like', "%{$s}%"));
                   });
             });
         }
@@ -59,7 +65,7 @@ class TransactionController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        $transaction = Transaction::with(['payment.booking.service', 'payment.client', 'processedBy'])
+        $transaction = Transaction::with(['payment.booking.service', 'payment.booking.processedBy', 'payment.booking.details.service', 'payment.client', 'processedBy'])
             ->findOrFail($id);
 
         return response()->json($transaction);
@@ -70,7 +76,7 @@ class TransactionController extends Controller
      */
     public function retry(Request $request, int $id): JsonResponse
     {
-        $transaction = Transaction::with(['payment.booking.service', 'payment.client', 'processedBy'])
+        $transaction = Transaction::with(['payment.booking.service', 'payment.booking.processedBy', 'payment.booking.details.service', 'payment.client', 'processedBy'])
             ->findOrFail($id);
 
         $transaction->update([
@@ -88,7 +94,7 @@ class TransactionController extends Controller
 
         return response()->json([
             'message' => "Transaction #{$id} retry initiated successfully",
-            'transaction' => $transaction->fresh(['payment.booking.service', 'payment.client', 'processedBy']),
+            'transaction' => $transaction->fresh(['payment.booking.service', 'payment.booking.processedBy', 'payment.booking.details.service', 'payment.client', 'processedBy']),
         ]);
     }
 
@@ -119,7 +125,7 @@ class TransactionController extends Controller
      */
     public function receipt(int $id): JsonResponse
     {
-        $transaction = Transaction::with(['payment.booking.service', 'payment.client', 'processedBy'])
+        $transaction = Transaction::with(['payment.booking.service', 'payment.booking.processedBy', 'payment.booking.details.service', 'payment.client', 'processedBy'])
             ->findOrFail($id);
 
         return response()->json([
@@ -140,5 +146,64 @@ class TransactionController extends Controller
             ->get();
 
         return response()->json($transactions);
+    }
+
+    /**
+     * Update transaction details (description, notes, reference_number).
+     */
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $transaction = Transaction::findOrFail($id);
+
+        $request->validate([
+            'description'      => 'nullable|string|max:1000',
+            'notes'            => 'nullable|string|max:2000',
+            'reference_number' => 'nullable|string|max:100',
+        ]);
+
+        if ($request->has('description')) {
+            $transaction->update(['description' => $request->description]);
+        }
+
+        if ($transaction->payment) {
+            $paymentUpdates = [];
+            if ($request->has('notes')) $paymentUpdates['notes'] = $request->notes;
+            if ($request->has('reference_number')) $paymentUpdates['reference_number'] = $request->reference_number;
+            if (!empty($paymentUpdates)) {
+                $transaction->payment->update($paymentUpdates);
+            }
+        }
+
+        return response()->json([
+            'message' => 'Transaction details updated successfully',
+            'transaction' => $transaction->fresh(['payment.booking.service', 'payment.booking.processedBy', 'payment.booking.details.service', 'payment.client', 'processedBy']),
+        ]);
+    }
+
+    /**
+     * Update transaction status (success, failed, pending).
+     */
+    public function updateStatus(Request $request, int $id): JsonResponse
+    {
+        $transaction = Transaction::findOrFail($id);
+        $request->validate(['status' => 'required|in:pending,success,failed']);
+
+        $transaction->update(['status' => $request->status]);
+
+        if ($transaction->payment) {
+            $paymentStatus = $request->status === 'success' ? 'paid' : ($request->status === 'failed' ? 'failed' : 'pending');
+            $transaction->payment->update([
+                'status'  => $paymentStatus,
+                'paid_at' => $paymentStatus === 'paid' ? now() : $transaction->payment->paid_at,
+            ]);
+            if ($transaction->payment->booking && $paymentStatus === 'paid') {
+                $transaction->payment->booking->update(['payment_status' => 'paid']);
+            }
+        }
+
+        return response()->json([
+            'message' => "Transaction status updated to {$request->status}",
+            'transaction' => $transaction->fresh(['payment.booking.service', 'payment.booking.processedBy', 'payment.booking.details.service', 'payment.client', 'processedBy']),
+        ]);
     }
 }
