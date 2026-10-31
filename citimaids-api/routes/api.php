@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ReportsController;
 use App\Http\Controllers\Api\ServiceController;
+use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\TransactionController;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +26,10 @@ Route::get('/services', [ServiceController::class, 'index']);
 
 // Public settings (business info, etc)
 Route::get('/settings', [SettingController::class, 'index']);
+
+// Public reviews (approved only)
+Route::get('/reviews', [ReviewController::class, 'index']);
+Route::post('/reviews', [ReviewController::class, 'store']);
 
 // ─── Protected Routes (Sanctum Auth Required) ─────────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {
@@ -67,6 +72,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Settings (admin CRUD)
     Route::put('/settings', [SettingController::class, 'update']);
+
+    // Reviews (admin management)
+    Route::get('/admin/reviews', [ReviewController::class, 'adminIndex']);
+    Route::put('/reviews/{id}', [ReviewController::class, 'update']);
+    Route::patch('/reviews/{id}/status', [ReviewController::class, 'updateStatus']);
+    Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
 
     // Payments
     Route::get('/payments', [PaymentController::class, 'index']);

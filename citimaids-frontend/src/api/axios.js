@@ -24,7 +24,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       const url = error.config?.url || '';
       // Only force-logout on protected routes, NOT on public endpoints like /services
-      const isPublicRoute = url === '/services' || url.startsWith('/services?') || url === '/bookings';
+      const isPublicRoute = url === '/services' || url.startsWith('/services?') || url === '/bookings' || url === '/reviews' || url.startsWith('/reviews');
       const isAdminRoute = window.location.pathname.startsWith('/admin') && window.location.pathname !== '/admin/login';
       
       if (!isPublicRoute && isAdminRoute) {

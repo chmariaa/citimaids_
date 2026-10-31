@@ -25,6 +25,7 @@ import Payments from './pages/admin/Payments';
 import Clients from './pages/admin/Clients';
 import ClientDetail from './pages/admin/ClientDetail';
 import Services from './pages/admin/Services';
+import Reviews from './pages/admin/Reviews';
 import Reports from './pages/admin/Reports';
 import Settings from './pages/admin/Settings';
 
@@ -69,6 +70,7 @@ function App() {
               <Route path="clients" element={<Clients />} />
               <Route path="clients/:id" element={<ClientDetail />} />
               <Route path="services" element={<Services />} />
+              <Route path="reviews" element={<Reviews />} />
               <Route path="reports" element={<Reports />} />
               <Route path="settings" element={<Settings />} />
               <Route path="settings/:tab" element={<Settings />} />

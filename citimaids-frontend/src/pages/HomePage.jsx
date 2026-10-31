@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useServices } from '../hooks/useServices';
 import { useSettings } from '../hooks/useSettings';
+import { useReviews } from '../hooks/useReviews';
 import Reveal from '../components/Reveal';
 import BeforeAfterSlider from '../components/BeforeAfterSlider';
 import {
@@ -89,29 +90,7 @@ const steps = [
   },
 ];
 
-const reviews = [
-  {
-    name: 'Fatima Al Mansoori',
-    location: 'Al Khalidiyah, Abu Dhabi',
-    stars: 5,
-    text: "CitiMaids completely elevated our 4-bedroom villa. The cleaners were punctual, polite, and paid incredible attention to marble polishing and kitchen degreasing. By far the best in Abu Dhabi.",
-    avatar: 'FA',
-  },
-  {
-    name: 'James Thornton',
-    location: 'Corniche Towers, Abu Dhabi',
-    stars: 5,
-    text: "Outstanding commercial service for our regional office. They operate quietly and thoroughly after hours, and our team arrives every morning to a fresh, gleaming workspace.",
-    avatar: 'JT',
-  },
-  {
-    name: 'Sara Al Hashmi',
-    location: 'Al Mushrif, Abu Dhabi',
-    stars: 5,
-    text: "Booked their move-out handover clean. We received our full tenancy security deposit back with zero deductions! The ovens and bathrooms looked brand new.",
-    avatar: 'SH',
-  },
-];
+// Reviews are now fetched dynamically via useReviews hook
 
 const faqs = [
   {
@@ -190,9 +169,12 @@ function FAQCard({ q, a, index }) {
 export default function HomePage() {
   const { settings } = useSettings();
   const { services } = useServices();
+  const { reviews, loading: reviewsLoading, submitReview } = useReviews();
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
-  const [reviewForm, setReviewForm] = useState({ name: '', location: '', stars: 5, text: '' });
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewError, setReviewError] = useState(null);
+  const [reviewForm, setReviewForm] = useState({ name: '', whatsapp: '', location: '', stars: 5, text: '' });
   
   // Safely extract city from the address or default to 'Abu Dhabi'
   const addressParts = settings?.business_address ? settings.business_address.split(',') : [];
@@ -628,38 +610,58 @@ export default function HomePage() {
             </div>
           </Reveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {reviews.map((r, i) => (
-              <Reveal key={r.name} delay={i * 80}>
-                <div
-                  className="bg-slate-50 rounded-3xl p-8 border border-slate-200/80 flex flex-col justify-between h-full shadow-sm hover:shadow-lg transition-all"
-                >
-                  <div>
-                    <div className="flex gap-1 text-amber-400 mb-5">
-                      {Array.from({ length: r.stars }).map((_, j) => (
-                        <StarIcon key={j} className="w-5 h-5 text-amber-400" />
-                      ))}
-                    </div>
-                    <p className="text-slate-700 text-sm sm:text-base leading-relaxed italic mb-8">
-                      "{r.text}"
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-4 pt-5 border-t border-slate-200">
+          {reviewsLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="bg-slate-100 rounded-3xl p-8 border border-slate-200/60 animate-pulse h-56" />
+              ))}
+            </div>
+          ) : reviews.length === 0 ? (
+            <div className="text-center py-16 text-slate-400">
+              <p className="text-lg font-semibold">No reviews yet — be the first!</p>
+              <p className="text-sm mt-1">Click "Write a Review" above to share your experience.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {reviews.map((r, i) => {
+                const initials = r.name
+                  .split(' ')
+                  .slice(0, 2)
+                  .map((w) => w[0]?.toUpperCase() ?? '')
+                  .join('');
+                return (
+                  <Reveal key={r.id} delay={i * 80}>
                     <div
-                      className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-extrabold text-sm flex-shrink-0 shadow-md"
-                      style={{ background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)' }}
+                      className="bg-slate-50 rounded-3xl p-8 border border-slate-200/80 flex flex-col justify-between h-full shadow-sm hover:shadow-lg transition-all"
                     >
-                      {r.avatar}
+                      <div>
+                        <div className="flex gap-1 text-amber-400 mb-5">
+                          {Array.from({ length: r.stars }).map((_, j) => (
+                            <StarIcon key={j} className="w-5 h-5 text-amber-400" />
+                          ))}
+                        </div>
+                        <p className="text-slate-700 text-sm sm:text-base leading-relaxed italic mb-8">
+                          "{r.body}"
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-4 pt-5 border-t border-slate-200">
+                        <div
+                          className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-extrabold text-sm flex-shrink-0 shadow-md"
+                          style={{ background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)' }}
+                        >
+                          {initials}
+                        </div>
+                        <div>
+                          <div className="font-extrabold text-slate-900 text-base">{r.name}</div>
+                          <div className="text-slate-500 text-xs">{r.location}</div>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="font-extrabold text-slate-900 text-base">{r.name}</div>
-                      <div className="text-slate-500 text-xs">{r.location}</div>
-                    </div>
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
+                  </Reveal>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* ── Review Submission Modal Template ── */}
@@ -683,19 +685,35 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <form onSubmit={(e) => {
+              <form onSubmit={async (e) => {
                 e.preventDefault();
-                setReviewSubmitted(true);
-                setTimeout(() => {
-                  setReviewSubmitted(false);
-                  setShowReviewModal(false);
-                }, 2000);
+                setReviewSubmitting(true);
+                setReviewError(null);
+                try {
+                  await submitReview({
+                    name:     reviewForm.name,
+                    whatsapp: reviewForm.whatsapp,
+                    location: reviewForm.location,
+                    stars:    reviewForm.stars,
+                    body:     reviewForm.text,
+                  });
+                  setReviewSubmitted(true);
+                  setReviewForm({ name: '', whatsapp: '', location: '', stars: 5, text: '' });
+                  setTimeout(() => {
+                    setReviewSubmitted(false);
+                    setShowReviewModal(false);
+                  }, 3000);
+                } catch (err) {
+                  setReviewError('Something went wrong. Please try again.');
+                } finally {
+                  setReviewSubmitting(false);
+                }
               }} className="space-y-4">
                 {reviewSubmitted ? (
                   <div className="p-6 bg-emerald-50 border border-emerald-200 rounded-2xl text-center">
                     <div className="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto mb-3 font-bold text-xl">✓</div>
                     <h4 className="font-bold text-emerald-900 text-base">Thank You for Your Feedback!</h4>
-                    <p className="text-emerald-700 text-xs mt-1">Review template submitted. Integration ready for landing page.</p>
+                    <p className="text-emerald-700 text-xs mt-1">Your review has been submitted and will appear once approved by our team.</p>
                   </div>
                 ) : (
                   <>
@@ -725,6 +743,17 @@ export default function HomePage() {
                         placeholder="e.g. Mariam Al Zaabi"
                         value={reviewForm.name}
                         onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">WhatsApp Number <span className="normal-case font-normal text-slate-400">(optional)</span></label>
+                      <input
+                        type="tel"
+                        placeholder="e.g. +971501234567"
+                        value={reviewForm.whatsapp}
+                        onChange={(e) => setReviewForm({ ...reviewForm, whatsapp: e.target.value })}
                         className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900"
                       />
                     </div>
@@ -760,11 +789,15 @@ export default function HomePage() {
                       >
                         Cancel
                       </button>
+                      {reviewError && (
+                        <p className="text-red-600 text-xs text-center col-span-2">{reviewError}</p>
+                      )}
                       <button
                         type="submit"
-                        className="flex-1 py-3 rounded-xl bg-blue-950 text-white font-extrabold text-sm hover:bg-blue-900 transition-all shadow-lg"
+                        disabled={reviewSubmitting}
+                        className="flex-1 py-3 rounded-xl bg-blue-950 text-white font-extrabold text-sm hover:bg-blue-900 transition-all shadow-lg disabled:opacity-60"
                       >
-                        Submit Review
+                        {reviewSubmitting ? 'Submitting…' : 'Submit Review'}
                       </button>
                     </div>
                   </>
