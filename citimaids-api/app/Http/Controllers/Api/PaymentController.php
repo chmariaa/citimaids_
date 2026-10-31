@@ -17,12 +17,21 @@ class PaymentController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Payment::with(['booking.service', 'client', 'transactions'])
-            ->orderByDesc('created_at');
+        $sortDir = strtolower($request->get('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $query = Payment::with(['booking.service', 'booking.processedBy', 'booking.details.service', 'client', 'transactions'])
+            ->orderBy('created_at', $sortDir);
 
         // ── Filters ──
+        if ($request->filled('service_id') && $request->service_id !== 'all') {
+            $query->whereHas('booking', fn($bq) => $bq->where('service_id', $request->service_id));
+        }
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            $status = $request->status;
+            if ($status === 'unpaid' || $status === 'failed') {
+                $query->whereIn('status', ['unpaid', 'failed']);
+            } else {
+                $query->where('status', $status);
+            }
         }
         if ($request->filled('payment_method')) {
             $query->where('payment_method', $request->payment_method);
@@ -44,8 +53,9 @@ class PaymentController extends Controller
                   ->orWhere('amount', 'like', "%{$s}%")
                   ->orWhere('status', 'like', "%{$s}%")
                   ->orWhere('payment_method', 'like', "%{$s}%")
-                  ->orWhereHas('client', fn($cq) => $cq->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%")->orWhere('phone', 'like', "%{$s}%"))
-                  ->orWhereHas('booking', fn($bq) => $bq->where('id', 'like', "%{$s}%"));
+                  ->orWhereHas('client', fn($cq) => $cq->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%")->orWhere('contact_number', 'like', "%{$s}%"))
+                  ->orWhereHas('booking', fn($bq) => $bq->where('id', 'like', "%{$s}%"))
+                  ->orWhereHas('booking.service', fn($sq) => $sq->where('name', 'like', "%{$s}%"));
             });
         }
 
@@ -133,36 +143,38 @@ class PaymentController extends Controller
      */
     public function updateStatus(Request $request, int $id): JsonResponse
     {
-        $payment = Payment::findOrFail($id);
+        $payment = Payment::with(['booking', 'transactions'])->findOrFail($id);
 
         $request->validate([
-            'status' => 'required|in:pending,paid,failed,expired',
+            'status' => 'required|in:pending,paid,unpaid,failed,refunded,expired',
         ]);
 
         $oldStatus = $payment->status;
         $newStatus = $request->status;
+        $rawMethod = $payment->payment_method ?? 'card';
+        $normalizedMethod = $this->normalizePaymentMethodCode($rawMethod);
+        $methodLabel = $this->formatPaymentMethodLabel($rawMethod);
 
         $payment->update([
             'status'  => $newStatus,
             'paid_at' => $newStatus === 'paid' ? now() : $payment->paid_at,
         ]);
 
-        // Update the charge transaction status
-        if (in_array($newStatus, ['paid', 'failed'])) {
-            $payment->transactions()
-                ->where('type', 'charge')
-                ->where('status', 'pending')
-                ->update(['status' => $newStatus === 'paid' ? 'success' : 'failed']);
-        }
-
         // Sync booking payment_status
         if ($newStatus === 'paid') {
-            $payment->booking()->update(['payment_status' => 'paid']);
+            $payment->booking?->update(['payment_status' => 'paid']);
+        } elseif ($newStatus === 'refunded') {
+            $payment->booking?->update(['payment_status' => 'refunded']);
+        } else {
+            $payment->booking?->update(['payment_status' => 'unpaid']);
         }
+
+        // Update existing linked transaction directly in place (no duplicate records)
+        $this->syncLinkedTransactionInPlace($payment, $newStatus, $methodLabel, $normalizedMethod, null, $request->user()?->id);
 
         return response()->json([
             'message' => "Payment status updated from {$oldStatus} to {$newStatus}",
-            'payment' => $payment->fresh(['transactions', 'booking']),
+            'payment' => $payment->fresh(['transactions.processedBy', 'booking']),
         ]);
     }
 
@@ -237,30 +249,220 @@ class PaymentController extends Controller
     }
 
     /**
-     * Update payment details (reference_number, external_reference, notes, description).
+     * Update payment details (status, payment_method, notes, etc.).
+     * Updates the existing linked record in the Transactions Ledger directly in place.
+     * Does not create new or duplicate transaction log entries.
      */
     public function update(Request $request, int $id): JsonResponse
     {
-        $payment = Payment::findOrFail($id);
+        $payment = Payment::with(['booking', 'transactions'])->findOrFail($id);
 
         $request->validate([
+            'status'             => 'nullable|string|in:pending,paid,unpaid,failed,refunded,expired',
+            'amount'             => 'nullable|numeric|min:0',
+            'payment_method'     => 'nullable|string|max:50',
             'reference_number'   => 'nullable|string|max:100',
             'external_reference' => 'nullable|string|max:100',
             'notes'              => 'nullable|string|max:2000',
             'description'        => 'nullable|string|max:1000',
         ]);
 
-        $payment->update($request->only(['reference_number', 'external_reference', 'notes']));
+        $updateData = $request->only(['amount', 'reference_number', 'external_reference', 'notes']);
 
-        if ($request->has('description')) {
-            $payment->transactions()->where('type', 'charge')->latest()->first()?->update([
-                'description' => $request->description,
-            ]);
+        $rawMethod = $request->payment_method ?? $payment->payment_method ?? 'card';
+        $normalizedMethod = $this->normalizePaymentMethodCode($rawMethod);
+        $methodLabel = $this->formatPaymentMethodLabel($rawMethod);
+
+        if ($request->filled('payment_method')) {
+            $updateData['payment_method'] = $normalizedMethod;
         }
 
+        $newStatus = $request->input('status', $payment->status);
+
+        if ($request->filled('status')) {
+            $updateData['status'] = $newStatus;
+
+            if ($newStatus === 'paid') {
+                $updateData['paid_at'] = now();
+                $payment->booking?->update([
+                    'payment_status' => 'paid',
+                    'payment_method' => $normalizedMethod,
+                ]);
+            } elseif ($newStatus === 'refunded') {
+                $payment->booking?->update([
+                    'payment_status' => 'refunded',
+                ]);
+            } elseif (in_array($newStatus, ['unpaid', 'failed', 'pending'])) {
+                $payment->booking?->update([
+                    'payment_status' => 'unpaid',
+                    'payment_method' => $normalizedMethod,
+                ]);
+            }
+        }
+
+        $payment->update($updateData);
+        $payment->refresh();
+
+        // Directly update the existing linked transaction record in place (no duplicate entries)
+        $this->syncLinkedTransactionInPlace(
+            $payment,
+            $newStatus,
+            $methodLabel,
+            $normalizedMethod,
+            $request->notes,
+            $request->user()?->id,
+            $request->description
+        );
+
         return response()->json([
-            'message' => 'Invoice details updated successfully',
-            'payment' => $payment->fresh(['booking.service', 'client', 'transactions']),
+            'message' => 'Invoice details and linked transaction updated in place successfully',
+            'payment' => $payment->fresh(['booking.service', 'booking.processedBy', 'booking.details.service', 'client', 'transactions.processedBy']),
         ]);
+    }
+
+    /**
+     * Updates the existing linked record in the Transactions Ledger directly in place.
+     * Does not create new or duplicate transaction log entries.
+     *
+     * Status Mapping Rules:
+     * - Invoice set to Paid     ➔ Linked Transaction status updates to Success
+     * - Invoice set to Unpaid   ➔ Linked Transaction status updates to Failed
+     * - Invoice set to Pending  ➔ Linked Transaction status updates to Pending
+     * - Invoice set to Refunded ➔ Linked Transaction status updates to Success
+     */
+    protected function syncLinkedTransactionInPlace(
+        Payment $payment,
+        string $status,
+        string $methodLabel,
+        string $methodCode,
+        ?string $notes = null,
+        ?int $userId = null,
+        ?string $customDescription = null
+    ): Transaction {
+        $amount = (float) $payment->amount;
+        $ref = $payment->reference_number ?: ("INV-" . $payment->id);
+
+        // Status mapping rules:
+        $txStatus = match ($status) {
+            'paid'     => 'success',
+            'unpaid'   => 'failed',
+            'pending'  => 'pending',
+            'refunded' => 'success',
+            default    => ($status === 'failed' ? 'failed' : 'pending'),
+        };
+
+        $txType = ($status === 'refunded') ? 'refund' : 'charge';
+
+        $description = $customDescription;
+        if (empty($description)) {
+            if ($status === 'paid') {
+                $description = "Payment received via {$methodLabel} for Invoice #{$ref}";
+            } elseif ($status === 'refunded') {
+                $description = "Refund processed for Invoice #{$ref}";
+            } elseif ($status === 'unpaid' || $status === 'failed') {
+                $description = "Invoice marked as Unpaid for Invoice #{$ref}";
+            } else {
+                $description = "Invoice marked as Pending for Invoice #{$ref}";
+            }
+        }
+
+        // Check for existing linked transaction(s)
+        $transactions = $payment->transactions()->get();
+
+        if ($transactions->isNotEmpty()) {
+            $primary = $transactions->first();
+
+            $existingPayload = is_array($primary->gateway_response) ? $primary->gateway_response : [];
+            $updatedPayload = array_merge($existingPayload, [
+                'payment_method'      => $methodLabel,
+                'method_code'         => $methodCode,
+                'status'              => $txStatus,
+                'amount'              => $amount,
+                'invoice_ref'         => $ref,
+                'updated_in_place_at' => now()->toIso8601String(),
+            ]);
+
+            if ($notes !== null) {
+                $updatedPayload['notes'] = $notes;
+            }
+
+            $txUpdates = [
+                'type'             => $txType,
+                'status'           => $txStatus,
+                'amount'           => $amount,
+                'description'      => $description,
+                'gateway_response' => $updatedPayload,
+            ];
+
+            if ($userId) {
+                $txUpdates['processed_by_user_id'] = $userId;
+            }
+
+            $primary->update($txUpdates);
+
+            // Clean up any stale duplicate entries from past testing to guarantee strict 1-to-1 linkage
+            if ($transactions->count() > 1) {
+                $payment->transactions()->where('id', '!=', $primary->id)->delete();
+            }
+
+            return $primary;
+        }
+
+        // If no linked transaction exists yet, create the single linked record
+        return Transaction::create([
+            'payment_id'           => $payment->id,
+            'type'                 => $txType,
+            'amount'               => $amount,
+            'status'               => $txStatus,
+            'description'          => $description,
+            'gateway_response'     => [
+                'payment_method' => $methodLabel,
+                'method_code'    => $methodCode,
+                'status'         => $txStatus,
+                'amount'         => $amount,
+                'invoice_ref'    => $ref,
+                'notes'          => $notes,
+                'recorded_at'    => now()->toIso8601String(),
+            ],
+            'processed_by_user_id' => $userId,
+        ]);
+    }
+
+    /**
+     * Format payment method code into clean human label.
+     */
+    protected function formatPaymentMethodLabel(?string $method): string
+    {
+        if (empty($method)) {
+            return 'Online Gateway';
+        }
+
+        $m = strtolower(trim($method));
+        return match ($m) {
+            'cash'                      => 'Cash',
+            'card', 'credit_card'       => 'Credit Card',
+            'bank_transfer', 'bank'     => 'Bank Transfer',
+            'online', 'adcb_pace_pay'   => 'Online Gateway',
+            default                     => ucwords(str_replace('_', ' ', $method)),
+        };
+    }
+
+    /**
+     * Normalize payment method input to recognized database code.
+     */
+    protected function normalizePaymentMethodCode(?string $method): string
+    {
+        if (empty($method)) {
+            return 'adcb_pace_pay';
+        }
+
+        $m = strtolower(trim($method));
+        return match ($m) {
+            'cash'                      => 'cash',
+            'card', 'credit_card'       => 'card',
+            'bank_transfer', 'bank'     => 'bank_transfer',
+            'online', 'adcb_pace_pay'   => 'adcb_pace_pay',
+            default                     => $method,
+        };
     }
 }
