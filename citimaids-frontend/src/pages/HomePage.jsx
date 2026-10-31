@@ -174,7 +174,7 @@ export default function HomePage() {
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewError, setReviewError] = useState(null);
-  const [reviewForm, setReviewForm] = useState({ name: '', location: '', stars: 5, text: '' });
+  const [reviewForm, setReviewForm] = useState({ name: '', whatsapp: '', location: '', stars: 5, text: '' });
   
   // Safely extract city from the address or default to 'Abu Dhabi'
   const addressParts = settings?.business_address ? settings.business_address.split(',') : [];
@@ -692,12 +692,13 @@ export default function HomePage() {
                 try {
                   await submitReview({
                     name:     reviewForm.name,
+                    whatsapp: reviewForm.whatsapp,
                     location: reviewForm.location,
                     stars:    reviewForm.stars,
                     body:     reviewForm.text,
                   });
                   setReviewSubmitted(true);
-                  setReviewForm({ name: '', location: '', stars: 5, text: '' });
+                  setReviewForm({ name: '', whatsapp: '', location: '', stars: 5, text: '' });
                   setTimeout(() => {
                     setReviewSubmitted(false);
                     setShowReviewModal(false);
@@ -742,6 +743,17 @@ export default function HomePage() {
                         placeholder="e.g. Mariam Al Zaabi"
                         value={reviewForm.name}
                         onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">WhatsApp Number <span className="normal-case font-normal text-slate-400">(optional)</span></label>
+                      <input
+                        type="tel"
+                        placeholder="e.g. +971501234567"
+                        value={reviewForm.whatsapp}
+                        onChange={(e) => setReviewForm({ ...reviewForm, whatsapp: e.target.value })}
                         className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900"
                       />
                     </div>

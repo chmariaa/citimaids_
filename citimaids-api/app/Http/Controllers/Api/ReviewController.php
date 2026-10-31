@@ -23,6 +23,7 @@ class ReviewController extends Controller
     {
         $validated = $request->validate([
             'name'     => 'required|string|max:120',
+            'whatsapp' => 'nullable|string|max:30',
             'location' => 'nullable|string|max:120',
             'stars'    => 'required|integer|min:1|max:5',
             'body'     => 'required|string|min:10|max:1500',
@@ -48,20 +49,16 @@ class ReviewController extends Controller
         return response()->json($query->get());
     }
 
-    // ── Admin: approve / reject / update a review ───────────────────────────────
+    // ── Admin: update review status only (client feedback is immutable) ─────────
     public function update(Request $request, $id)
     {
         $review = Review::findOrFail($id);
 
         $validated = $request->validate([
-            'name'     => 'sometimes|string|max:120',
-            'location' => 'nullable|string|max:120',
-            'stars'    => 'sometimes|integer|min:1|max:5',
-            'body'     => 'sometimes|string|min:10|max:1500',
-            'status'   => 'sometimes|in:pending,approved,rejected',
+            'status' => 'required|in:pending,approved,rejected',
         ]);
 
-        $review->update($validated);
+        $review->update(['status' => $validated['status']]);
 
         return response()->json($review);
     }
