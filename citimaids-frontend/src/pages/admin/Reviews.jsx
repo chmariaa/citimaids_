@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../../api/axios';
+import InquiriesPanel from './InquiriesPanel';
 import {
     brand, fonts, pageTitle, pageSubtitle, card, solidBtn as solidBtnToken,
     outlineBtn as outlineBtnToken, inputStyle as inputStyleToken,
@@ -7,7 +9,13 @@ import {
     statusBadge,
 } from './adminStyles';
 
-// ── Status config ─────────────────────────────────────────────────────────────
+// ── Sub-navigation tabs (matching Reports layout) ─────────────────────────────
+const SUB_TABS = [
+    { id: 'reviews',   label: 'Client Reviews',    desc: 'Ratings & testimonials' },
+    { id: 'inquiries', label: 'Customer Inquiries', desc: 'Visitor & client queries' },
+];
+
+// ── Status config for reviews ────────────────────────────────────────────────
 const STATUS_TABS = [
     { key: 'all',      label: 'All' },
     { key: 'pending',  label: 'Pending' },
@@ -98,12 +106,25 @@ function ReviewStatusModal({ review, onClose, onSaved }) {
                     }}
                 >✕</button>
 
-                <h3 style={{ ...pageTitle, fontSize: 20, marginBottom: 4 }}>Moderate Review</h3>
-                <p style={{ fontSize: 12, color: '#64748b', marginBottom: 20 }}>
-                    Client feedback is immutable to protect testimonial authenticity. Only publication status can be adjusted.
-                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
+                    <div style={{
+                        width: 44, height: 44, borderRadius: 12,
+                        background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)',
+                        color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontWeight: 800, fontSize: 16,
+                    }}>
+                        {initials(review.name)}
+                    </div>
+                    <div>
+                        <h2 style={{ fontSize: 18, fontWeight: 800, color: brand.navy, margin: 0 }}>Review Moderation</h2>
+                        <div style={{ display: 'flex', gap: 8, marginTop: 4, alignItems: 'center' }}>
+                            <StarRow stars={review.stars} />
+                            <span style={{ fontSize: 12, color: '#64748b' }}>• {review.name}</span>
+                        </div>
+                    </div>
+                </div>
 
-                {/* Read-only client details card */}
+                {/* Read-Only Client Feedback Information Card */}
                 <div style={{
                     background: '#f8fafc',
                     border: '1px solid #e2e8f0',
@@ -112,30 +133,25 @@ function ReviewStatusModal({ review, onClose, onSaved }) {
                     marginBottom: 20,
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: 12,
+                    gap: 10,
                 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                         <div>
                             <span style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.5 }}>Client Name</span>
-                            <div style={{ fontSize: 14, fontWeight: 700, color: brand.navy, marginTop: 2 }}>{review.name}</div>
+                            <div style={{ fontSize: 13, fontWeight: 700, color: brand.navy, marginTop: 2 }}>{review.name}</div>
                         </div>
-                        <div style={{ textAlign: 'right' }}>
-                            <span style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.5 }}>Rating</span>
-                            <div style={{ marginTop: 2 }}>
-                                <StarRow stars={review.stars} />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: 20, fontSize: 12, color: '#64748b', flexWrap: 'wrap' }}>
                         {review.location && (
                             <div>
-                                <span style={{ fontWeight: 600 }}>📍 Location: </span>{review.location}
+                                <span style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.5 }}>Location / District</span>
+                                <div style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginTop: 2 }}>{review.location}</div>
                             </div>
                         )}
                         {review.whatsapp && (
-                            <div>
-                                <span style={{ fontWeight: 600 }}>💬 WhatsApp: </span>{review.whatsapp}
+                            <div style={{ gridColumn: 'span 2' }}>
+                                <span style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.5 }}>WhatsApp Number</span>
+                                <div style={{ fontSize: 13, fontWeight: 700, color: '#16a34a', marginTop: 2, display: 'flex', alignItems: 'center', gap: 6 }}>
+                                    💬 {review.whatsapp}
+                                </div>
                             </div>
                         )}
                     </div>
@@ -204,7 +220,8 @@ function ReviewStatusModal({ review, onClose, onSaved }) {
 
 // ── Actions Dropdown ──────────────────────────────────────────────────────────
 function ActionsDropdown({ review, onApprove, onReject, onMarkPending, onChangeStatus, onDelete, onToggleExpand, isExpanded, loading }) {
-    const [open, setOpen] = useStateWithClose();
+    const [open, setOpen] = useState(false);
+    const [openUpward, setOpenUpward] = useState(false);
     const ref = useRef(null);
 
     useEffect(() => {
@@ -212,6 +229,15 @@ function ActionsDropdown({ review, onApprove, onReject, onMarkPending, onChangeS
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
     }, []);
+
+    const toggleOpen = () => {
+        if (!open && ref.current) {
+            const rect = ref.current.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.bottom;
+            setOpenUpward(spaceBelow < 280);
+        }
+        setOpen((v) => !v);
+    };
 
     const menuItem = (label, color, onClick, disabled) => (
         <button
@@ -234,7 +260,7 @@ function ActionsDropdown({ review, onApprove, onReject, onMarkPending, onChangeS
     return (
         <div ref={ref} onClick={(e) => e.stopPropagation()} style={{ position: 'relative', display: 'inline-block' }}>
             <button
-                onClick={() => setOpen((v) => !v)}
+                onClick={toggleOpen}
                 disabled={loading}
                 style={{
                     padding: '6px 14px', borderRadius: 8,
@@ -252,10 +278,18 @@ function ActionsDropdown({ review, onApprove, onReject, onMarkPending, onChangeS
 
             {open && (
                 <div style={{
-                    position: 'absolute', right: 0, top: 'calc(100% + 6px)',
-                    background: '#fff', borderRadius: 12, minWidth: 175,
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.13)', border: '1px solid #e2e8f0',
-                    zIndex: 100, overflow: 'hidden',
+                    position: 'absolute',
+                    right: 0,
+                    ...(openUpward
+                        ? { bottom: 'calc(100% + 6px)' }
+                        : { top: 'calc(100% + 6px)' }),
+                    background: '#fff',
+                    borderRadius: 12,
+                    minWidth: 175,
+                    boxShadow: '0 12px 36px rgba(0,0,0,0.16)',
+                    border: '1px solid #e2e8f0',
+                    zIndex: 9999,
+                    overflow: 'hidden',
                 }}>
                     {menuItem(isExpanded ? '▲ Hide Full Review' : '👁 Read Full Review', '#2563eb', onToggleExpand, false)}
                     <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
@@ -273,13 +307,12 @@ function ActionsDropdown({ review, onApprove, onReject, onMarkPending, onChangeS
     );
 }
 
-function useStateWithClose() {
-    const [val, setVal] = useState(false);
-    return [val, setVal];
-}
-
-
+// ── Main Page Component ───────────────────────────────────────────────────────
 export default function Reviews() {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const activeSubTab = searchParams.get('tab') === 'inquiries' ? 'inquiries' : 'reviews';
+    const setSubTab = (id) => setSearchParams(id === 'reviews' ? {} : { tab: id });
+
     const [reviews, setReviews]       = useState([]);
     const [loading, setLoading]       = useState(true);
     const [tab, setTab]               = useState('all');
@@ -287,6 +320,7 @@ export default function Reviews() {
     const [statusTarget, setStatusTarget] = useState(null);
     const [actionLoading, setActionLoading] = useState({});
     const [expandedIds, setExpandedIds] = useState(new Set());
+    const [inquiriesPendingCount, setInquiriesPendingCount] = useState(0);
 
     const toggleExpand = (id) => {
         setExpandedIds((prev) => {
@@ -305,16 +339,28 @@ export default function Reviews() {
             .finally(() => setLoading(false));
     };
 
-    useEffect(() => { fetchReviews(); }, []);
+    const fetchInquiriesCount = () => {
+        api.get('/admin/inquiries')
+            .then(({ data }) => {
+                const count = (data || []).filter((inq) => inq.status === 'pending').length;
+                setInquiriesPendingCount(count);
+            })
+            .catch(() => {});
+    };
 
-    // ── Counts per tab ───────────────────────────────────────────────────────
+    useEffect(() => {
+        fetchReviews();
+        fetchInquiriesCount();
+    }, []);
+
+    // ── Counts per tab for Reviews ────────────────────────────────────────────
     const counts = useMemo(() => {
         const c = { all: reviews.length, pending: 0, approved: 0, rejected: 0 };
         reviews.forEach((r) => { if (c[r.status] !== undefined) c[r.status]++; });
         return c;
     }, [reviews]);
 
-    // ── Filtered list ────────────────────────────────────────────────────────
+    // ── Filtered reviews list ─────────────────────────────────────────────────
     const filtered = useMemo(() => {
         let list = tab === 'all' ? reviews : reviews.filter((r) => r.status === tab);
         if (search.trim()) {
@@ -342,7 +388,7 @@ export default function Reviews() {
         }
     };
 
-    // ── Delete ───────────────────────────────────────────────────────────────
+    // ── Delete review ────────────────────────────────────────────────────────
     const handleDelete = async (id, name) => {
         if (!window.confirm(`Delete review from "${name}"? This cannot be undone.`)) return;
         setActionLoading((prev) => ({ ...prev, [id]: true }));
@@ -357,387 +403,473 @@ export default function Reviews() {
     };
 
     // ── Styles ───────────────────────────────────────────────────────────────
-    const page = { padding: '32px 40px', fontFamily: fonts.body };
+    const page = { fontFamily: fonts.body, width: '100%', boxSizing: 'border-box' };
 
     return (
         <div style={page}>
+            <style>{`
+                .reviews-layout-grid {
+                    display: grid;
+                    grid-template-columns: 210px minmax(0, 1fr);
+                    gap: 20px;
+                    align-items: start;
+                }
+                @media (max-width: 1180px) {
+                    .reviews-layout-grid {
+                        grid-template-columns: 1fr;
+                        gap: 16px;
+                    }
+                    .reviews-subnav-sidebar {
+                        display: flex !important;
+                        flex-direction: row !important;
+                        gap: 10px !important;
+                        overflow-x: auto !important;
+                    }
+                    .reviews-subnav-sidebar button {
+                        flex: 1 1 0 !important;
+                        min-width: 180px !important;
+                        margin-bottom: 0 !important;
+                    }
+                }
+            `}</style>
+
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
                 <div>
-                    <h1 style={pageTitle}>Client Reviews</h1>
-                    <p style={pageSubtitle}>Moderate, approve, or reject customer-submitted testimonials.</p>
+                    <h1 style={pageTitle}>
+                        {activeSubTab === 'reviews' ? 'Client Reviews' : 'Customer Inquiries'}
+                    </h1>
+                    <p style={pageSubtitle}>
+                        {activeSubTab === 'reviews'
+                            ? 'Moderate, approve, or reject customer-submitted testimonials.'
+                            : 'Review, manage, and reply to client inquiries and quote requests.'}
+                    </p>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                     <span style={{
                         padding: '8px 18px', borderRadius: 10, fontSize: 13, fontWeight: 700,
                         background: '#fef3c7', color: '#b45309', border: '1px solid #fcd34d',
                     }}>
-                        {counts.pending} Pending
+                        {activeSubTab === 'reviews' ? `${counts.pending} Pending Reviews` : `${inquiriesPendingCount} Pending Inquiries`}
                     </span>
                 </div>
             </div>
 
-            {/* Filters */}
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', marginBottom: 24 }}>
-                {/* Tab pills */}
-                <div style={{ display: 'flex', gap: 6 }}>
-                    {STATUS_TABS.map((t) => (
-                        <button
-                            key={t.key}
-                            onClick={() => setTab(t.key)}
-                            style={tabBtn(tab === t.key)}
-                        >
-                            {t.label}
-                            {counts[t.key] > 0 && (
-                                <span style={{
-                                    marginLeft: 4, fontSize: 10, fontWeight: 800,
-                                    background: tab === t.key ? 'rgba(255,255,255,0.25)' : '#f1f5f9',
-                                    color: tab === t.key ? '#fff' : '#64748b',
-                                    padding: '1px 6px', borderRadius: 20,
-                                }}>{counts[t.key]}</span>
-                            )}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Search */}
-                <div style={{ ...searchBarToken, marginLeft: 'auto', minWidth: 240 }}>
-                    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#94a3b8" strokeWidth="2">
-                        <circle cx="11" cy="11" r="8" /><path strokeLinecap="round" d="M21 21l-4.35-4.35" />
-                    </svg>
-                    <input
-                        style={searchInputToken}
-                        placeholder="Search by name, location…"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                </div>
-            </div>
-
-            {/* Table */}
-            <div style={{ ...card, overflow: 'visible' }}>
-                {/* Column headers */}
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: '2.5fr 1.5fr 70px 120px 220px',
-                    padding: '14px 24px',
-                    background: brand.softBg,
-                    borderBottom: `1px solid ${brand.border}`,
-                    fontSize: 10, fontWeight: 700, color: '#64748b',
-                    textTransform: 'uppercase', letterSpacing: 0.8,
-                }}>
-                    <span>Reviewer & Review (Click to expand)</span>
-                    <span>Location</span>
-                    <span>Stars</span>
-                    <span>Status</span>
-                    <span style={{ textAlign: 'right' }}>Actions</span>
-                </div>
-
-                {loading ? (
-                    <div style={{ padding: 48, textAlign: 'center', color: '#94a3b8' }}>Loading reviews…</div>
-                ) : filtered.length === 0 ? (
-                    <div style={{ padding: 48, textAlign: 'center', color: '#94a3b8' }}>
-                        {search ? 'No reviews match your search.' : 'No reviews in this category yet.'}
-                    </div>
-                ) : (
-                    filtered.map((r) => {
-                        const isExpanded = expandedIds.has(r.id);
+            {/* Nested Sidebar Grid (Matching Reports Layout) */}
+            <div className="reviews-layout-grid">
+                {/* Secondary Sidebar */}
+                <div className="reviews-subnav-sidebar" style={{ ...card, padding: 10 }}>
+                    {SUB_TABS.map((t) => {
+                        const act = t.id === activeSubTab;
+                        const badgeCount = t.id === 'reviews' ? counts.pending : inquiriesPendingCount;
                         return (
-                            <div key={r.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                {/* Row Header / Summary */}
-                                <div
-                                    onClick={() => toggleExpand(r.id)}
-                                    style={{
-                                        display: 'grid',
-                                        gridTemplateColumns: '2.5fr 1.5fr 70px 120px 220px',
-                                        padding: '16px 24px',
-                                        alignItems: 'center',
-                                        cursor: 'pointer',
-                                        background: isExpanded ? '#f8fafc' : '',
-                                        transition: 'background 0.15s',
-                                    }}
-                                    onMouseEnter={(e) => { if (!isExpanded) e.currentTarget.style.background = '#f8fafc'; }}
-                                    onMouseLeave={(e) => { if (!isExpanded) e.currentTarget.style.background = ''; }}
-                                >
-                                    {/* Reviewer */}
-                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                                        {/* Expand Chevron Icon */}
-                                        <div
-                                            title={isExpanded ? 'Collapse review' : 'Click to read full review'}
-                                            style={{
-                                                marginTop: 10,
-                                                color: isExpanded ? brand.navy : '#94a3b8',
-                                                transition: 'transform 0.2s',
-                                                transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                flexShrink: 0,
-                                            }}
+                            <button
+                                key={t.id}
+                                onClick={() => setSubTab(t.id)}
+                                style={{
+                                    width: '100%', textAlign: 'left', padding: '12px 14px', border: 'none', borderRadius: 12,
+                                    marginBottom: 4, cursor: 'pointer', transition: 'all .15s',
+                                    background: act ? 'linear-gradient(135deg,#0A2342,#1E3A8A)' : 'transparent',
+                                    color: act ? '#fff' : brand.navy,
+                                    boxShadow: act ? '0 4px 12px rgba(10,35,66,.2)' : 'none',
+                                    display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8,
+                                }}
+                            >
+                                <div>
+                                    <div style={{ fontSize: 13.5, fontWeight: 700 }}>{t.label}</div>
+                                    <div style={{ fontSize: 11, color: act ? '#bfdbfe' : '#94a3b8', marginTop: 1 }}>{t.desc}</div>
+                                </div>
+                                {badgeCount > 0 && (
+                                    <span style={{
+                                        fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 12,
+                                        background: act ? 'rgba(255,255,255,0.25)' : '#fef3c7',
+                                        color: act ? '#fff' : '#b45309',
+                                        border: act ? 'none' : '1px solid #fcd34d',
+                                        flexShrink: 0,
+                                    }}>
+                                        {badgeCount}
+                                    </span>
+                                )}
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {/* Right Panel */}
+                <div style={{ minWidth: 0, width: '100%' }}>
+                    {activeSubTab === 'inquiries' ? (
+                        <InquiriesPanel onPendingCountChange={setInquiriesPendingCount} />
+                    ) : (
+                        <>
+                            {/* Reviews Filters */}
+                            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', marginBottom: 20 }}>
+                                {/* Tab pills */}
+                                <div style={{ display: 'flex', gap: 6 }}>
+                                    {STATUS_TABS.map((t) => (
+                                        <button
+                                            key={t.key}
+                                            onClick={() => setTab(t.key)}
+                                            style={tabBtn(tab === t.key)}
                                         >
-                                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                                                <path d="M4 2.5l3.5 3.5-3.5 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                            </svg>
-                                        </div>
-
-                                        <div style={{
-                                            width: 38, height: 38, borderRadius: 10, flexShrink: 0,
-                                            background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)',
-                                            color: '#fff', display: 'flex', alignItems: 'center',
-                                            justifyContent: 'center', fontWeight: 800, fontSize: 13,
-                                            fontFamily: fonts.heading,
-                                        }}>
-                                            {initials(r.name)}
-                                        </div>
-
-                                        <div style={{ minWidth: 0, flex: 1 }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                                                <span style={{ fontWeight: 700, fontSize: 14, color: brand.navy }}>{r.name}</span>
-                                                {r.whatsapp && (
-                                                    <a
-                                                        href={`https://wa.me/${r.whatsapp.replace(/\D/g, '')}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        style={{
-                                                            fontSize: 11, color: '#16a34a', background: '#dcfce7',
-                                                            padding: '1px 8px', borderRadius: 6, display: 'inline-flex',
-                                                            alignItems: 'center', gap: 4, textDecoration: 'none', fontWeight: 600,
-                                                        }}
-                                                        title="Open WhatsApp chat"
-                                                    >
-                                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="#16a34a"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.115.552 4.1 1.516 5.824L0 24l6.335-1.493A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.371l-.36-.214-3.722.877.936-3.613-.235-.372A9.818 9.818 0 012.182 12C2.182 6.58 6.58 2.182 12 2.182S21.818 6.58 21.818 12 17.42 21.818 12 21.818z"/></svg>
-                                                        {r.whatsapp}
-                                                    </a>
-                                                )}
-                                            </div>
-                                            <div
-                                                style={{
-                                                    fontSize: 12, color: '#64748b', marginTop: 4,
-                                                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                                                    fontStyle: 'italic', maxWidth: '90%',
-                                                }}
-                                                title="Click row to read full review"
-                                            >
-                                                "{r.body}"
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Location */}
-                                    <div style={{ fontSize: 13, color: '#64748b' }}>{r.location || '—'}</div>
-
-                                    {/* Stars */}
-                                    <StarRow stars={r.stars} />
-
-                                    {/* Status */}
-                                    <ReviewStatusBadge status={r.status} />
-
-                                    {/* Actions */}
-                                    <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', alignItems: 'center' }}>
-                                        {r.whatsapp && (
-                                            <a
-                                                href={`https://wa.me/${r.whatsapp.replace(/\D/g, '')}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                onClick={(e) => e.stopPropagation()}
-                                                title={`Message ${r.name} on WhatsApp`}
-                                                style={{
-                                                    display: 'inline-flex', alignItems: 'center', gap: 5,
-                                                    padding: '6px 12px', borderRadius: 8,
-                                                    background: '#dcfce7', color: '#15803d',
-                                                    fontSize: 12, fontWeight: 700,
-                                                    textDecoration: 'none', border: '1px solid #bbf7d0',
-                                                    cursor: 'pointer', transition: 'background 0.15s',
-                                                }}
-                                                onMouseEnter={(e) => e.currentTarget.style.background = '#bbf7d0'}
-                                                onMouseLeave={(e) => e.currentTarget.style.background = '#dcfce7'}
-                                            >
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="#15803d"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.115.552 4.1 1.516 5.824L0 24l6.335-1.493A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.371l-.36-.214-3.722.877.936-3.613-.235-.372A9.818 9.818 0 012.182 12C2.182 6.58 6.58 2.182 12 2.182S21.818 6.58 21.818 12 17.42 21.818 12 21.818z"/></svg>
-                                                Message
-                                            </a>
-                                        )}
-                                        <ActionsDropdown
-                                            review={r}
-                                            loading={!!actionLoading[r.id]}
-                                            isExpanded={isExpanded}
-                                            onToggleExpand={() => toggleExpand(r.id)}
-                                            onApprove={() => quickStatus(r.id, 'approved')}
-                                            onReject={() => quickStatus(r.id, 'rejected')}
-                                            onMarkPending={() => quickStatus(r.id, 'pending')}
-                                            onChangeStatus={() => setStatusTarget(r)}
-                                            onDelete={() => handleDelete(r.id, r.name)}
-                                        />
-                                    </div>
+                                            {t.label}
+                                            {counts[t.key] > 0 && (
+                                                <span style={{
+                                                    marginLeft: 4, fontSize: 10, fontWeight: 800,
+                                                    background: tab === t.key ? 'rgba(255,255,255,0.25)' : '#f1f5f9',
+                                                    color: tab === t.key ? '#fff' : '#64748b',
+                                                    padding: '1px 6px', borderRadius: 20,
+                                                }}>{counts[t.key]}</span>
+                                            )}
+                                        </button>
+                                    ))}
                                 </div>
 
-                                {/* Expanded Full Review Detail Panel */}
-                                {isExpanded && (
-                                    <div
-                                        style={{
-                                            background: '#f8fafc',
-                                            padding: '20px 28px 24px 62px',
-                                            borderLeft: `4px solid ${brand.navy}`,
-                                            borderTop: '1px solid #f1f5f9',
-                                        }}
-                                        onClick={(e) => e.stopPropagation()}
-                                    >
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                                                <span style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>
-                                                    Full Review from {r.name}
-                                                </span>
-                                                <span style={{ fontSize: 12, color: '#cbd5e1' }}>•</span>
-                                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#64748b' }}>
-                                                    <StarRow stars={r.stars} />
-                                                    <strong style={{ color: '#0f172a' }}>{r.stars} / 5 Stars</strong>
-                                                </span>
-                                                {r.created_at && (
-                                                    <>
-                                                        <span style={{ fontSize: 12, color: '#cbd5e1' }}>•</span>
-                                                        <span style={{ fontSize: 12, color: '#64748b' }}>
-                                                            Submitted on {new Date(r.created_at).toLocaleDateString('en-US', {
-                                                                month: 'short',
-                                                                day: 'numeric',
-                                                                year: 'numeric',
-                                                                hour: '2-digit',
-                                                                minute: '2-digit'
-                                                            })}
-                                                        </span>
-                                                    </>
-                                                )}
-                                            </div>
+                                {/* Search */}
+                                <div style={{ ...searchBarToken, marginLeft: 'auto', minWidth: 220, maxWidth: 300, flex: '1 1 220px' }}>
+                                    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#94a3b8" strokeWidth="2">
+                                        <circle cx="11" cy="11" r="8" /><path strokeLinecap="round" d="M21 21l-4.35-4.35" />
+                                    </svg>
+                                    <input
+                                        style={searchInputToken}
+                                        placeholder="Search by name, location…"
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                    />
+                                </div>
+                            </div>
 
-                                            <button
-                                                type="button"
-                                                onClick={() => toggleExpand(r.id)}
+                            {/* Reviews Table */}
+                            <div style={{ ...card, overflow: 'visible', width: '100%', minWidth: 0 }}>
+                                {/* Column headers */}
+                                <div style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'minmax(0, 2.2fr) minmax(0, 1fr) 75px 105px 165px',
+                                    gap: 12,
+                                    padding: '12px 20px',
+                                    background: brand.softBg,
+                                    borderBottom: `1px solid ${brand.border}`,
+                                    borderTopLeftRadius: 18,
+                                    borderTopRightRadius: 18,
+                                    fontSize: 10, fontWeight: 700, color: '#64748b',
+                                    textTransform: 'uppercase', letterSpacing: 0.8,
+                                    alignItems: 'center',
+                                }}>
+                                    <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Reviewer & Review</span>
+                                    <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Location</span>
+                                    <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Stars</span>
+                                    <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Status</span>
+                                    <span style={{ minWidth: 0, textAlign: 'right' }}>Actions</span>
+                                </div>
+
+                                {loading ? (
+                                    <div style={{ padding: 48, textAlign: 'center', color: '#94a3b8' }}>Loading reviews…</div>
+                                ) : filtered.length === 0 ? (
+                                    <div style={{ padding: 48, textAlign: 'center', color: '#94a3b8' }}>
+                                        {search ? 'No reviews match your search.' : 'No reviews in this category yet.'}
+                                    </div>
+                                ) : (
+                                    filtered.map((r, index) => {
+                                        const isExpanded = expandedIds.has(r.id);
+                                        const isLast = index === filtered.length - 1;
+                                        return (
+                                            <div
+                                                key={r.id}
                                                 style={{
-                                                    background: 'none', border: 'none', color: '#64748b',
-                                                    fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                                                    display: 'flex', alignItems: 'center', gap: 4,
-                                                    padding: '4px 8px', borderRadius: 6,
+                                                    borderBottom: isLast && !isExpanded ? 'none' : '1px solid #f1f5f9',
+                                                    borderBottomLeftRadius: isLast && !isExpanded ? 18 : 0,
+                                                    borderBottomRightRadius: isLast && !isExpanded ? 18 : 0,
                                                 }}
-                                                onMouseEnter={(e) => e.currentTarget.style.color = brand.navy}
-                                                onMouseLeave={(e) => e.currentTarget.style.color = '#64748b'}
                                             >
-                                                Collapse ▲
-                                            </button>
-                                        </div>
-
-                                        {/* Full Review Text Box */}
-                                        <div style={{
-                                            background: '#ffffff',
-                                            border: '1px solid #e2e8f0',
-                                            borderRadius: 12,
-                                            padding: '16px 20px',
-                                            fontSize: 14,
-                                            lineHeight: 1.7,
-                                            color: '#1e293b',
-                                            whiteSpace: 'pre-wrap',
-                                            fontFamily: fonts.body,
-                                            boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
-                                        }}>
-                                            "{r.body}"
-                                        </div>
-
-                                        {/* Footer Meta Details & Quick Actions */}
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14, flexWrap: 'wrap', gap: 12 }}>
-                                            <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap', fontSize: 12, color: '#64748b' }}>
-                                                {r.location && (
-                                                    <span>📍 <strong>Location:</strong> {r.location}</span>
-                                                )}
-                                                {r.whatsapp && (
-                                                    <span>
-                                                        💬 <strong>WhatsApp:</strong>{' '}
-                                                        <a
-                                                            href={`https://wa.me/${r.whatsapp.replace(/\D/g, '')}`}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            style={{ color: '#16a34a', textDecoration: 'none', fontWeight: 700 }}
-                                                        >
-                                                            {r.whatsapp}
-                                                        </a>
-                                                    </span>
-                                                )}
-                                                <span><strong>Status:</strong> <ReviewStatusBadge status={r.status} /></span>
-                                            </div>
-
-                                            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                                                {r.whatsapp && (
-                                                    <a
-                                                        href={`https://wa.me/${r.whatsapp.replace(/\D/g, '')}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        style={{
-                                                            display: 'inline-flex', alignItems: 'center', gap: 5,
-                                                            padding: '6px 14px', borderRadius: 8,
-                                                            background: '#dcfce7', color: '#15803d',
-                                                            fontSize: 12, fontWeight: 700,
-                                                            textDecoration: 'none', border: '1px solid #bbf7d0',
-                                                            cursor: 'pointer',
-                                                        }}
-                                                    >
-                                                        💬 Message on WhatsApp
-                                                    </a>
-                                                )}
-                                                {r.status !== 'approved' && (
-                                                    <button
-                                                        onClick={() => quickStatus(r.id, 'approved')}
-                                                        disabled={actionLoading[r.id]}
-                                                        style={{
-                                                            padding: '6px 14px', borderRadius: 8,
-                                                            border: '1px solid #86efac', background: '#d1fae5', color: '#047857',
-                                                            fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                                                        }}
-                                                    >
-                                                        ✓ Approve
-                                                    </button>
-                                                )}
-                                                {r.status !== 'rejected' && (
-                                                    <button
-                                                        onClick={() => quickStatus(r.id, 'rejected')}
-                                                        disabled={actionLoading[r.id]}
-                                                        style={{
-                                                            padding: '6px 14px', borderRadius: 8,
-                                                            border: '1px solid #fca5a5', background: '#fee2e2', color: '#b91c1c',
-                                                            fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                                                        }}
-                                                    >
-                                                        ✕ Reject
-                                                    </button>
-                                                )}
-                                                {r.status !== 'pending' && (
-                                                    <button
-                                                        onClick={() => quickStatus(r.id, 'pending')}
-                                                        disabled={actionLoading[r.id]}
-                                                        style={{
-                                                            padding: '6px 14px', borderRadius: 8,
-                                                            border: '1px solid #fcd34d', background: '#fef3c7', color: '#b45309',
-                                                            fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                                                        }}
-                                                    >
-                                                        ⏳ Mark Pending
-                                                    </button>
-                                                )}
-                                                <button
-                                                    onClick={() => setStatusTarget(r)}
+                                                {/* Row Header / Summary */}
+                                                <div
+                                                    onClick={() => toggleExpand(r.id)}
                                                     style={{
-                                                        padding: '6px 14px', borderRadius: 8,
-                                                        border: '1px solid #bfdbfe', background: '#dbeafe', color: '#1e40af',
-                                                        fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                                                        display: 'grid',
+                                                        gridTemplateColumns: 'minmax(0, 2.2fr) minmax(0, 1fr) 75px 105px 165px',
+                                                        gap: 12,
+                                                        padding: '15px 20px',
+                                                        alignItems: 'center',
+                                                        background: isExpanded ? '#f8fafc' : '#fff',
+                                                        cursor: 'pointer',
+                                                        transition: 'background 0.15s',
                                                     }}
                                                 >
-                                                    ⇄ Set Status
-                                                </button>
+                                                    {/* Reviewer Name, WhatsApp & Body Preview */}
+                                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, minWidth: 0 }}>
+                                                        <span style={{
+                                                            color: '#94a3b8', fontSize: 11, marginTop: 7, userSelect: 'none',
+                                                            transform: isExpanded ? 'rotate(90deg)' : 'none',
+                                                            transition: 'transform 0.15s', display: 'inline-block', flexShrink: 0,
+                                                        }}>
+                                                            ▶
+                                                        </span>
+                                                        <div style={{
+                                                            width: 36, height: 36, borderRadius: 10,
+                                                            background: brand.navy, color: '#fff',
+                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                            fontWeight: 800, fontSize: 13, flexShrink: 0,
+                                                        }}>
+                                                            {initials(r.name)}
+                                                        </div>
+                                                        <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                                                                <span style={{ fontWeight: 700, color: brand.navy, fontSize: 13.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>
+                                                                    {r.name}
+                                                                </span>
+                                                                {r.whatsapp && (
+                                                                    <a
+                                                                        href={`https://wa.me/${r.whatsapp.replace(/\D/g, '')}`}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        onClick={(e) => e.stopPropagation()}
+                                                                        title="Chat with reviewer on WhatsApp"
+                                                                        style={{
+                                                                            display: 'inline-flex', alignItems: 'center', gap: 3,
+                                                                            fontSize: 10.5, fontWeight: 700, color: '#16a34a',
+                                                                            background: '#dcfce7', padding: '1px 6px', borderRadius: 6,
+                                                                            textDecoration: 'none', maxWidth: '100%', overflow: 'hidden',
+                                                                            textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                                                                        }}
+                                                                    >
+                                                                        💬 {r.whatsapp}
+                                                                    </a>
+                                                                )}
+                                                            </div>
+                                                            <div style={{
+                                                                fontSize: 12, color: '#64748b',
+                                                                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                                                                marginTop: 2, fontStyle: 'italic',
+                                                            }}>
+                                                                "{r.body}"
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Location */}
+                                                    <div style={{ fontSize: 13, color: '#475569', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                        {r.location || <span style={{ color: '#cbd5e1' }}>—</span>}
+                                                    </div>
+
+                                                    {/* Stars */}
+                                                    <div style={{ minWidth: 0, flexShrink: 0 }}>
+                                                        <StarRow stars={r.stars} />
+                                                    </div>
+
+                                                    {/* Status */}
+                                                    <div style={{ minWidth: 0, flexShrink: 0 }}>
+                                                        <ReviewStatusBadge status={r.status} />
+                                                    </div>
+
+                                                    {/* Actions */}
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6, minWidth: 0, flexShrink: 0 }}>
+                                                        {r.whatsapp && (
+                                                            <a
+                                                                href={`https://wa.me/${r.whatsapp.replace(/\D/g, '')}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                                title={`Send WhatsApp message to ${r.name}`}
+                                                                style={{
+                                                                    display: 'inline-flex', alignItems: 'center', gap: 4,
+                                                                    padding: '5px 10px', borderRadius: 8,
+                                                                    background: '#dcfce7', color: '#15803d',
+                                                                    fontSize: 11.5, fontWeight: 700,
+                                                                    textDecoration: 'none', border: '1px solid #bbf7d0',
+                                                                    cursor: 'pointer', transition: 'all 0.15s', whiteSpace: 'nowrap', flexShrink: 0,
+                                                                }}
+                                                            >
+                                                                💬 Message
+                                                            </a>
+                                                        )}
+                                                        <ActionsDropdown
+                                                            review={r}
+                                                            onApprove={() => quickStatus(r.id, 'approved')}
+                                                            onReject={() => quickStatus(r.id, 'rejected')}
+                                                            onMarkPending={() => quickStatus(r.id, 'pending')}
+                                                            onChangeStatus={() => setStatusTarget(r)}
+                                                            onDelete={() => handleDelete(r.id, r.name)}
+                                                            onToggleExpand={() => toggleExpand(r.id)}
+                                                            isExpanded={isExpanded}
+                                                            loading={!!actionLoading[r.id]}
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                {/* Expanded Full Review Text Drawer */}
+                                                {isExpanded && (
+                                                    <div style={{
+                                                        padding: '0 20px 20px 48px',
+                                                        background: '#f8fafc',
+                                                        borderTop: '1px dashed #e2e8f0',
+                                                        borderBottomLeftRadius: isLast ? 18 : 0,
+                                                        borderBottomRightRadius: isLast ? 18 : 0,
+                                                    }}>
+                                                        <div style={{
+                                                            display: 'flex',
+                                                            justifyContent: 'space-between',
+                                                            alignItems: 'center',
+                                                            padding: '12px 0 8px',
+                                                        }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                                <span style={{
+                                                                    fontSize: 11, fontWeight: 700,
+                                                                    color: '#64748b', textTransform: 'uppercase',
+                                                                    letterSpacing: 0.8,
+                                                                }}>
+                                                                    Complete Verified Testimonial
+                                                                </span>
+                                                                {r.created_at && (
+                                                                    <>
+                                                                        <span style={{ color: '#cbd5e1' }}>•</span>
+                                                                        <span style={{ fontSize: 12, color: '#94a3b8' }}>
+                                                                            Submitted on {new Date(r.created_at).toLocaleDateString('en-AE', {
+                                                                                month: 'short',
+                                                                                day: 'numeric',
+                                                                                year: 'numeric',
+                                                                                hour: '2-digit',
+                                                                                minute: '2-digit'
+                                                                            })}
+                                                                        </span>
+                                                                    </>
+                                                                )}
+                                                            </div>
+
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => toggleExpand(r.id)}
+                                                                style={{
+                                                                    background: 'none', border: 'none', color: '#64748b',
+                                                                    fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                                                                    display: 'flex', alignItems: 'center', gap: 4,
+                                                                    padding: '4px 8px', borderRadius: 6,
+                                                                }}
+                                                                onMouseEnter={(e) => e.currentTarget.style.color = brand.navy}
+                                                                onMouseLeave={(e) => e.currentTarget.style.color = '#64748b'}
+                                                            >
+                                                                Collapse ▲
+                                                            </button>
+                                                        </div>
+
+                                                        {/* Full Review Text Box */}
+                                                        <div style={{
+                                                            background: '#ffffff',
+                                                            border: '1px solid #e2e8f0',
+                                                            borderRadius: 12,
+                                                            padding: '16px 20px',
+                                                            fontSize: 14,
+                                                            lineHeight: 1.7,
+                                                            color: '#1e293b',
+                                                            whiteSpace: 'pre-wrap',
+                                                            fontFamily: fonts.body,
+                                                            boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                                                        }}>
+                                                            "{r.body}"
+                                                        </div>
+
+                                                        {/* Footer Meta Details & Quick Actions */}
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14, flexWrap: 'wrap', gap: 12 }}>
+                                                            <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap', fontSize: 12, color: '#64748b' }}>
+                                                                {r.location && (
+                                                                    <span>📍 <strong>Location:</strong> {r.location}</span>
+                                                                )}
+                                                                {r.whatsapp && (
+                                                                    <span>
+                                                                        💬 <strong>WhatsApp:</strong>{' '}
+                                                                        <a
+                                                                            href={`https://wa.me/${r.whatsapp.replace(/\D/g, '')}`}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            style={{ color: '#16a34a', textDecoration: 'none', fontWeight: 700 }}
+                                                                        >
+                                                                            {r.whatsapp}
+                                                                        </a>
+                                                                    </span>
+                                                                )}
+                                                                <span><strong>Status:</strong> <ReviewStatusBadge status={r.status} /></span>
+                                                            </div>
+
+                                                            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                                                                {r.whatsapp && (
+                                                                    <a
+                                                                        href={`https://wa.me/${r.whatsapp.replace(/\D/g, '')}`}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        style={{
+                                                                            display: 'inline-flex', alignItems: 'center', gap: 5,
+                                                                            padding: '6px 14px', borderRadius: 8,
+                                                                            background: '#dcfce7', color: '#15803d',
+                                                                            fontSize: 12, fontWeight: 700,
+                                                                            textDecoration: 'none', border: '1px solid #bbf7d0',
+                                                                            cursor: 'pointer',
+                                                                        }}
+                                                                    >
+                                                                        💬 Message on WhatsApp
+                                                                    </a>
+                                                                )}
+                                                                {r.status !== 'approved' && (
+                                                                    <button
+                                                                        onClick={() => quickStatus(r.id, 'approved')}
+                                                                        disabled={actionLoading[r.id]}
+                                                                        style={{
+                                                                            padding: '6px 14px', borderRadius: 8,
+                                                                            border: '1px solid #86efac', background: '#d1fae5', color: '#047857',
+                                                                            fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                                                                        }}
+                                                                    >
+                                                                        ✓ Approve
+                                                                    </button>
+                                                                )}
+                                                                {r.status !== 'rejected' && (
+                                                                    <button
+                                                                        onClick={() => quickStatus(r.id, 'rejected')}
+                                                                        disabled={actionLoading[r.id]}
+                                                                        style={{
+                                                                            padding: '6px 14px', borderRadius: 8,
+                                                                            border: '1px solid #fca5a5', background: '#fee2e2', color: '#b91c1c',
+                                                                            fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                                                                        }}
+                                                                    >
+                                                                        ✕ Reject
+                                                                    </button>
+                                                                )}
+                                                                {r.status !== 'pending' && (
+                                                                    <button
+                                                                        onClick={() => quickStatus(r.id, 'pending')}
+                                                                        disabled={actionLoading[r.id]}
+                                                                        style={{
+                                                                            padding: '6px 14px', borderRadius: 8,
+                                                                            border: '1px solid #fcd34d', background: '#fef3c7', color: '#b45309',
+                                                                            fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                                                                        }}
+                                                                    >
+                                                                        ⏳ Mark Pending
+                                                                    </button>
+                                                                )}
+                                                                <button
+                                                                    onClick={() => setStatusTarget(r)}
+                                                                    style={{
+                                                                        padding: '6px 14px', borderRadius: 8,
+                                                                        border: '1px solid #bfdbfe', background: '#dbeafe', color: '#1e40af',
+                                                                        fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                                                                    }}
+                                                                >
+                                                                    ⇄ Set Status
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
-                                        </div>
-                                    </div>
+                                        );
+                                    })
                                 )}
                             </div>
-                        );
-                    })
-                )}
+                        </>
+                    )}
+                </div>
             </div>
 
-            {/* Status Modal */}
+            {/* Status Modal for Reviews */}
             {statusTarget && (
                 <ReviewStatusModal
                     review={statusTarget}
