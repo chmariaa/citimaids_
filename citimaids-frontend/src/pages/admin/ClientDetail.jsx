@@ -150,6 +150,24 @@ export default function ClientDetail() {
 
     return (
         <div style={{ fontFamily: fonts.body }}>
+            <style>{`
+                @media (max-width: 1024px) {
+                    .client-detail-grid {
+                        grid-template-columns: 1fr !important;
+                    }
+                }
+                @media (max-width: 640px) {
+                    .client-detail-subgrid {
+                        grid-template-columns: 1fr !important;
+                    }
+                    .client-detail-subgrid > div {
+                        grid-column: span 1 !important;
+                    }
+                    .client-detail-card {
+                        padding: 20px 16px !important;
+                    }
+                }
+            `}</style>
             {/* Toast */}
             {toast && (
                 <div style={{
@@ -224,13 +242,13 @@ export default function ClientDetail() {
             </div>
 
             {/* Content Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: 24, alignItems: 'start' }}>
+            <div className="client-detail-grid" style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: 24, alignItems: 'start' }}>
 
                 {/* Left Column */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
                     {/* Client Information */}
-                    <div style={{ ...card, padding: '26px 28px' }}>
+                    <div className="client-detail-card" style={{ ...card, padding: '26px 28px' }}>
                         <h3 style={{ fontSize: 16, fontWeight: 800, color: brand.navy, margin: '0 0 20px', fontFamily: fonts.heading }}>
                             Client Information
                         </h3>
@@ -246,7 +264,7 @@ export default function ClientDetail() {
                             </div>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+                        <div className="client-detail-subgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                             <FieldItem
                                 icon={
                                     <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -298,9 +316,9 @@ export default function ClientDetail() {
                                 No bookings found for this client.
                             </div>
                         ) : (
-                            <div>
+                            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
                                 {/* Table Rows Scroll Container */}
-                                <div style={{ maxHeight: 380, overflowY: 'auto' }}>
+                                <div style={{ minWidth: 640, maxHeight: 380, overflowY: 'auto' }}>
                                     {client.bookings.map((booking, i) => {
                                         const statusColor = {
                                             pending: { bg: '#fef9c3', text: '#854d0e' },

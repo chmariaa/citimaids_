@@ -539,61 +539,63 @@ export default function Reviews() {
                             </div>
 
                             {/* Reviews Table */}
-                            <div style={{ ...card, overflow: 'visible', width: '100%', minWidth: 0 }}>
-                                {/* Column headers */}
-                                <div style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'minmax(0, 2.2fr) minmax(0, 1fr) 75px 105px 165px',
-                                    gap: 12,
-                                    padding: '12px 20px',
-                                    background: brand.softBg,
-                                    borderBottom: `1px solid ${brand.border}`,
-                                    borderTopLeftRadius: 18,
-                                    borderTopRightRadius: 18,
-                                    fontSize: 10, fontWeight: 700, color: '#64748b',
-                                    textTransform: 'uppercase', letterSpacing: 0.8,
-                                    alignItems: 'center',
-                                }}>
-                                    <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Reviewer & Review</span>
-                                    <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Location</span>
-                                    <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Stars</span>
-                                    <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Status</span>
-                                    <span style={{ minWidth: 0, textAlign: 'right' }}>Actions</span>
-                                </div>
+                            <div style={{ ...card, overflow: 'hidden', width: '100%' }}>
+                                <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                                    <div style={{ minWidth: 740 }}>
+                                        {/* Column headers */}
+                                        <div style={{
+                                            display: 'grid',
+                                            gridTemplateColumns: 'minmax(240px, 2.2fr) minmax(130px, 1fr) 80px 105px 165px',
+                                            gap: 12,
+                                            padding: '12px 20px',
+                                            background: brand.softBg,
+                                            borderBottom: `1px solid ${brand.border}`,
+                                            borderTopLeftRadius: 18,
+                                            borderTopRightRadius: 18,
+                                            fontSize: 10, fontWeight: 700, color: '#64748b',
+                                            textTransform: 'uppercase', letterSpacing: 0.8,
+                                            alignItems: 'center',
+                                        }}>
+                                            <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Reviewer & Review</span>
+                                            <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Location</span>
+                                            <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Stars</span>
+                                            <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Status</span>
+                                            <span style={{ minWidth: 0, textAlign: 'right' }}>Actions</span>
+                                        </div>
 
-                                {loading ? (
-                                    <div style={{ padding: 48, textAlign: 'center', color: '#94a3b8' }}>Loading reviews…</div>
-                                ) : filtered.length === 0 ? (
-                                    <div style={{ padding: 48, textAlign: 'center', color: '#94a3b8' }}>
-                                        {search ? 'No reviews match your search.' : 'No reviews in this category yet.'}
-                                    </div>
-                                ) : (
-                                    filtered.map((r, index) => {
-                                        const isExpanded = expandedIds.has(r.id);
-                                        const isLast = index === filtered.length - 1;
-                                        return (
-                                            <div
-                                                key={r.id}
-                                                style={{
-                                                    borderBottom: isLast && !isExpanded ? 'none' : '1px solid #f1f5f9',
-                                                    borderBottomLeftRadius: isLast && !isExpanded ? 18 : 0,
-                                                    borderBottomRightRadius: isLast && !isExpanded ? 18 : 0,
-                                                }}
-                                            >
-                                                {/* Row Header / Summary */}
-                                                <div
-                                                    onClick={() => toggleExpand(r.id)}
-                                                    style={{
-                                                        display: 'grid',
-                                                        gridTemplateColumns: 'minmax(0, 2.2fr) minmax(0, 1fr) 75px 105px 165px',
-                                                        gap: 12,
-                                                        padding: '15px 20px',
-                                                        alignItems: 'center',
-                                                        background: isExpanded ? '#f8fafc' : '#fff',
-                                                        cursor: 'pointer',
-                                                        transition: 'background 0.15s',
-                                                    }}
-                                                >
+                                        {loading ? (
+                                            <div style={{ padding: 48, textAlign: 'center', color: '#94a3b8' }}>Loading reviews…</div>
+                                        ) : filtered.length === 0 ? (
+                                            <div style={{ padding: 48, textAlign: 'center', color: '#94a3b8' }}>
+                                                {search ? 'No reviews match your search.' : 'No reviews in this category yet.'}
+                                            </div>
+                                        ) : (
+                                            filtered.map((r, index) => {
+                                                const isExpanded = expandedIds.has(r.id);
+                                                const isLast = index === filtered.length - 1;
+                                                return (
+                                                    <div
+                                                        key={r.id}
+                                                        style={{
+                                                            borderBottom: isLast && !isExpanded ? 'none' : '1px solid #f1f5f9',
+                                                            borderBottomLeftRadius: isLast && !isExpanded ? 18 : 0,
+                                                            borderBottomRightRadius: isLast && !isExpanded ? 18 : 0,
+                                                        }}
+                                                    >
+                                                        {/* Row Header / Summary */}
+                                                        <div
+                                                            onClick={() => toggleExpand(r.id)}
+                                                            style={{
+                                                                display: 'grid',
+                                                                gridTemplateColumns: 'minmax(240px, 2.2fr) minmax(130px, 1fr) 80px 105px 165px',
+                                                                gap: 12,
+                                                                padding: '15px 20px',
+                                                                alignItems: 'center',
+                                                                background: isExpanded ? '#f8fafc' : '#fff',
+                                                                cursor: 'pointer',
+                                                                transition: 'background 0.15s',
+                                                            }}
+                                                        >
                                                     {/* Reviewer Name, WhatsApp & Body Preview */}
                                                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, minWidth: 0 }}>
                                                         <span style={{
@@ -863,6 +865,8 @@ export default function Reviews() {
                                         );
                                     })
                                 )}
+                                    </div>
+                                </div>
                             </div>
                         </>
                     )}

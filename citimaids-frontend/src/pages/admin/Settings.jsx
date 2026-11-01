@@ -96,6 +96,52 @@ export default function Settings() {
 
     return (
         <div style={{ fontFamily: "'Inter', -apple-system, sans-serif" }}>
+            <style>{`
+                @media (max-width: 1024px) {
+                    .settings-layout-grid {
+                        grid-template-columns: 1fr !important;
+                    }
+                    .settings-subnav-sidebar {
+                        display: flex !important;
+                        flex-direction: row !important;
+                        overflow-x: auto !important;
+                        white-space: nowrap !important;
+                        gap: 6px !important;
+                        padding: 6px !important;
+                        -webkit-overflow-scrolling: touch !important;
+                    }
+                    .settings-subnav-sidebar button {
+                        width: auto !important;
+                        flex-shrink: 0 !important;
+                        border-left: none !important;
+                        border-bottom: 3px solid transparent !important;
+                        margin-bottom: 0 !important;
+                        padding: 8px 14px !important;
+                    }
+                    .settings-subnav-sidebar button.tab-active {
+                        border-left: none !important;
+                        border-bottom: 3px solid #3b82f6 !important;
+                    }
+                }
+                @media (max-width: 768px) {
+                    .settings-form-row-4 {
+                        grid-template-columns: repeat(2, 1fr) !important;
+                    }
+                    .settings-form-row-3 {
+                        grid-template-columns: 1fr !important;
+                    }
+                    .settings-card-pad {
+                        padding: 16px !important;
+                    }
+                }
+                @media (max-width: 600px) {
+                    .settings-form-row-4,
+                    .settings-form-row-2 {
+                        grid-template-columns: 1fr !important;
+                    }
+                }
+            `}</style>
+
             {toast && (
                 <div style={{
                     position: 'fixed', top: 24, right: 24, zIndex: 9999,
@@ -112,11 +158,11 @@ export default function Settings() {
             </div>
 
             {/* Layout */}
-            <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: 20, alignItems: 'start' }}>
+            <div className="settings-layout-grid" style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: 20, alignItems: 'start' }}>
                 {/* Sidebar */}
-                <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 8 }}>
+                <div className="settings-subnav-sidebar" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 8 }}>
                     {TABS.map(t => (
-                        <button key={t.id} onClick={() => changeTab(t.id)} style={{
+                        <button key={t.id} onClick={() => changeTab(t.id)} className={activeTab === t.id ? 'tab-active' : ''} style={{
                             width: '100%', textAlign: 'left', padding: '11px 14px', border: 'none', borderRadius: 8,
                             background: activeTab === t.id ? '#eff6ff' : 'transparent',
                             cursor: 'pointer', marginBottom: 2, display: 'flex', alignItems: 'center', gap: 10,
@@ -195,7 +241,7 @@ function GeneralSettings({ showToast }) {
         <form onSubmit={handleSave}>
             <SettingsCard title="General Settings" subtitle="Update your business information and branding.">
                 <SectionHeader>BUSINESS INFORMATION</SectionHeader>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                <div className="settings-form-row-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
                     <Field label="Business Name">
                         <input value={form.business_name} onChange={e => setForm({ ...form, business_name: e.target.value })} style={inputStyle} />
                     </Field>
@@ -203,7 +249,7 @@ function GeneralSettings({ showToast }) {
                         <input value={form.contact_number} onChange={e => setForm({ ...form, contact_number: formatUAEPhone(e.target.value) })} style={inputStyle} />
                     </Field>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                <div className="settings-form-row-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
                     <Field label="Business Email">
                         <input type="email" value={form.business_email} onChange={e => setForm({ ...form, business_email: e.target.value })} style={inputStyle} />
                     </Field>
@@ -211,7 +257,7 @@ function GeneralSettings({ showToast }) {
                         <input value={form.additional_number || ''} onChange={e => setForm({ ...form, additional_number: formatUAEPhone(e.target.value) })} style={inputStyle} placeholder="Optional" />
                     </Field>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                <div className="settings-form-row-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
                     <Field label="Additional Email">
                         <input type="email" value={form.additional_email || ''} onChange={e => setForm({ ...form, additional_email: e.target.value })} style={inputStyle} placeholder="Optional" />
                     </Field>
@@ -229,7 +275,7 @@ function GeneralSettings({ showToast }) {
                 </div>
 
                 <SectionHeader>PREFERENCES</SectionHeader>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 8 }}>
+                <div className="settings-form-row-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 8 }}>
                     <Field label="Time Zone">
                         <select value={form.timezone} onChange={e => setForm({ ...form, timezone: e.target.value })} style={{ ...inputStyle, cursor: 'pointer' }}>
                             <option value="Asia/Manila">(GMT+08:00) Asia/Manila</option>
@@ -295,7 +341,7 @@ function ProfileSettings({ showToast }) {
                         <button type="button" style={{ fontSize: 12, color: '#3b82f6', border: 'none', background: 'none', cursor: 'pointer', padding: 0, marginTop: 4 }}>Change avatar</button>
                     </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+                <div className="settings-form-row-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
                     <Field label="Full Name">
                         <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={inputStyle} />
                     </Field>
@@ -305,7 +351,7 @@ function ProfileSettings({ showToast }) {
                 </div>
 
                 <SectionHeader>CHANGE PASSWORD</SectionHeader>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 8 }}>
+                <div className="settings-form-row-3" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 8 }}>
                     <Field label="Current Password">
                         <input type="password" placeholder="••••••••" value={form.current_password} onChange={e => setForm({ ...form, current_password: e.target.value })} style={inputStyle} />
                     </Field>
@@ -366,43 +412,47 @@ function AdminAccounts({ showToast }) {
                     <button onClick={() => setAddModal(true)} style={saveBtn}>+ Add Admin</button>
                 </div>
                 <div style={{ border: '1px solid #e2e8f0', borderRadius: 10, overflow: 'hidden' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr 80px', padding: '12px 20px', background: '#fafbfc', borderBottom: '1px solid #e2e8f0' }}>
-                        {['ADMIN', 'ROLE', 'LAST LOGIN', 'STATUS', 'ACTIONS'].map(h => (
-                            <span key={h} style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.8 }}>{h}</span>
-                        ))}
-                    </div>
-                    {admins.map((admin, i) => (
-                        <div key={admin.id} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr 80px', padding: '16px 20px', borderBottom: '1px solid #f1f5f9', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                <div style={{ width: 36, height: 36, borderRadius: '50%', background: i === 0 ? '#3b82f6' : '#8b5cf6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700 }}>
-                                    {admin.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                                </div>
-                                <div>
-                                    <div style={{ fontSize: 14, fontWeight: 600, color: '#1a1f37' }}>{admin.name}</div>
-                                    <div style={{ fontSize: 12, color: '#94a3b8' }}>{admin.email}</div>
-                                </div>
+                    <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                        <div style={{ minWidth: 620 }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr 80px', padding: '12px 20px', background: '#fafbfc', borderBottom: '1px solid #e2e8f0' }}>
+                                {['ADMIN', 'ROLE', 'LAST LOGIN', 'STATUS', 'ACTIONS'].map(h => (
+                                    <span key={h} style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.8 }}>{h}</span>
+                                ))}
                             </div>
-                            <span style={{ fontSize: 12, fontWeight: 600, color: '#3b82f6', background: '#eff6ff', padding: '3px 10px', borderRadius: 6, width: 'fit-content' }}>{admin.role}</span>
-                            <span style={{ fontSize: 13, color: '#64748b' }}>{admin.last_login}</span>
-                            <span style={{ fontSize: 12, fontWeight: 600, color: '#10b981', background: '#d1fae5', padding: '3px 10px', borderRadius: 6, width: 'fit-content' }}>Active</span>
-                            <div style={{ display: 'flex', gap: 6 }}>
-                                <SmallBtn title="Edit" icon={
-                                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
-                                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
-                                    </svg>
-                                } />
-                                {i !== 0 && (
-                                    <SmallBtn title="Delete" icon={
-                                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                            <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" />
-                                            <path d="M10 11v6M14 11v6M9 6V4h6v2" />
-                                        </svg>
-                                    } onClick={() => showToast('Admin removed.', 'error')} />
-                                )}
-                            </div>
+                            {admins.map((admin, i) => (
+                                <div key={admin.id} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr 80px', padding: '16px 20px', borderBottom: '1px solid #f1f5f9', alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                        <div style={{ width: 36, height: 36, borderRadius: '50%', background: i === 0 ? '#3b82f6' : '#8b5cf6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700 }}>
+                                            {admin.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                                        </div>
+                                        <div>
+                                            <div style={{ fontSize: 14, fontWeight: 600, color: '#1a1f37' }}>{admin.name}</div>
+                                            <div style={{ fontSize: 12, color: '#94a3b8' }}>{admin.email}</div>
+                                        </div>
+                                    </div>
+                                    <span style={{ fontSize: 12, fontWeight: 600, color: '#3b82f6', background: '#eff6ff', padding: '3px 10px', borderRadius: 6, width: 'fit-content' }}>{admin.role}</span>
+                                    <span style={{ fontSize: 13, color: '#64748b' }}>{admin.last_login}</span>
+                                    <span style={{ fontSize: 12, fontWeight: 600, color: '#10b981', background: '#d1fae5', padding: '3px 10px', borderRadius: 6, width: 'fit-content' }}>Active</span>
+                                    <div style={{ display: 'flex', gap: 6 }}>
+                                        <SmallBtn title="Edit" icon={
+                                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                                                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                            </svg>
+                                        } />
+                                        {i !== 0 && (
+                                            <SmallBtn title="Delete" icon={
+                                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                                    <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" />
+                                                    <path d="M10 11v6M14 11v6M9 6V4h6v2" />
+                                                </svg>
+                                            } onClick={() => showToast('Admin removed.', 'error')} />
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                    ))}
+                    </div>
                 </div>
             </SettingsCard>
         </div>
@@ -430,27 +480,29 @@ function BookingStatuses({ showToast }) {
 
     return (
         <SettingsCard title="Booking Statuses" subtitle="Configure booking status labels and colors.">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 24 }}>
-                {statuses.map(s => (
-                    <div key={s.id} style={{ display: 'grid', gridTemplateColumns: '40px 1fr 1fr 160px', gap: 16, alignItems: 'center', padding: '16px 20px', border: '1px solid #e2e8f0', borderRadius: 10, borderLeft: `4px solid ${s.color}` }}>
-                        <span style={{ width: 14, height: 14, borderRadius: '50%', background: s.color, display: 'inline-block', boxShadow: `0 0 8px ${s.color}60` }} />
-                        <input
-                            value={s.label}
-                            onChange={e => handleLabelChange(s.id, e.target.value)}
-                            style={{ ...inputStyle, fontWeight: 600, color: s.color }}
-                        />
-                        <input
-                            value={s.description}
-                            onChange={e => setStatuses(prev => prev.map(x => x.id === s.id ? { ...x, description: e.target.value } : x))}
-                            style={{ ...inputStyle, fontSize: 13, color: '#64748b' }}
-                        />
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <input type="color" value={s.color} onChange={e => handleColorChange(s.id, e.target.value)}
-                                style={{ width: 36, height: 36, border: 'none', background: 'none', cursor: 'pointer', borderRadius: 6 }} />
-                            <span style={{ fontSize: 12, color: '#64748b' }}>{s.color}</span>
+            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                <div style={{ minWidth: 540, display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 24 }}>
+                    {statuses.map(s => (
+                        <div key={s.id} style={{ display: 'grid', gridTemplateColumns: '40px 1fr 1fr 160px', gap: 16, alignItems: 'center', padding: '16px 20px', border: '1px solid #e2e8f0', borderRadius: 10, borderLeft: `4px solid ${s.color}` }}>
+                            <span style={{ width: 14, height: 14, borderRadius: '50%', background: s.color, display: 'inline-block', boxShadow: `0 0 8px ${s.color}60` }} />
+                            <input
+                                value={s.label}
+                                onChange={e => handleLabelChange(s.id, e.target.value)}
+                                style={{ ...inputStyle, fontWeight: 600, color: s.color }}
+                            />
+                            <input
+                                value={s.description}
+                                onChange={e => setStatuses(prev => prev.map(x => x.id === s.id ? { ...x, description: e.target.value } : x))}
+                                style={{ ...inputStyle, fontSize: 13, color: '#64748b' }}
+                            />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <input type="color" value={s.color} onChange={e => handleColorChange(s.id, e.target.value)}
+                                    style={{ width: 36, height: 36, border: 'none', background: 'none', cursor: 'pointer', borderRadius: 6 }} />
+                                <span style={{ fontSize: 12, color: '#64748b' }}>{s.color}</span>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <button onClick={() => showToast('Booking statuses saved!')} style={saveBtn}>Save Changes</button>
@@ -482,25 +534,29 @@ function BookingForm({ showToast }) {
 
     return (
         <SettingsCard title="Booking Form" subtitle="Configure which fields appear on the customer booking form.">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px', gap: 0, marginBottom: 8 }}>
-                <span style={thStyle}>FORM FIELD</span>
-                <span style={{ ...thStyle, textAlign: 'center' }}>ENABLED</span>
-                <span style={{ ...thStyle, textAlign: 'center' }}>REQUIRED</span>
-            </div>
-            {fields.map(f => (
-                <div key={f.id} style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px', gap: 0, padding: '14px 0', borderBottom: '1px solid #f1f5f9', alignItems: 'center' }}>
-                    <div>
-                        <div style={{ fontSize: 14, fontWeight: 500, color: '#1a1f37' }}>{f.label}</div>
-                        {f.locked && <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>Required system field</div>}
+            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                <div style={{ minWidth: 420 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px', gap: 0, marginBottom: 8 }}>
+                        <span style={thStyle}>FORM FIELD</span>
+                        <span style={{ ...thStyle, textAlign: 'center' }}>ENABLED</span>
+                        <span style={{ ...thStyle, textAlign: 'center' }}>REQUIRED</span>
                     </div>
-                    <div style={{ textAlign: 'center' }}>
-                        <Toggle on={f.enabled} disabled={f.locked} onToggle={() => toggle(f.id, 'enabled')} />
-                    </div>
-                    <div style={{ textAlign: 'center' }}>
-                        <Toggle on={f.required} disabled={f.locked || !f.enabled} onToggle={() => toggle(f.id, 'required')} />
-                    </div>
+                    {fields.map(f => (
+                        <div key={f.id} style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px', gap: 0, padding: '14px 0', borderBottom: '1px solid #f1f5f9', alignItems: 'center' }}>
+                            <div>
+                                <div style={{ fontSize: 14, fontWeight: 500, color: '#1a1f37' }}>{f.label}</div>
+                                {f.locked && <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>Required system field</div>}
+                            </div>
+                            <div style={{ textAlign: 'center' }}>
+                                <Toggle on={f.enabled} disabled={f.locked} onToggle={() => toggle(f.id, 'enabled')} />
+                            </div>
+                            <div style={{ textAlign: 'center' }}>
+                                <Toggle on={f.required} disabled={f.locked || !f.enabled} onToggle={() => toggle(f.id, 'required')} />
+                            </div>
+                        </div>
+                    ))}
                 </div>
-            ))}
+            </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 20 }}>
                 <button onClick={() => showToast('Booking form configuration saved!')} style={saveBtn}>Save Changes</button>
             </div>
@@ -664,21 +720,25 @@ function SecuritySettings({ showToast }) {
             {/* Login History */}
             <SettingsCard title="Login History" subtitle="Recent login attempts to your admin account.">
                 <div style={{ border: '1px solid #e2e8f0', borderRadius: 10, overflow: 'hidden' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1.2fr 80px', padding: '12px 20px', background: '#fafbfc', borderBottom: '1px solid #e2e8f0' }}>
-                        {['DEVICE', 'IP ADDRESS', 'TIME', 'RESULT'].map(h => (
-                            <span key={h} style={thStyle}>{h}</span>
-                        ))}
-                    </div>
-                    {loginHistory.map((l, i) => (
-                        <div key={i} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1.2fr 80px', padding: '14px 20px', borderBottom: '1px solid #f1f5f9', alignItems: 'center' }}>
-                            <span style={{ fontSize: 14, color: '#1a1f37' }}>{l.device}</span>
-                            <span style={{ fontSize: 13, color: '#64748b', fontFamily: 'monospace' }}>{l.ip}</span>
-                            <span style={{ fontSize: 13, color: '#64748b' }}>{l.time}</span>
-                            <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 6, width: 'fit-content', background: l.status === 'success' ? '#d1fae5' : '#fee2e2', color: l.status === 'success' ? '#10b981' : '#ef4444' }}>
-                                {l.status === 'success' ? '✓ Success' : '✗ Failed'}
-                            </span>
+                    <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                        <div style={{ minWidth: 520 }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1.2fr 80px', padding: '12px 20px', background: '#fafbfc', borderBottom: '1px solid #e2e8f0' }}>
+                                {['DEVICE', 'IP ADDRESS', 'TIME', 'RESULT'].map(h => (
+                                    <span key={h} style={thStyle}>{h}</span>
+                                ))}
+                            </div>
+                            {loginHistory.map((l, i) => (
+                                <div key={i} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1.2fr 80px', padding: '14px 20px', borderBottom: '1px solid #f1f5f9', alignItems: 'center' }}>
+                                    <span style={{ fontSize: 14, color: '#1a1f37' }}>{l.device}</span>
+                                    <span style={{ fontSize: 13, color: '#64748b', fontFamily: 'monospace' }}>{l.ip}</span>
+                                    <span style={{ fontSize: 13, color: '#64748b' }}>{l.time}</span>
+                                    <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 6, width: 'fit-content', background: l.status === 'success' ? '#d1fae5' : '#fee2e2', color: l.status === 'success' ? '#10b981' : '#ef4444' }}>
+                                        {l.status === 'success' ? '✓ Success' : '✗ Failed'}
+                                    </span>
+                                </div>
+                            ))}
                         </div>
-                    ))}
+                    </div>
                 </div>
             </SettingsCard>
         </div>
@@ -708,7 +768,7 @@ function SystemPreferences({ showToast }) {
     return (
         <SettingsCard title="System Preferences" subtitle="Configure global system behavior and display settings.">
             <SectionHeader>LOCALIZATION</SectionHeader>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 24 }}>
+            <div className="settings-form-row-3" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 24 }}>
                 <Field label="Language">
                     <select value={prefs.language} onChange={e => set('language', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
                         <option value="en">English</option>
@@ -734,7 +794,7 @@ function SystemPreferences({ showToast }) {
             </div>
 
             <SectionHeader>PAGINATION & DISPLAY</SectionHeader>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+            <div className="settings-form-row-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
                 <Field label="Items Per Page">
                     <select value={prefs.items_per_page} onChange={e => set('items_per_page', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
                         {['5', '10', '25', '50', '100'].map(v => <option key={v}>{v}</option>)}
@@ -749,7 +809,7 @@ function SystemPreferences({ showToast }) {
             </div>
 
             <SectionHeader>BOOKING RULES</SectionHeader>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 24 }}>
+            <div className="settings-form-row-3" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 24 }}>
                 <Field label="Max Bookings Per Day">
                     <input type="number" value={prefs.max_bookings_per_day} onChange={e => set('max_bookings_per_day', e.target.value)} style={inputStyle} />
                 </Field>
@@ -790,7 +850,7 @@ function SystemPreferences({ showToast }) {
 /* ─────────────────────────────────────────────── */
 function SettingsCard({ title, subtitle, children }) {
     return (
-        <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 28 }}>
+        <div className="settings-card-pad" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 28 }}>
             <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1a1f37', margin: '0 0 4px' }}>{title}</h2>
             <p style={{ fontSize: 13, color: '#64748b', margin: '0 0 24px' }}>{subtitle}</p>
             {children}

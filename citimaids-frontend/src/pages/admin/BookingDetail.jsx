@@ -168,6 +168,24 @@ export default function BookingDetail() {
 
     return (
         <div style={{ fontFamily: fonts.body }}>
+            <style>{`
+                @media (max-width: 1024px) {
+                    .booking-detail-grid {
+                        grid-template-columns: 1fr !important;
+                    }
+                }
+                @media (max-width: 640px) {
+                    .booking-detail-subgrid {
+                        grid-template-columns: 1fr !important;
+                    }
+                    .booking-detail-subgrid > div {
+                        grid-column: span 1 !important;
+                    }
+                    .booking-detail-card {
+                        padding: 20px 16px !important;
+                    }
+                }
+            `}</style>
             {/* Toast */}
             {toast && (
                 <div style={{
@@ -267,11 +285,11 @@ export default function BookingDetail() {
             </div>
 
             {/* Content Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: 24, alignItems: 'start' }}>
+            <div className="booking-detail-grid" style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: 24, alignItems: 'start' }}>
                 {/* Left Column */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                     {/* Client Information */}
-                    <div style={{ ...card, padding: '26px 28px' }}>
+                    <div className="booking-detail-card" style={{ ...card, padding: '26px 28px' }}>
                         <h3 style={{ fontSize: 16, fontWeight: 800, color: brand.navy, margin: '0 0 20px', fontFamily: fonts.heading }}>
                             Client Information
                         </h3>
@@ -287,7 +305,7 @@ export default function BookingDetail() {
                             </div>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+                        <div className="booking-detail-subgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                             <FieldItem
                                 icon={
                                     <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -321,11 +339,11 @@ export default function BookingDetail() {
                     </div>
 
                     {/* Booking Details */}
-                    <div style={{ ...card, padding: '26px 28px' }}>
+                    <div className="booking-detail-card" style={{ ...card, padding: '26px 28px' }}>
                         <h3 style={{ fontSize: 16, fontWeight: 800, color: brand.navy, margin: '0 0 20px', fontFamily: fonts.heading }}>
                             Service & Schedule
                         </h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+                        <div className="booking-detail-subgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                             <FieldItem
                                 icon={
                                     <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">

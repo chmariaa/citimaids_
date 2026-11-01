@@ -62,6 +62,69 @@ export default function Reports() {
 
     return (
         <div style={{ fontFamily: fonts.body }}>
+            <style>{`
+                .reports-layout-grid {
+                    display: grid;
+                    grid-template-columns: 220px minmax(0, 1fr);
+                    gap: 24px;
+                    align-items: start;
+                }
+                .reports-subnav-sidebar {
+                    padding: 10px;
+                }
+                .reports-grid4 {
+                    display: grid;
+                    grid-template-columns: repeat(4, 1fr);
+                    gap: 16px;
+                }
+                .reports-grid3 {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 16px;
+                }
+                .reports-grid2 {
+                    display: grid;
+                    gap: 20px;
+                }
+
+                @media (max-width: 1100px) {
+                    .reports-layout-grid {
+                        grid-template-columns: 1fr;
+                        gap: 16px;
+                    }
+                    .reports-subnav-sidebar {
+                        display: flex !important;
+                        flex-direction: row !important;
+                        gap: 8px !important;
+                        overflow-x: auto !important;
+                    }
+                    .reports-subnav-sidebar button {
+                        flex: 1 1 0 !important;
+                        min-width: 170px !important;
+                        margin-bottom: 0 !important;
+                    }
+                    .reports-grid4 {
+                        grid-template-columns: repeat(2, 1fr);
+                    }
+                    .reports-grid3 {
+                        grid-template-columns: repeat(2, 1fr);
+                    }
+                }
+                @media (max-width: 640px) {
+                    .reports-grid4 {
+                        grid-template-columns: 1fr;
+                        gap: 12px;
+                    }
+                    .reports-grid3 {
+                        grid-template-columns: 1fr;
+                        gap: 12px;
+                    }
+                    .reports-grid2 {
+                        grid-template-columns: 1fr !important;
+                        gap: 16px;
+                    }
+                }
+            `}</style>
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28, flexWrap: 'wrap', gap: 16 }}>
                 <div>
@@ -82,9 +145,9 @@ export default function Reports() {
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: 24, alignItems: 'start' }}>
+            <div className="reports-layout-grid">
                 {/* Sidebar */}
-                <div style={{ ...card, padding: 10 }}>
+                <div className="reports-subnav-sidebar" style={{ ...card }}>
                     {TABS.map(t => {
                         const act = t.id === active;
                         return (
@@ -210,19 +273,23 @@ function BookingsPanel({ d }) {
 
             {/* Recent bookings */}
             <Pane title="Recent Bookings in Period" sub="Latest 10 bookings from selected date range">
-                {recent.length === 0 ? <Empty /> : recent.map((b, i) => (
-                    <div key={b.id} style={{ display: 'grid', gridTemplateColumns: '80px 1fr 120px 110px', gap: 12, padding: '11px 0', borderBottom: i < recent.length - 1 ? '1px solid #f1f5f9' : 'none', alignItems: 'center' }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8' }}>#{String(b.id).padStart(4, '0')}</span>
-                        <div>
-                            <div style={{ fontSize: 13, fontWeight: 700, color: brand.navy }}>{b.client?.name || '—'}</div>
-                            <div style={{ fontSize: 11, color: '#94a3b8' }}>{b.service?.name}</div>
-                        </div>
-                        <div style={{ fontSize: 12, color: '#64748b' }}>
-                            {b.preferred_date ? new Date(b.preferred_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
-                        </div>
-                        <span style={statusBadge(b.status)}>{b.status?.charAt(0).toUpperCase() + b.status?.slice(1)}</span>
+                <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                    <div style={{ minWidth: 460 }}>
+                        {recent.length === 0 ? <Empty /> : recent.map((b, i) => (
+                            <div key={b.id} style={{ display: 'grid', gridTemplateColumns: '80px 1fr 120px 110px', gap: 12, padding: '11px 0', borderBottom: i < recent.length - 1 ? '1px solid #f1f5f9' : 'none', alignItems: 'center' }}>
+                                <span style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8' }}>#{String(b.id).padStart(4, '0')}</span>
+                                <div>
+                                    <div style={{ fontSize: 13, fontWeight: 700, color: brand.navy }}>{b.client?.name || '—'}</div>
+                                    <div style={{ fontSize: 11, color: '#94a3b8' }}>{b.service?.name}</div>
+                                </div>
+                                <div style={{ fontSize: 12, color: '#64748b' }}>
+                                    {b.preferred_date ? new Date(b.preferred_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
+                                </div>
+                                <span style={statusBadge(b.status)}>{b.status?.charAt(0).toUpperCase() + b.status?.slice(1)}</span>
+                            </div>
+                        ))}
                     </div>
-                ))}
+                </div>
             </Pane>
         </Col>
     );
@@ -382,31 +449,35 @@ function ServicesPanel({ d }) {
 
             {/* Services table */}
             <div style={{ ...card, overflow: 'hidden' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 80px 80px 90px 100px 80px', gap: 12, padding: '12px 24px', background: brand.softBg, borderBottom: `1px solid ${brand.border}` }}>
-                    {['SERVICE', 'BOOKINGS', 'COMPLETED', 'COMP.RATE', 'REVENUE', 'SHARE'].map(h => (
-                        <span key={h} style={{ fontSize: 10, fontWeight: 700, color: '#64748b', letterSpacing: .6 }}>{h}</span>
-                    ))}
-                </div>
-                {svcs.length === 0 ? <Empty /> : svcs.map((svc, i) => (
-                    <div key={svc.id} style={{ display: 'grid', gridTemplateColumns: '1.8fr 80px 80px 90px 100px 80px', gap: 12, padding: '14px 24px', borderBottom: '1px solid #f1f5f9', alignItems: 'center' }}
-                        onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
-                        onMouseLeave={e => e.currentTarget.style.background = '#fff'}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <span style={{ width: 10, height: 10, borderRadius: '50%', background: PAL[i % PAL.length], flexShrink: 0 }} />
-                            <div>
-                                <div style={{ fontSize: 13, fontWeight: 700, color: brand.navy }}>{svc.name}</div>
-                                <div style={{ height: 4, background: '#f1f5f9', borderRadius: 4, overflow: 'hidden', width: 80, marginTop: 3 }}>
-                                    <div style={{ height: '100%', width: `${Math.round((svc.total_bookings / maxBk) * 100)}%`, background: PAL[i % PAL.length], borderRadius: 4 }} />
-                                </div>
-                            </div>
+                <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                    <div style={{ minWidth: 640 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 80px 80px 90px 100px 80px', gap: 12, padding: '12px 24px', background: brand.softBg, borderBottom: `1px solid ${brand.border}` }}>
+                            {['SERVICE', 'BOOKINGS', 'COMPLETED', 'COMP.RATE', 'REVENUE', 'SHARE'].map(h => (
+                                <span key={h} style={{ fontSize: 10, fontWeight: 700, color: '#64748b', letterSpacing: .6 }}>{h}</span>
+                            ))}
                         </div>
-                        <span style={num}>{svc.total_bookings}</span>
-                        <span style={{ ...num, color: '#059669' }}>{svc.completed_bookings}</span>
-                        <span style={{ ...num, color: svc.completion_rate >= 70 ? '#059669' : svc.completion_rate >= 40 ? '#d97706' : '#dc2626' }}>{pct(svc.completion_rate)}</span>
-                        <span style={num}>{AED(svc.revenue)}</span>
-                        <span style={{ ...num, color: '#64748b' }}>{pct(svc.booking_share)}</span>
+                        {svcs.length === 0 ? <Empty /> : svcs.map((svc, i) => (
+                            <div key={svc.id} style={{ display: 'grid', gridTemplateColumns: '1.8fr 80px 80px 90px 100px 80px', gap: 12, padding: '14px 24px', borderBottom: '1px solid #f1f5f9', alignItems: 'center' }}
+                                onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
+                                onMouseLeave={e => e.currentTarget.style.background = '#fff'}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                    <span style={{ width: 10, height: 10, borderRadius: '50%', background: PAL[i % PAL.length], flexShrink: 0 }} />
+                                    <div>
+                                        <div style={{ fontSize: 13, fontWeight: 700, color: brand.navy }}>{svc.name}</div>
+                                        <div style={{ height: 4, background: '#f1f5f9', borderRadius: 4, overflow: 'hidden', width: 80, marginTop: 3 }}>
+                                            <div style={{ height: '100%', width: `${Math.round((svc.total_bookings / maxBk) * 100)}%`, background: PAL[i % PAL.length], borderRadius: 4 }} />
+                                        </div>
+                                    </div>
+                                </div>
+                                <span style={num}>{svc.total_bookings}</span>
+                                <span style={{ ...num, color: '#059669' }}>{svc.completed_bookings}</span>
+                                <span style={{ ...num, color: svc.completion_rate >= 70 ? '#059669' : svc.completion_rate >= 40 ? '#d97706' : '#dc2626' }}>{pct(svc.completion_rate)}</span>
+                                <span style={num}>{AED(svc.revenue)}</span>
+                                <span style={{ ...num, color: '#64748b' }}>{pct(svc.booking_share)}</span>
+                            </div>
+                        ))}
                     </div>
-                ))}
+                </div>
             </div>
         </Col>
     );
@@ -470,10 +541,10 @@ function RevenuePanel({ d }) {
    SHARED MINI-COMPONENTS
 ═══════════════════════════════════════════════════════════ */
 function Col({ children }) { return <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>{children}</div>; }
-function Grid4({ children }) { return <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16 }}>{children}</div>; }
-function Grid3({ children }) { return <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>{children}</div>; }
+function Grid4({ children }) { return <div className="reports-grid4">{children}</div>; }
+function Grid3({ children }) { return <div className="reports-grid3">{children}</div>; }
 function Grid2({ children, left = '1fr', right = '1fr' }) {
-    return <div style={{ display: 'grid', gridTemplateColumns: `${left} ${right}`, gap: 20 }}>{children}</div>;
+    return <div className="reports-grid2" style={{ gridTemplateColumns: `${left} ${right}` }}>{children}</div>;
 }
 
 function Pane({ title, sub, children }) {

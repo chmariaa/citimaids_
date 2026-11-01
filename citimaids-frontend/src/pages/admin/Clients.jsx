@@ -279,8 +279,8 @@ export default function Clients() {
             </div>
 
             {/* Search & Actions */}
-            <div style={{ display: 'flex', gap: 10, margin: '20px 0 20px', alignItems: 'flex-start' }}>
-                <div style={{ position: 'relative', flex: 1, maxWidth: 440 }}>
+            <div style={{ display: 'flex', gap: 10, margin: '20px 0 20px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{ position: 'relative', flex: '1 1 260px', minWidth: 200, maxWidth: 440 }}>
                     <div style={{ ...searchBar, maxWidth: '100%' }}>
                         <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#94a3b8" strokeWidth="2">
                             <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
@@ -336,15 +336,23 @@ export default function Clients() {
 
             {/* Table */}
             <div style={{ ...card, overflow: 'hidden' }}>
-                {/* Header */}
-                <div style={tableHeaderStyle}>
-                    <ColHead>CLIENT</ColHead>
-                    <ColHead>CONTACT</ColHead>
-                    <ColHead>EMAIL</ColHead>
-                    <ColHead>TOTAL BOOKINGS</ColHead>
-                    <ColHead>LAST BOOKING</ColHead>
-                    <ColHead style={{ textAlign: 'right' }}>ACTIONS</ColHead>
-                </div>
+                <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                    <div style={{ minWidth: 880 }}>
+                        {/* Header */}
+                        <div style={tableHeaderStyle}>
+                            <ColHead style={{
+                                position: 'sticky',
+                                left: 0,
+                                background: brand.softBg,
+                                zIndex: 3,
+                                boxShadow: '3px 0 8px rgba(0,0,0,0.05)',
+                            }}>CLIENT</ColHead>
+                            <ColHead>CONTACT</ColHead>
+                            <ColHead>EMAIL</ColHead>
+                            <ColHead>TOTAL BOOKINGS</ColHead>
+                            <ColHead>LAST BOOKING</ColHead>
+                            <ColHead style={{ textAlign: 'right' }}>ACTIONS</ColHead>
+                        </div>
 
                 {/* Body */}
                 {loading ? (
@@ -376,7 +384,17 @@ export default function Clients() {
                                 onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
                                 onMouseLeave={e => e.currentTarget.style.background = '#fff'}>
                                 {/* Client */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                <div style={{
+                                    position: 'sticky',
+                                    left: 0,
+                                    background: 'inherit',
+                                    zIndex: 2,
+                                    boxShadow: '3px 0 8px rgba(0,0,0,0.05)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 12,
+                                    paddingRight: 8,
+                                }}>
                                     <div style={avatarToken(color, 38)}>{initials}</div>
                                     <div>
                                         <div style={{ fontSize: 14, fontWeight: 600, color: brand.navy }}>{client.name}</div>
@@ -433,6 +451,8 @@ export default function Clients() {
                         );
                     })
                 )}
+                    </div>
+                </div>
 
                 {/* Pagination */}
                 {totalPages > 1 && (
@@ -551,15 +571,16 @@ function PageBtn({ label, active, disabled, onClick }) {
 }
 
 const tableHeaderStyle = {
-    display: 'grid', gridTemplateColumns: '1.8fr 1.3fr 1.6fr 130px 130px 110px',
+    display: 'grid', gridTemplateColumns: 'minmax(200px, 1.8fr) minmax(140px, 1.3fr) minmax(170px, 1.6fr) 120px 120px 110px',
     padding: '14px 24px', borderBottom: `1px solid ${brand.border}`, background: brand.softBg,
     alignItems: 'center', gap: 16,
 };
 
 const tableRowStyle = {
-    display: 'grid', gridTemplateColumns: '1.8fr 1.3fr 1.6fr 130px 130px 110px',
+    display: 'grid', gridTemplateColumns: 'minmax(200px, 1.8fr) minmax(140px, 1.3fr) minmax(170px, 1.6fr) 120px 120px 110px',
     padding: '16px 24px', borderBottom: '1px solid #f1f5f9',
     alignItems: 'center', gap: 16, transition: 'background 0.15s',
+    background: '#fff',
 };
 
 function HoverBtn({ children, onClick, base, hoverStyle }) {

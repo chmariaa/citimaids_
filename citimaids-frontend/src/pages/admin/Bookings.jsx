@@ -858,14 +858,16 @@ export default function Bookings() {
 
             {/* Bookings Table */}
             <div style={{ ...card, overflow: 'hidden' }}>
-                {/* Table Header */}
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: '95px 1.25fr 1.15fr 1.1fr 125px 155px',
-                    padding: '14px 24px',
-                    borderBottom: `1px solid ${brand.border}`,
-                    background: brand.softBg,
-                }}>
+                <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                    <div style={{ minWidth: 800 }}>
+                        {/* Table Header */}
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: '95px 1.25fr 1.15fr 1.1fr 125px 155px',
+                            padding: '14px 24px',
+                            borderBottom: `1px solid ${brand.border}`,
+                            background: brand.softBg,
+                        }}>
                     {['BOOKING ID', 'CLIENT', 'SERVICE', 'PREFERRED DATE', 'STATUS', 'ACTIONS'].map(h => (
                         <span key={h} style={{
                             fontSize: 10, fontWeight: 700, color: '#64748b',
@@ -1099,6 +1101,8 @@ export default function Bookings() {
                         );
                     })
                 )}
+                    </div>
+                </div>
 
                 {/* Pagination */}
                 {meta.last_page > 1 && (
