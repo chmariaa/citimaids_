@@ -697,12 +697,14 @@ export default function Services() {
                 )}
 
                 {/* Table Header */}
-                <div style={{
-                    ...thRow,
-                    gridTemplateColumns: reorderMode
-                        ? '28px 1.8fr 130px 110px 105px 92px'
-                        : '1.8fr 130px 110px 105px 92px',
-                }}>
+                <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                    <div style={{ minWidth: 680 }}>
+                        <div style={{
+                            ...thRow,
+                            gridTemplateColumns: reorderMode
+                                ? '28px 1.8fr 130px 110px 105px 92px'
+                                : '1.8fr 130px 110px 105px 92px',
+                        }}>
                     {reorderMode && <span />}
                     <Th>SERVICE</Th>
                     <Th>CATEGORY</Th>
@@ -775,6 +777,8 @@ export default function Services() {
                         )}
                     </div>
                 )}
+                    </div>
+                </div>
 
                 {/* Footer Info */}
                 <div style={{

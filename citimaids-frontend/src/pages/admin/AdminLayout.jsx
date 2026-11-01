@@ -1,4 +1,5 @@
-import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { NavLink, Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 const navItems = [
@@ -15,6 +16,22 @@ const navItems = [
 export default function AdminLayout() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+
+    // Auto-close mobile drawer on route change
+    useEffect(() => {
+        setSidebarOpen(false);
+    }, [location.pathname]);
+
+    // Close on Escape key
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') setSidebarOpen(false);
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
 
     const handleLogout = async () => {
         await logout();
@@ -22,21 +39,109 @@ export default function AdminLayout() {
     };
 
     return (
-        <div style={{ display: 'flex', minHeight: '100vh', background: '#f8fafc', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
-            {/* Sidebar */}
-            <aside style={{
-                width: 250,
-                background: 'linear-gradient(180deg, #0A2342 0%, #061429 100%)',
-                display: 'flex',
-                flexDirection: 'column',
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                bottom: 0,
-                zIndex: 50,
-                borderRight: '1px solid rgba(255,255,255,0.08)',
-                boxShadow: '4px 0 24px rgba(0,0,0,0.12)',
-            }}>
+        <div style={{ display: 'flex', minHeight: '100vh', background: '#f8fafc', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif", width: '100%', overflowX: 'hidden' }}>
+            <style>{`
+                .admin-desktop-sidebar {
+                    width: 250px;
+                    background: linear-gradient(180deg, #0A2342 0%, #061429 100%);
+                    display: flex;
+                    flex-direction: column;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    bottom: 0;
+                    z-index: 150;
+                    border-right: 1px solid rgba(255,255,255,0.08);
+                    box-shadow: 4px 0 24px rgba(0,0,0,0.12);
+                    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+                .admin-main-wrapper {
+                    flex: 1;
+                    margin-left: 250px;
+                    min-height: 100vh;
+                    background: #f8fafc;
+                    min-width: 0;
+                    display: flex;
+                    flex-direction: column;
+                }
+                .admin-main-content {
+                    flex: 1;
+                    padding: 32px 36px;
+                    min-width: 0;
+                    box-sizing: border-box;
+                }
+                .admin-mobile-header {
+                    display: none;
+                }
+                .admin-sidebar-backdrop {
+                    display: none;
+                }
+                .admin-mobile-close-btn {
+                    display: none;
+                }
+
+                @media (max-width: 1024px) {
+                    .admin-desktop-sidebar {
+                        transform: translateX(-100%);
+                        width: 280px;
+                        box-shadow: 10px 0 40px rgba(0,0,0,0.4);
+                        z-index: 200;
+                    }
+                    .admin-desktop-sidebar.open {
+                        transform: translateX(0);
+                    }
+                    .admin-main-wrapper {
+                        margin-left: 0 !important;
+                        width: 100% !important;
+                    }
+                    .admin-main-content {
+                        padding: 18px 16px !important;
+                        width: 100% !important;
+                    }
+                    .admin-mobile-header {
+                        display: flex !important;
+                        align-items: center;
+                        justify-content: space-between;
+                        padding: 12px 16px;
+                        background: #0A2342;
+                        border-bottom: 1px solid rgba(255,255,255,0.1);
+                        position: sticky;
+                        top: 0;
+                        z-index: 100;
+                        box-shadow: 0 4px 16px rgba(10,35,66,0.18);
+                    }
+                    .admin-sidebar-backdrop {
+                        display: block !important;
+                        position: fixed;
+                        inset: 0;
+                        background: rgba(6, 20, 41, 0.65);
+                        backdrop-filter: blur(4px);
+                        z-index: 180;
+                        opacity: 0;
+                        pointer-events: none;
+                        transition: opacity 0.25s ease;
+                    }
+                    .admin-sidebar-backdrop.open {
+                        opacity: 1;
+                        pointer-events: auto;
+                    }
+                    .admin-mobile-close-btn {
+                        display: inline-flex !important;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                }
+            `}</style>
+
+            {/* Backdrop for mobile drawer */}
+            <div
+                className={`admin-sidebar-backdrop ${sidebarOpen ? 'open' : ''}`}
+                onClick={() => setSidebarOpen(false)}
+                aria-hidden="true"
+            />
+
+            {/* Sidebar Navigation */}
+            <aside className={`admin-desktop-sidebar ${sidebarOpen ? 'open' : ''}`}>
                 {/* Brand Header */}
                 <div style={{
                     padding: '24px 20px',
@@ -58,10 +163,26 @@ export default function AdminLayout() {
                             flexShrink: 0,
                         }}
                     />
-                    <div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ color: '#fff', fontWeight: 800, fontSize: 16, letterSpacing: 0.8, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>CITIMAIDS</div>
                         <div style={{ color: '#93c5fd', fontSize: 11, fontWeight: 600, letterSpacing: 0.5 }}>Staff Portal</div>
                     </div>
+                    <button
+                        onClick={() => setSidebarOpen(false)}
+                        style={{
+                            background: 'rgba(255,255,255,0.08)',
+                            border: '1px solid rgba(255,255,255,0.15)',
+                            borderRadius: 8,
+                            color: '#93c5fd',
+                            padding: '6px 10px',
+                            cursor: 'pointer',
+                            fontSize: 14,
+                        }}
+                        className="admin-mobile-close-btn"
+                        aria-label="Close sidebar"
+                    >
+                        ✕
+                    </button>
                 </div>
 
                 {/* Live Customer Website Shortcut */}
@@ -70,6 +191,7 @@ export default function AdminLayout() {
                         to="/"
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={() => setSidebarOpen(false)}
                         style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -102,6 +224,7 @@ export default function AdminLayout() {
                         <NavLink
                             key={item.path}
                             to={item.path}
+                            onClick={() => setSidebarOpen(false)}
                             style={({ isActive }) => ({
                                 display: 'flex',
                                 alignItems: 'center',
@@ -175,10 +298,88 @@ export default function AdminLayout() {
                 </div>
             </aside>
 
-            {/* Main Content Area */}
-            <main style={{ flex: 1, marginLeft: 250, padding: '32px 36px', minHeight: '100vh', background: '#f8fafc', minWidth: 0 }}>
-                <Outlet />
-            </main>
+            {/* Main Wrapper */}
+            <div className="admin-main-wrapper">
+                {/* Mobile Header Bar */}
+                <header className="admin-mobile-header">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <button
+                            onClick={() => setSidebarOpen(!sidebarOpen)}
+                            style={{
+                                background: 'rgba(255,255,255,0.08)',
+                                border: '1px solid rgba(255,255,255,0.15)',
+                                borderRadius: 10,
+                                color: '#fff',
+                                padding: '8px 10px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                            }}
+                            aria-label="Toggle navigation drawer"
+                        >
+                            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <img
+                                src="/images/citimaids-badge.png"
+                                alt="Logo"
+                                style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }}
+                            />
+                            <span style={{ color: '#fff', fontWeight: 800, fontSize: 14, letterSpacing: 0.5, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                                CITIMAIDS <span style={{ color: '#93c5fd', fontSize: 11, fontWeight: 600 }}>Portal</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Link
+                            to="/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                                color: '#93c5fd',
+                                padding: '6px 10px',
+                                borderRadius: 8,
+                                background: 'rgba(255,255,255,0.08)',
+                                fontSize: 11.5,
+                                fontWeight: 600,
+                                textDecoration: 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 4,
+                            }}
+                        >
+                            <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#34d399' }} />
+                            Live Site
+                        </Link>
+                        {user && (
+                            <div style={{
+                                width: 30,
+                                height: 30,
+                                borderRadius: '50%',
+                                background: '#1E3A8A',
+                                border: '1px solid #3b82f6',
+                                color: '#fff',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: 11,
+                                fontWeight: 800,
+                            }}>
+                                {user.name ? user.name.slice(0, 2).toUpperCase() : 'AD'}
+                            </div>
+                        )}
+                    </div>
+                </header>
+
+                {/* Main Content Area */}
+                <main className="admin-main-content">
+                    <Outlet />
+                </main>
+            </div>
         </div>
     );
 }

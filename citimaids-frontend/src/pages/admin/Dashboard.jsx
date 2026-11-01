@@ -148,11 +148,95 @@ export default function Dashboard() {
 
     return (
         <div style={{ fontFamily: fonts.body }}>
+            <style>{`
+                .dashboard-header-card {
+                    padding: 30px 36px;
+                }
+                .dashboard-header-title {
+                    font-size: 30px;
+                }
+                .dashboard-kpi-grid {
+                    display: grid;
+                    grid-template-columns: repeat(4, 1fr);
+                    gap: 18px;
+                    margin-bottom: 24px;
+                }
+                .dashboard-pipeline-strip {
+                    display: grid;
+                    grid-template-columns: repeat(4, 1fr);
+                    gap: 16px;
+                    align-items: center;
+                }
+                .dashboard-pipeline-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 14px;
+                    border-right: 1px solid ${brand.border};
+                    padding-right: 16px;
+                }
+                .dashboard-pipeline-item:last-child {
+                    border-right: none;
+                }
+                .dashboard-twocol-grid {
+                    display: grid;
+                    grid-template-columns: 1.8fr 1fr;
+                    gap: 24px;
+                    align-items: start;
+                }
+
+                @media (max-width: 1200px) {
+                    .dashboard-kpi-grid {
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 14px;
+                    }
+                }
+                @media (max-width: 1024px) {
+                    .dashboard-header-card {
+                        padding: 22px 20px !important;
+                    }
+                    .dashboard-header-title {
+                        font-size: 24px !important;
+                    }
+                    .dashboard-pipeline-strip {
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 14px;
+                    }
+                    .dashboard-pipeline-item {
+                        border-right: none !important;
+                        border-bottom: 1px solid #f1f5f9;
+                        padding-bottom: 10px;
+                    }
+                    .dashboard-twocol-grid {
+                        grid-template-columns: 1fr;
+                        gap: 20px;
+                    }
+                }
+                @media (max-width: 600px) {
+                    .dashboard-header-card {
+                        padding: 18px 16px !important;
+                    }
+                    .dashboard-header-title {
+                        font-size: 20px !important;
+                    }
+                    .dashboard-kpi-grid {
+                        grid-template-columns: 1fr;
+                        gap: 12px;
+                    }
+                    .dashboard-pipeline-strip {
+                        grid-template-columns: 1fr;
+                        gap: 10px;
+                    }
+                    .dashboard-recent-row {
+                        flex-direction: column !important;
+                        align-items: flex-start !important;
+                        gap: 10px !important;
+                    }
+                }
+            `}</style>
             {/* ═══ Executive Operations Command Header ═══ */}
-            <div style={{
+            <div className="dashboard-header-card" style={{
                 background: 'linear-gradient(135deg, #061429 0%, #0A2342 55%, #1E3A8A 100%)',
                 borderRadius: 22,
-                padding: '30px 36px',
                 color: '#fff',
                 marginBottom: 28,
                 boxShadow: '0 12px 36px rgba(10,35,66,0.18)',
@@ -208,8 +292,7 @@ export default function Dashboard() {
                             Abu Dhabi Operations Hub · Live Dispatch
                         </div>
 
-                        <h1 style={{
-                            fontSize: 30,
+                        <h1 className="dashboard-header-title" style={{
                             fontWeight: 800,
                             margin: '0 0 6px',
                             fontFamily: fonts.heading,
@@ -296,7 +379,7 @@ export default function Dashboard() {
             </div>
 
             {/* ═══ Primary Executive KPI Row ═══ */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 18, marginBottom: 24 }}>
+            <div className="dashboard-kpi-grid">
                 {statCards.map((c, i) => (
                     <div key={i} style={{
                         ...card,
@@ -364,24 +447,14 @@ export default function Dashboard() {
             </div>
 
             {/* ═══ Operational Pipeline Status Strip ═══ */}
-            <div style={{
+            <div className="dashboard-pipeline-strip" style={{
                 ...card,
                 padding: '16px 24px',
                 marginBottom: 28,
-                display: 'grid',
-                gridTemplateColumns: 'repeat(4, 1fr)',
-                gap: 16,
-                alignItems: 'center',
                 background: '#fff',
             }}>
                 {pipelineStages.map((st, i) => (
-                    <div key={st.label} style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 14,
-                        borderRight: i < 3 ? `1px solid ${brand.border}` : 'none',
-                        paddingRight: 16,
-                    }}>
+                    <div key={st.label} className="dashboard-pipeline-item">
                         <div style={{
                             width: 36,
                             height: 36,
@@ -409,7 +482,7 @@ export default function Dashboard() {
             </div>
 
             {/* ═══ Two-Column Operations Layout ═══ */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: 24, alignItems: 'start' }}>
+            <div className="dashboard-twocol-grid">
                 {/* ── Left Column: Recent Bookings Stream ── */}
                 <div style={{ ...card, padding: '26px 28px' }}>
                     <div style={{
@@ -487,6 +560,7 @@ export default function Dashboard() {
                                 return (
                                     <div
                                         key={b.id}
+                                        className="dashboard-recent-row"
                                         onClick={() => navigate(`/admin/bookings/${b.id}`)}
                                         style={{
                                             display: 'flex',
@@ -501,7 +575,7 @@ export default function Dashboard() {
                                         onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
                                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                                     >
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                                             <div style={avatar(avatarColor, 40)}>{initials}</div>
                                             <div>
                                                 <div style={{ fontSize: 14.5, fontWeight: 700, color: brand.navy }}>
@@ -517,7 +591,7 @@ export default function Dashboard() {
                                             </div>
                                         </div>
 
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                                             <span style={{ fontSize: 13.5, fontWeight: 800, color: brand.navy }}>
                                                 AED {b.service?.base_price ? Number(b.service.base_price).toLocaleString() : '35'}
                                             </span>

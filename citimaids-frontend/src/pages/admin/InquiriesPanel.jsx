@@ -462,75 +462,77 @@ export default function InquiriesPanel({ onPendingCountChange }) {
                 </div>
             </div>
 
-            {/* Inquiries Table Card - overflow visible so action dropdowns are never clipped */}
-            <div style={{ ...card, overflow: 'visible', width: '100%', minWidth: 0 }}>
-                {/* Header row */}
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'minmax(0, 1.4fr) minmax(145px, 1.3fr) 85px 95px 170px',
-                    gap: 12,
-                    padding: '12px 18px',
-                    background: '#f8fafc',
-                    borderBottom: '1px solid #e2e8f0',
-                    borderTopLeftRadius: 18,
-                    borderTopRightRadius: 18,
-                    fontSize: 10, fontWeight: 700, color: '#64748b',
-                    letterSpacing: 0.8, textTransform: 'uppercase',
-                    alignItems: 'center',
-                }}>
-                    <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>VISITOR & INQUIRY</span>
-                    <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>CONTACT DETAILS</span>
-                    <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>RECEIVED</span>
-                    <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>STATUS</span>
-                    <span style={{ minWidth: 0, textAlign: 'right' }}>ACTIONS</span>
-                </div>
+            {/* Inquiries Table Card */}
+            <div style={{ ...card, overflow: 'hidden', width: '100%' }}>
+                <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                    <div style={{ minWidth: 780 }}>
+                        {/* Header row */}
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'minmax(220px, 1.4fr) minmax(180px, 1.3fr) 100px 105px 170px',
+                            gap: 12,
+                            padding: '12px 18px',
+                            background: '#f8fafc',
+                            borderBottom: '1px solid #e2e8f0',
+                            borderTopLeftRadius: 18,
+                            borderTopRightRadius: 18,
+                            fontSize: 10, fontWeight: 700, color: '#64748b',
+                            letterSpacing: 0.8, textTransform: 'uppercase',
+                            alignItems: 'center',
+                        }}>
+                            <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>VISITOR & INQUIRY</span>
+                            <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>CONTACT DETAILS</span>
+                            <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>RECEIVED</span>
+                            <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>STATUS</span>
+                            <span style={{ minWidth: 0, textAlign: 'right' }}>ACTIONS</span>
+                        </div>
 
-                {/* Content */}
-                {loading ? (
-                    <div style={{ padding: '60px 0', textAlign: 'center', color: '#94a3b8' }}>
-                        Loading customer inquiries…
-                    </div>
-                ) : filtered.length === 0 ? (
-                    <div style={{ padding: '60px 0', textAlign: 'center', color: '#94a3b8' }}>
-                        {search ? 'No inquiries matching your search.' : 'No customer inquiries in this tab.'}
-                    </div>
-                ) : (
-                    filtered.map((inq, index) => {
-                        const isExpanded = expandedIds.has(inq.id);
-                        const cleanPhone = (inq.phone || '').replace(/\D/g, '');
-                        const hasPhone = cleanPhone.length >= 7;
+                        {/* Content */}
+                        {loading ? (
+                            <div style={{ padding: '60px 0', textAlign: 'center', color: '#94a3b8' }}>
+                                Loading customer inquiries…
+                            </div>
+                        ) : filtered.length === 0 ? (
+                            <div style={{ padding: '60px 0', textAlign: 'center', color: '#94a3b8' }}>
+                                {search ? 'No inquiries matching your search.' : 'No customer inquiries in this tab.'}
+                            </div>
+                        ) : (
+                            filtered.map((inq, index) => {
+                                const isExpanded = expandedIds.has(inq.id);
+                                const cleanPhone = (inq.phone || '').replace(/\D/g, '');
+                                const hasPhone = cleanPhone.length >= 7;
 
-                        const waText = encodeURIComponent(
-                            `Hi ${inq.name}! Thank you for reaching out to CitiMaids. Regarding your inquiry: "${inq.message.slice(0, 50)}..."`
-                        );
-                        const waUrl = hasPhone ? `https://wa.me/${cleanPhone}?text=${waText}` : null;
-                        const mailtoUrl = `mailto:${inq.email}?subject=${encodeURIComponent(`CitiMaids Inquiry - ${inq.name}`)}`;
-                        const isLast = index === filtered.length - 1;
+                                const waText = encodeURIComponent(
+                                    `Hi ${inq.name}! Thank you for reaching out to CitiMaids. Regarding your inquiry: "${inq.message.slice(0, 50)}..."`
+                                );
+                                const waUrl = hasPhone ? `https://wa.me/${cleanPhone}?text=${waText}` : null;
+                                const mailtoUrl = `mailto:${inq.email}?subject=${encodeURIComponent(`CitiMaids Inquiry - ${inq.name}`)}`;
+                                const isLast = index === filtered.length - 1;
 
-                        return (
-                            <div
-                                key={inq.id}
-                                style={{
-                                    borderBottom: isLast && !isExpanded ? 'none' : '1px solid #f1f5f9',
-                                    background: isExpanded ? '#f8fafc' : '#fff',
-                                    borderBottomLeftRadius: isLast && !isExpanded ? 18 : 0,
-                                    borderBottomRightRadius: isLast && !isExpanded ? 18 : 0,
-                                    transition: 'background 0.15s',
-                                    position: 'relative',
-                                }}
-                            >
-                                {/* Main Clickable Row */}
-                                <div
-                                    onClick={() => toggleExpand(inq.id)}
-                                    style={{
-                                        display: 'grid',
-                                        gridTemplateColumns: 'minmax(0, 1.4fr) minmax(145px, 1.3fr) 85px 95px 170px',
-                                        gap: 12,
-                                        padding: '15px 18px',
-                                        alignItems: 'center',
-                                        cursor: 'pointer',
-                                    }}
-                                >
+                                return (
+                                    <div
+                                        key={inq.id}
+                                        style={{
+                                            borderBottom: isLast && !isExpanded ? 'none' : '1px solid #f1f5f9',
+                                            background: isExpanded ? '#f8fafc' : '#fff',
+                                            borderBottomLeftRadius: isLast && !isExpanded ? 18 : 0,
+                                            borderBottomRightRadius: isLast && !isExpanded ? 18 : 0,
+                                            transition: 'background 0.15s',
+                                            position: 'relative',
+                                        }}
+                                    >
+                                        {/* Main Clickable Row */}
+                                        <div
+                                            onClick={() => toggleExpand(inq.id)}
+                                            style={{
+                                                display: 'grid',
+                                                gridTemplateColumns: 'minmax(220px, 1.4fr) minmax(180px, 1.3fr) 100px 105px 170px',
+                                                gap: 12,
+                                                padding: '15px 18px',
+                                                alignItems: 'center',
+                                                cursor: 'pointer',
+                                            }}
+                                        >
                                     {/* Visitor & Snippet */}
                                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, minWidth: 0 }}>
                                         <span style={{
@@ -789,6 +791,8 @@ export default function InquiriesPanel({ onPendingCountChange }) {
                         );
                     })
                 )}
+                    </div>
+                </div>
             </div>
 
             {/* Modal */}
