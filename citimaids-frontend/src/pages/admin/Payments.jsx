@@ -351,6 +351,7 @@ export default function Payments({ defaultTab = 'payments' }) {
 
     const queryParams = new URLSearchParams(location.search);
     const initialTab = queryParams.get('tab') || defaultTab;
+    const initialSearch = queryParams.get('search') || '';
 
     const [activeTab, setActiveTab] = useState(initialTab);
 
@@ -358,7 +359,20 @@ export default function Payments({ defaultTab = 'payments' }) {
     const [payments, setPayments] = useState([]);
     const [paymentsMeta, setPaymentsMeta] = useState({});
     const [paymentsLoading, setPaymentsLoading] = useState(true);
-    const [paymentSearch, setPaymentSearch] = useState('');
+    const [paymentSearch, setPaymentSearch] = useState(initialSearch);
+
+    // Sync state when location.search query parameters change
+    useEffect(() => {
+        const qp = new URLSearchParams(location.search);
+        const tab = qp.get('tab');
+        const s = qp.get('search');
+        if (tab && tab !== activeTab) {
+            setActiveTab(tab);
+        }
+        if (s != null && s !== paymentSearch) {
+            setPaymentSearch(s);
+        }
+    }, [location.search]);
     const [paymentStatusFilter, setPaymentStatusFilter] = useState('all');
     const [paymentsPage, setPaymentsPage] = useState(1);
     const [services, setServices] = useState([]);

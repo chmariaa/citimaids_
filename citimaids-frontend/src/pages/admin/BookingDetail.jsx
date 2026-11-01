@@ -86,6 +86,54 @@ export default function BookingDetail() {
     const [hoverSaveBtn, setHoverSaveBtn] = useState(false);
     const [toast, setToast] = useState(null);
     const [showManifest, setShowManifest] = useState(false);
+    const [invoiceLoading, setInvoiceLoading] = useState(false);
+
+    const handleCreateInvoice = async () => {
+        setInvoiceLoading(true);
+        try {
+            const amount = Number(booking?.total_amount) || Number(booking?.service?.base_price) || 350;
+            const res = await api.post(`/bookings/${id}/payment`, {
+                amount,
+                payment_method: 'cash',
+                notes: `Invoice generated from Booking #${id}`,
+            });
+            const newPayment = res.data?.payment;
+            if (newPayment) {
+                setBooking(prev => ({
+                    ...prev,
+                    payment: newPayment,
+                    payment_status: newPayment.status || 'unpaid',
+                }));
+                showToast(`Invoice ${newPayment.reference_number} created successfully!`, 'success');
+            }
+        } catch (err) {
+            console.error('Invoice creation error:', err);
+            const msg = err.response?.data?.message || 'Failed to create invoice.';
+            showToast(msg, 'error');
+        } finally {
+            setInvoiceLoading(false);
+        }
+    };
+
+    const handleMarkPaid = async (paymentId) => {
+        setInvoiceLoading(true);
+        try {
+            const res = await api.patch(`/payments/${paymentId}/status`, { status: 'paid' });
+            const updatedPayment = res.data?.payment;
+            setBooking(prev => ({
+                ...prev,
+                payment_status: 'paid',
+                payment: prev.payment ? { ...prev.payment, status: 'paid', paid_at: new Date().toISOString() } : updatedPayment,
+            }));
+            showToast('Invoice marked as paid!', 'success');
+        } catch (err) {
+            console.error('Mark paid error:', err);
+            const msg = err.response?.data?.message || 'Failed to update payment status.';
+            showToast(msg, 'error');
+        } finally {
+            setInvoiceLoading(false);
+        }
+    };
 
     useEffect(() => { fetchBooking(); }, [id]);
 
@@ -592,32 +640,175 @@ export default function BookingDetail() {
                         </button>
                     </div>
 
-                    {/* Financial Summary */}
+                    {/* Billing & Invoicing Card */}
                     <div style={{ ...card, padding: '24px' }}>
-                        <h3 style={{ fontSize: 15, fontWeight: 800, color: brand.navy, margin: '0 0 16px', fontFamily: fonts.heading }}>
-                            Estimated Charges
-                        </h3>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, fontSize: 13 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
-                                <span>Service Rate</span>
-                                <span style={{ fontWeight: 700, color: brand.navy }}>
-                                    AED {booking.service?.base_price ? Number(booking.service.base_price).toLocaleString() : '35'}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <div style={{
+                                    width: 30, height: 30, borderRadius: 8,
+                                    background: '#eff6ff', color: brand.royal,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                }}>
+                                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                        <rect x="2" y="4" width="20" height="16" rx="2" /><path d="M2 10h20" />
+                                    </svg>
+                                </div>
+                                <h3 style={{ fontSize: 15, fontWeight: 800, color: brand.navy, margin: 0, fontFamily: fonts.heading }}>
+                                    Billing & Invoicing
+                                </h3>
+                            </div>
+                            {booking.payment || booking.payments?.[0] ? (
+                                <span style={{
+                                    padding: '4px 10px', borderRadius: 8, fontSize: 11, fontWeight: 700, textTransform: 'uppercase',
+                                    background: (booking.payment || booking.payments[0]).status === 'paid' ? '#ecfdf5' : ((booking.payment || booking.payments[0]).status === 'unpaid' ? '#fffbeb' : '#eff6ff'),
+                                    color: (booking.payment || booking.payments[0]).status === 'paid' ? '#059669' : ((booking.payment || booking.payments[0]).status === 'unpaid' ? '#d97706' : '#2563eb'),
+                                    border: `1px solid ${(booking.payment || booking.payments[0]).status === 'paid' ? '#a7f3d0' : ((booking.payment || booking.payments[0]).status === 'unpaid' ? '#fde68a' : '#bfdbfe')}`,
+                                }}>
+                                    {(booking.payment || booking.payments[0]).status?.toUpperCase() || 'UNPAID'}
                                 </span>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
-                                <span>Inspection Guarantee</span>
-                                <span style={{ fontWeight: 700, color: '#059669' }}>Free</span>
-                            </div>
-                            <div style={{
-                                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                borderTop: `1px solid ${brand.border}`, paddingTop: 12, marginTop: 4,
-                            }}>
-                                <span style={{ fontWeight: 700, color: brand.navy }}>Total Due Upon Completion</span>
-                                <span style={{ fontSize: 18, fontWeight: 800, color: brand.navy, fontFamily: fonts.heading }}>
-                                    AED {booking.service?.base_price ? Number(booking.service.base_price).toLocaleString() : '35'}
+                            ) : (
+                                <span style={{
+                                    padding: '4px 10px', borderRadius: 8, fontSize: 11, fontWeight: 700, textTransform: 'uppercase',
+                                    background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca',
+                                }}>
+                                    NO INVOICE
                                 </span>
-                            </div>
+                            )}
                         </div>
+
+                        {booking.payment || booking.payments?.[0] ? (() => {
+                            const p = booking.payment || booking.payments[0];
+                            return (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                                    <div style={{
+                                        background: '#f8fafc',
+                                        border: `1px solid ${brand.border}`,
+                                        borderRadius: 12,
+                                        padding: '14px 16px',
+                                    }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                                            <span style={{ fontSize: 11, color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Invoice Reference</span>
+                                            <span style={{ fontSize: 12, fontFamily: 'monospace', fontWeight: 800, color: brand.navy }}>
+                                                {p.reference_number}
+                                            </span>
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                                            <span style={{ fontSize: 11, color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Payment Method</span>
+                                            <span style={{ fontSize: 12.5, fontWeight: 600, color: brand.navy, textTransform: 'capitalize' }}>
+                                                {p.payment_method?.replace(/_/g, ' ') || 'Cash on Completion'}
+                                            </span>
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 8, borderTop: '1px solid #e2e8f0' }}>
+                                            <span style={{ fontSize: 12, fontWeight: 700, color: brand.navy }}>Total Amount</span>
+                                            <span style={{ fontSize: 17, fontWeight: 800, color: brand.navy, fontFamily: fonts.heading }}>
+                                                AED {Number(p.amount || booking.total_amount || 0).toLocaleString()}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                        <button
+                                            type="button"
+                                            onClick={() => navigate(`/admin/payments?tab=payments&search=${encodeURIComponent(p.reference_number)}`)}
+                                            style={{
+                                                ...solidBtn,
+                                                width: '100%',
+                                                justifyContent: 'center',
+                                                padding: '10px 16px',
+                                                fontSize: 12.5,
+                                                background: 'linear-gradient(135deg, #0A2342 0%, #1d4ed8 100%)',
+                                                color: '#fff',
+                                                border: 'none',
+                                                boxShadow: '0 4px 14px rgba(10, 35, 66, 0.18)',
+                                            }}
+                                        >
+                                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                            </svg>
+                                            View Invoice in Billing Ledger →
+                                        </button>
+
+                                        {p.status !== 'paid' && (
+                                            <button
+                                                type="button"
+                                                disabled={invoiceLoading}
+                                                onClick={() => handleMarkPaid(p.id)}
+                                                style={{
+                                                    ...outlineBtn,
+                                                    width: '100%',
+                                                    justifyContent: 'center',
+                                                    padding: '9px 16px',
+                                                    fontSize: 12.5,
+                                                    color: '#059669',
+                                                    borderColor: '#a7f3d0',
+                                                    background: '#ecfdf5',
+                                                }}
+                                            >
+                                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                Mark Invoice as Paid
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })() : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                                <div style={{
+                                    background: '#fffbeb',
+                                    border: '1px solid #fde68a',
+                                    borderRadius: 10,
+                                    padding: '12px 14px',
+                                    fontSize: 12.5,
+                                    color: '#92400e',
+                                    lineHeight: 1.5,
+                                }}>
+                                    No invoice record has been generated for this booking yet. Create one now to manage payment collection and ledger reconciliation.
+                                </div>
+
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 13, padding: '4px 2px' }}>
+                                    <span style={{ color: '#64748b' }}>Rate Due:</span>
+                                    <span style={{ fontSize: 17, fontWeight: 800, color: brand.navy, fontFamily: fonts.heading }}>
+                                        AED {Number(booking.total_amount || booking.service?.base_price || 350).toLocaleString()}
+                                    </span>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    disabled={invoiceLoading}
+                                    onClick={handleCreateInvoice}
+                                    style={{
+                                        ...solidBtn,
+                                        width: '100%',
+                                        justifyContent: 'center',
+                                        padding: '11px 16px',
+                                        fontSize: 13,
+                                        fontWeight: 700,
+                                        background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                                        color: '#fff',
+                                        boxShadow: '0 4px 14px rgba(5, 150, 105, 0.25)',
+                                    }}
+                                >
+                                    {invoiceLoading ? (
+                                        <>
+                                            <svg style={{ animation: 'spin 1s linear infinite' }} width="14" height="14" fill="none" viewBox="0 0 24 24">
+                                                <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                                            </svg>
+                                            Creating Invoice...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                                            </svg>
+                                            Create Invoice Now
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {/* Customer Tracking & WhatsApp Dispatch Card */}
