@@ -39,6 +39,9 @@ class PaymentController extends Controller
         if ($request->filled('client_id')) {
             $query->where('client_id', $request->client_id);
         }
+        if ($request->filled('booking_id')) {
+            $query->where('booking_id', $request->booking_id);
+        }
         if ($request->filled('from')) {
             $query->whereDate('created_at', '>=', $request->from);
         }
@@ -80,29 +83,41 @@ class PaymentController extends Controller
      */
     public function createForBooking(Request $request, int $bookingId): JsonResponse
     {
-        $booking = Booking::with('client')->findOrFail($bookingId);
+        $booking = Booking::with(['client', 'service'])->findOrFail($bookingId);
+
+        // Check if invoice already exists
+        $existing = Payment::where('booking_id', $bookingId)->first();
+        if ($existing) {
+            return response()->json([
+                'message' => 'An invoice already exists for this booking.',
+                'payment' => $existing->load(['transactions', 'client', 'booking']),
+            ], 200);
+        }
 
         // Validate
         $request->validate([
-            'amount'         => 'required|numeric|min:1',
-            'payment_method' => 'required|in:adcb_pace_pay,bank_transfer,cash,card',
+            'amount'         => 'nullable|numeric|min:1',
+            'payment_method' => 'nullable|in:adcb_pace_pay,bank_transfer,cash,card',
             'notes'          => 'nullable|string|max:1000',
         ]);
+
+        $amount = (float) ($request->amount ?? $booking->total_amount ?? $booking->service?->base_price ?? 350);
+        $paymentMethod = $request->payment_method ?? 'cash';
 
         // Create payment record
         $payment = Payment::create([
             'booking_id'       => $booking->id,
             'client_id'        => $booking->client_id,
-            'amount'           => $request->amount,
+            'amount'           => $amount,
             'currency'         => 'AED',
-            'payment_method'   => $request->payment_method,
-            'status'           => 'pending',
+            'payment_method'   => $paymentMethod,
+            'status'           => 'unpaid',
             'reference_number' => Payment::generateReference(),
-            'notes'            => $request->notes,
+            'notes'            => $request->notes ?? "Invoice generated for Booking #{$booking->id}",
         ]);
 
         // If ADCB Pace Pay, generate the payment link
-        if ($request->payment_method === 'adcb_pace_pay') {
+        if ($paymentMethod === 'adcb_pace_pay') {
             $adcb   = new AdcbPacePayService();
             $result = $adcb->generatePaymentLink($payment);
 
@@ -125,15 +140,15 @@ class PaymentController extends Controller
 
         // Update booking payment info
         $booking->update([
-            'total_amount'   => $request->amount,
+            'total_amount'   => $amount,
             'payment_status' => 'unpaid',
-            'payment_method' => $request->payment_method,
+            'payment_method' => $paymentMethod,
         ]);
 
         $payment->load(['transactions', 'client', 'booking']);
 
         return response()->json([
-            'message' => 'Payment created successfully',
+            'message' => 'Invoice created successfully',
             'payment' => $payment,
         ], 201);
     }

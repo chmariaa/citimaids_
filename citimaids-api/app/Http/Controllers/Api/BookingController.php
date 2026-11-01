@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\BookingDetail;
 use App\Models\Client;
+use App\Models\Payment;
 use App\Models\Service;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 
 class BookingController extends Controller
@@ -14,7 +16,7 @@ class BookingController extends Controller
     // Public: list all bookings (admin) or with filters
     public function index(Request $request)
     {
-        $query = Booking::with(['client', 'service', 'processedBy']);
+        $query = Booking::with(['client', 'service', 'processedBy', 'payment']);
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -128,11 +130,33 @@ class BookingController extends Controller
             'total_price' => $rateAmount,
         ]);
 
+        // Auto-generate invoice in payments table
+        $payment = Payment::create([
+            'booking_id'       => $booking->id,
+            'client_id'        => $client->id,
+            'amount'           => $rateAmount,
+            'currency'         => 'AED',
+            'payment_method'   => 'cash',
+            'status'           => 'unpaid',
+            'reference_number' => Payment::generateReference(),
+            'notes'            => "Auto-generated invoice for Booking #{$booking->id} ({$service->name})",
+        ]);
+
+        // Record initial pending charge in transactions ledger
+        Transaction::create([
+            'payment_id'           => $payment->id,
+            'type'                 => 'charge',
+            'amount'               => $rateAmount,
+            'status'               => 'pending',
+            'description'          => "Initial booking charge for Booking #{$booking->id}",
+            'processed_by_user_id' => $request->user()?->id,
+        ]);
+
         return response()->json([
             'message'    => 'Booking request submitted successfully.',
             'booking_id' => $booking->id,
             'reference'  => 'CM-' . str_pad($booking->id, 5, '0', STR_PAD_LEFT),
-            'booking'    => $booking->load(['client', 'service']),
+            'booking'    => $booking->load(['client', 'service', 'payment']),
         ], 201);
     }
 
@@ -262,7 +286,14 @@ class BookingController extends Controller
 
     public function show($id)
     {
-        $booking = Booking::with(['client', 'service', 'processedBy', 'details.service'])->findOrFail($id);
+        $booking = Booking::with([
+            'client',
+            'service',
+            'processedBy',
+            'details.service',
+            'payment.transactions',
+            'payments.transactions',
+        ])->findOrFail($id);
         return response()->json($booking);
     }
 
