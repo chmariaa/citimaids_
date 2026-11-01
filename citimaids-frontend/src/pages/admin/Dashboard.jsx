@@ -6,6 +6,8 @@ import { brand, fonts, card, solidBtn, outlineBtn, statusBadge, idBadge, avatar 
 export default function Dashboard() {
     const [stats, setStats] = useState(null);
     const [recent, setRecent] = useState([]);
+    const [demandData, setDemandData] = useState([]);
+    const [territoryData, setTerritoryData] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
@@ -18,6 +20,12 @@ export default function Dashboard() {
             const res = await api.get('/dashboard/stats');
             setStats(res.data.stats);
             setRecent(res.data.recent_bookings || []);
+            if (res.data.demand_distribution && Array.isArray(res.data.demand_distribution)) {
+                setDemandData(res.data.demand_distribution);
+            }
+            if (res.data.top_districts && Array.isArray(res.data.top_districts)) {
+                setTerritoryData(res.data.top_districts);
+            }
         } catch (err) {
             console.error('Dashboard fetch error:', err);
         } finally {
@@ -59,11 +67,13 @@ export default function Dashboard() {
         );
     }
 
-    const totalBookings = stats?.total || 0;
+    const totalBookings = stats?.total_bookings ?? stats?.total ?? 0;
     const pendingCount = stats?.pending || 0;
     const confirmedCount = stats?.confirmed || 0;
     const completedCount = stats?.completed || 0;
-    const estimatedRevenue = (completedCount * 350) + (confirmedCount * 120);
+    const totalClients = stats?.total_clients ?? 0;
+    const realRevenue = stats?.total_revenue != null ? Number(stats.total_revenue) : ((completedCount * 350) + (confirmedCount * 120));
+    const pipelineRevenue = stats?.pipeline_revenue != null ? Number(stats.pipeline_revenue) : (confirmedCount * 120);
 
     const statCards = [
         {
@@ -73,7 +83,7 @@ export default function Dashboard() {
             accent: 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)',
             iconColor: '#2563eb',
             iconBg: '#eff6ff',
-            badge: '+12%',
+            badge: `${completedCount} completed`,
             icon: (
                 <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
@@ -82,12 +92,12 @@ export default function Dashboard() {
         },
         {
             label: 'TOTAL CLIENTS',
-            value: stats?.total || 0,
-            subtext: 'High repeat client rate in AD',
+            value: totalClients,
+            subtext: stats?.repeat_client_rate ? `${stats.repeat_client_rate}% repeat client rate` : 'Registered clients in CRM',
             accent: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
             iconColor: '#7c3aed',
             iconBg: '#f5f3ff',
-            badge: '+10%',
+            badge: stats?.new_clients_month ? `+${stats.new_clients_month} this mo` : (stats?.repeat_clients ? `${stats.repeat_clients} repeat` : 'Active'),
             icon: (
                 <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" />
@@ -110,13 +120,13 @@ export default function Dashboard() {
             ),
         },
         {
-            label: 'ESTIMATED REVENUE',
-            value: `AED ${estimatedRevenue.toLocaleString()}`,
-            subtext: 'Average AED 350 / handover',
+            label: 'COLLECTED REVENUE',
+            value: `AED ${realRevenue.toLocaleString()}`,
+            subtext: pipelineRevenue > 0 ? `AED ${pipelineRevenue.toLocaleString()} in pipeline` : 'From completed services',
             accent: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
             iconColor: '#059669',
             iconBg: '#ecfdf5',
-            badge: '+15%',
+            badge: 'Live DB',
             icon: (
                 <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -128,23 +138,27 @@ export default function Dashboard() {
     const pipelineStages = [
         { label: 'New Requests', count: pendingCount, color: '#d97706', bg: '#fffbeb' },
         { label: 'Vetted & Confirmed', count: confirmedCount, color: '#2563eb', bg: '#eff6ff' },
-        { label: 'Specialist Dispatched', count: Math.max(0, confirmedCount - 1), color: '#7c3aed', bg: '#f5f3ff' },
+        { label: 'Specialist Dispatched', count: stats?.dispatched ?? confirmedCount, color: '#7c3aed', bg: '#f5f3ff' },
         { label: 'Completed & Signed', count: completedCount, color: '#059669', bg: '#ecfdf5' },
     ];
 
-    const demandDistribution = [
+    const fallbackDemand = [
         { name: 'Home Cleaning', pct: 38, rate: 'AED 35/hr', color: '#059669' },
         { name: 'Villa Deep Care', pct: 28, rate: 'AED 80/hr', color: '#7c3aed' },
         { name: 'Move-in Handover', pct: 20, rate: 'AED 350 flat', color: '#dc2626' },
         { name: 'Office Commercial', pct: 14, rate: 'AED 45/hr', color: '#2563eb' },
     ];
 
-    const topDistricts = [
+    const demandDistribution = demandData.length > 0 ? demandData : fallbackDemand;
+
+    const fallbackDistricts = [
         { name: 'Al Reem Island', count: '42%' },
         { name: 'Saadiyat Island', count: '24%' },
         { name: 'Yas Island', count: '18%' },
         { name: 'Al Khalidiyah', count: '16%' },
     ];
+
+    const topDistricts = territoryData.length > 0 ? territoryData : fallbackDistricts;
 
     return (
         <div style={{ fontFamily: fonts.body }}>
@@ -593,7 +607,7 @@ export default function Dashboard() {
 
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                                             <span style={{ fontSize: 13.5, fontWeight: 800, color: brand.navy }}>
-                                                AED {b.service?.base_price ? Number(b.service.base_price).toLocaleString() : '35'}
+                                                AED {b.total_amount ? Number(b.total_amount).toLocaleString() : (b.service?.base_price ? Number(b.service.base_price).toLocaleString() : '35')}
                                             </span>
                                             <span style={statusBadge(b.status)}>
                                                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'currentColor' }} />
