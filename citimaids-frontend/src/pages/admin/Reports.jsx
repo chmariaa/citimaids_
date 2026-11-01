@@ -13,7 +13,14 @@ const chg = v => v == null ? '—  vs prev' : `${v >= 0 ? '+' : ''}${v}% vs prev
 const PAL = ['#2563eb', '#059669', '#7c3aed', '#d97706', '#ec4899', '#0891b2', '#dc2626', '#16a34a'];
 
 function today() { return new Date().toISOString().slice(0, 10); }
-function firstOfMonth() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`; }
+function firstOfMonth() {
+    const d = new Date();
+    if (d.getDate() === 1) {
+        d.setDate(d.getDate() - 30);
+        return d.toISOString().slice(0, 10);
+    }
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
+}
 
 const TABS = [
     { id: 'overview', label: 'Overview Report', desc: 'Cross-entity KPIs & trend' },

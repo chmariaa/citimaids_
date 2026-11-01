@@ -312,6 +312,80 @@ class BookingController extends Controller
         return response()->json(['message' => 'Status updated.', 'booking' => $booking->load(['client', 'service'])]);
     }
 
+    public function update(Request $request, $id)
+    {
+        $booking = Booking::with(['client', 'service', 'payment'])->findOrFail($id);
+
+        $validated = $request->validate([
+            'name'           => 'required|string|max:255',
+            'contact_number' => 'required|string|max:50',
+            'email'          => 'nullable|email|max:255',
+            'service_id'     => 'required|exists:services,id',
+            'preferred_date' => 'required|date',
+            'address'        => 'required|string|max:500',
+            'status'         => 'nullable|in:pending,confirmed,completed,cancelled',
+            'total_amount'   => 'nullable|numeric|min:0',
+            'payment_status' => 'nullable|string',
+            'payment_method' => 'nullable|string',
+            'notes'          => 'nullable|string',
+        ]);
+
+        if ($booking->client) {
+            $booking->client->update([
+                'name'           => $validated['name'],
+                'contact_number' => $validated['contact_number'],
+                'email'          => $validated['email'] ?? $booking->client->email,
+                'address'        => $validated['address'] ?? $booking->client->address,
+            ]);
+        }
+
+        $bookingData = [
+            'service_id'     => $validated['service_id'],
+            'preferred_date' => $validated['preferred_date'],
+            'address'        => $validated['address'],
+            'notes'          => $validated['notes'] ?? $booking->notes,
+        ];
+
+        if (!empty($validated['status'])) {
+            $bookingData['status'] = $validated['status'];
+            if ($request->user()) {
+                $bookingData['processed_by_user_id'] = $request->user()->id;
+            }
+        }
+        if (isset($validated['total_amount'])) {
+            $bookingData['total_amount'] = $validated['total_amount'];
+        }
+        if (!empty($validated['payment_status'])) {
+            $bookingData['payment_status'] = $validated['payment_status'];
+        }
+        if (!empty($validated['payment_method'])) {
+            $bookingData['payment_method'] = $validated['payment_method'];
+        }
+
+        $booking->update($bookingData);
+
+        if ($booking->payment) {
+            $paymentUpdates = [];
+            if (isset($validated['total_amount'])) {
+                $paymentUpdates['amount'] = $validated['total_amount'];
+            }
+            if (!empty($validated['payment_status'])) {
+                $paymentUpdates['status'] = $validated['payment_status'];
+            }
+            if (!empty($validated['payment_method'])) {
+                $paymentUpdates['payment_method'] = $validated['payment_method'];
+            }
+            if (!empty($paymentUpdates)) {
+                $booking->payment->update($paymentUpdates);
+            }
+        }
+
+        return response()->json([
+            'message' => 'Booking updated successfully.',
+            'booking' => $booking->fresh()->load(['client', 'service', 'payment']),
+        ]);
+    }
+
     public function destroy($id)
     {
         Booking::findOrFail($id)->delete();
