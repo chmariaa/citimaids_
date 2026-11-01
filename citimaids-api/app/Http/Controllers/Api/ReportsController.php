@@ -81,7 +81,10 @@ class ReportsController extends Controller
         [$from, $to] = $this->range($request);
 
         $bookings = Booking::with(['client:id,name','service:id,name,base_price'])
-            ->whereBetween('created_at', [$from, $to])
+            ->where(function ($q) use ($from, $to) {
+                $q->whereBetween('created_at', [$from, $to])
+                  ->orWhereBetween('preferred_date', [$from->toDateString(), $to->toDateString()]);
+            })
             ->orderByDesc('created_at')
             ->get();
 
@@ -95,8 +98,11 @@ class ReportsController extends Controller
             ->avg() ?? 0;
 
         $byDow = Booking::selectRaw("DAYNAME(preferred_date) as dow, COUNT(*) as count")
-            ->whereBetween('created_at', [$from, $to])
             ->whereNotNull('preferred_date')
+            ->where(function ($q) use ($from, $to) {
+                $q->whereBetween('created_at', [$from, $to])
+                  ->orWhereBetween('preferred_date', [$from->toDateString(), $to->toDateString()]);
+            })
             ->groupBy('dow')->orderByDesc('count')->get();
 
         return response()->json([

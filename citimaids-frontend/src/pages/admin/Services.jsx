@@ -74,7 +74,7 @@ export default function Services() {
 
     useEffect(() => { fetchServices(); }, []);
 
-    const fetchServices = async () => {
+    async function fetchServices() {
         setLoading(true);
         try {
             const res = await api.get('/admin/services');
@@ -272,7 +272,7 @@ export default function Services() {
         return 'translateY(0px)';
     };
 
-    const persistReorder = async (reordered) => {
+    async function persistReorder(reordered) {
         setReordering(true);
         try {
             await api.post('/services/reorder', {
@@ -287,7 +287,7 @@ export default function Services() {
         }
     };
 
-    const showToast = (msg, type) => {
+    function showToast(msg, type) {
         setToast({ msg, type });
         setTimeout(() => setToast(null), 3000);
     };

@@ -83,7 +83,7 @@ export function getAdminDispatchWALink(booking, template = 'confirmed') {
   const service = booking?.service?.name || booking?.service?.title || 'Cleaning Service';
   const trackingUrl = `${window.location.origin}/track-booking?ref=${encodeURIComponent(ref)}`;
   
-  let text = '';
+  let text;
   switch (template) {
     case 'confirmed':
       text = `Hello ${clientName}! 🧹✨

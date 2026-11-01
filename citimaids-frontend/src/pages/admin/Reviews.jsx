@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router-dom';
 import api from '../../api/axios';
 import InquiriesPanel from './InquiriesPanel';
@@ -221,27 +222,71 @@ function ReviewStatusModal({ review, onClose, onSaved }) {
 // ── Actions Dropdown ──────────────────────────────────────────────────────────
 function ActionsDropdown({ review, onApprove, onReject, onMarkPending, onChangeStatus, onDelete, onToggleExpand, isExpanded, loading }) {
     const [open, setOpen] = useState(false);
-    const [openUpward, setOpenUpward] = useState(false);
-    const ref = useRef(null);
+    const [coords, setCoords] = useState({ top: 0, bottom: 0, right: 0, openUpward: false });
+    const buttonRef = useRef(null);
+    const menuRef = useRef(null);
+
+    const updatePosition = () => {
+        if (!buttonRef.current) return;
+        const rect = buttonRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const openUpward = spaceBelow < 280 && rect.top > 280;
+        setCoords({
+            top: rect.bottom + 6,
+            bottom: window.innerHeight - rect.top + 6,
+            right: Math.max(12, window.innerWidth - rect.right),
+            openUpward,
+        });
+    };
+
+    const toggleOpen = (e) => {
+        e.stopPropagation();
+        if (!open) {
+            updatePosition();
+            setOpen(true);
+        } else {
+            setOpen(false);
+        }
+    };
 
     useEffect(() => {
-        const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-        document.addEventListener('mousedown', handler);
-        return () => document.removeEventListener('mousedown', handler);
-    }, []);
+        if (!open) return;
 
-    const toggleOpen = () => {
-        if (!open && ref.current) {
-            const rect = ref.current.getBoundingClientRect();
-            const spaceBelow = window.innerHeight - rect.bottom;
-            setOpenUpward(spaceBelow < 280);
-        }
-        setOpen((v) => !v);
-    };
+        const handleOutside = (e) => {
+            if (
+                buttonRef.current && !buttonRef.current.contains(e.target) &&
+                menuRef.current && !menuRef.current.contains(e.target)
+            ) {
+                setOpen(false);
+            }
+        };
+
+        const handleScroll = (e) => {
+            if (menuRef.current && !menuRef.current.contains(e.target)) {
+                setOpen(false);
+            }
+        };
+
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') setOpen(false);
+        };
+
+        document.addEventListener('mousedown', handleOutside);
+        window.addEventListener('scroll', handleScroll, true);
+        window.addEventListener('resize', handleScroll);
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('mousedown', handleOutside);
+            window.removeEventListener('scroll', handleScroll, true);
+            window.removeEventListener('resize', handleScroll);
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [open]);
 
     const menuItem = (label, color, onClick, disabled) => (
         <button
-            onClick={() => { onClick(); setOpen(false); }}
+            onClick={(e) => { e.stopPropagation(); onClick(); setOpen(false); }}
             disabled={disabled}
             style={{
                 display: 'block', width: '100%', textAlign: 'left',
@@ -258,8 +303,9 @@ function ActionsDropdown({ review, onApprove, onReject, onMarkPending, onChangeS
     );
 
     return (
-        <div ref={ref} onClick={(e) => e.stopPropagation()} style={{ position: 'relative', display: 'inline-block' }}>
+        <div style={{ position: 'relative', display: 'inline-block' }}>
             <button
+                ref={buttonRef}
                 onClick={toggleOpen}
                 disabled={loading}
                 style={{
@@ -276,21 +322,25 @@ function ActionsDropdown({ review, onApprove, onReject, onMarkPending, onChangeS
                 </svg>
             </button>
 
-            {open && (
-                <div style={{
-                    position: 'absolute',
-                    right: 0,
-                    ...(openUpward
-                        ? { bottom: 'calc(100% + 6px)' }
-                        : { top: 'calc(100% + 6px)' }),
-                    background: '#fff',
-                    borderRadius: 12,
-                    minWidth: 175,
-                    boxShadow: '0 12px 36px rgba(0,0,0,0.16)',
-                    border: '1px solid #e2e8f0',
-                    zIndex: 9999,
-                    overflow: 'hidden',
-                }}>
+            {open && createPortal(
+                <div
+                    ref={menuRef}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                        position: 'fixed',
+                        right: `${coords.right}px`,
+                        ...(coords.openUpward
+                            ? { bottom: `${coords.bottom}px` }
+                            : { top: `${coords.top}px` }),
+                        background: '#fff',
+                        borderRadius: 12,
+                        minWidth: 195,
+                        boxShadow: '0 16px 40px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.08)',
+                        border: '1px solid #e2e8f0',
+                        zIndex: 999999,
+                        overflow: 'hidden',
+                    }}
+                >
                     {menuItem(isExpanded ? '▲ Hide Full Review' : '👁 Read Full Review', '#2563eb', onToggleExpand, false)}
                     <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
                     {review.status !== 'approved' && menuItem('✓ Approve', '#047857', onApprove, loading)}
@@ -301,7 +351,8 @@ function ActionsDropdown({ review, onApprove, onReject, onMarkPending, onChangeS
                     {review.whatsapp && menuItem('💬 WhatsApp Client', '#16a34a', () => window.open(`https://wa.me/${review.whatsapp.replace(/\D/g, '')}`), false)}
                     <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
                     {menuItem('🗑 Delete', '#dc2626', onDelete, loading)}
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
@@ -539,13 +590,13 @@ export default function Reviews() {
                             </div>
 
                             {/* Reviews Table */}
-                            <div style={{ ...card, overflow: 'hidden', width: '100%' }}>
+                            <div data-card-container="true" style={{ ...card, overflow: 'hidden', width: '100%' }}>
                                 <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-                                    <div style={{ minWidth: 740 }}>
+                                    <div style={{ minWidth: 720 }}>
                                         {/* Column headers */}
                                         <div style={{
                                             display: 'grid',
-                                            gridTemplateColumns: 'minmax(240px, 2.2fr) minmax(130px, 1fr) 80px 105px 165px',
+                                            gridTemplateColumns: 'minmax(0, 2.5fr) minmax(0, 1.2fr) 90px 95px 165px',
                                             gap: 12,
                                             padding: '12px 20px',
                                             background: brand.softBg,
@@ -587,7 +638,7 @@ export default function Reviews() {
                                                             onClick={() => toggleExpand(r.id)}
                                                             style={{
                                                                 display: 'grid',
-                                                                gridTemplateColumns: 'minmax(240px, 2.2fr) minmax(130px, 1fr) 80px 105px 165px',
+                                                                gridTemplateColumns: 'minmax(0, 2.5fr) minmax(0, 1.2fr) 90px 95px 165px',
                                                                 gap: 12,
                                                                 padding: '15px 20px',
                                                                 alignItems: 'center',

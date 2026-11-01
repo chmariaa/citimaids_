@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import api from '../../api/axios';
 import {
     brand, fonts, card, solidBtn as solidBtnToken,
@@ -29,7 +30,7 @@ function InquiryStatusBadge({ status }) {
             border: `1px solid ${s.border}`,
             fontSize: 11.5, fontWeight: 700,
             color: s.color, background: s.bg,
-            whiteSpace: 'nowrap',
+            whiteSpace: 'nowrap', flexShrink: 0,
         }}>
             {s.label}
         </span>
@@ -243,31 +244,74 @@ function InquiryModal({ inquiry, onClose, onSaved }) {
 // ── Inquiries Actions Dropdown ────────────────────────────────────────────────
 function InquiriesDropdown({ inquiry, onOpenModal, onMarkReplied, onMarkPending, onMarkClosed, onDelete, onToggleExpand, isExpanded, loading }) {
     const [open, setOpen] = useState(false);
-    const [openUpward, setOpenUpward] = useState(false);
-    const ref = useRef(null);
+    const [coords, setCoords] = useState({ top: 0, bottom: 0, right: 0, openUpward: false });
+    const buttonRef = useRef(null);
+    const menuRef = useRef(null);
+
+    const updatePosition = () => {
+        if (!buttonRef.current) return;
+        const rect = buttonRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const openUpward = spaceBelow < 280 && rect.top > 280;
+        setCoords({
+            top: rect.bottom + 6,
+            bottom: window.innerHeight - rect.top + 6,
+            right: Math.max(12, window.innerWidth - rect.right),
+            openUpward,
+        });
+    };
+
+    const toggleOpen = (e) => {
+        e.stopPropagation();
+        if (!open) {
+            updatePosition();
+            setOpen(true);
+        } else {
+            setOpen(false);
+        }
+    };
 
     useEffect(() => {
-        const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-        document.addEventListener('mousedown', handler);
-        return () => document.removeEventListener('mousedown', handler);
-    }, []);
+        if (!open) return;
 
-    const toggleOpen = () => {
-        if (!open && ref.current) {
-            const rect = ref.current.getBoundingClientRect();
-            const spaceBelow = window.innerHeight - rect.bottom;
-            // If space below button is less than 280px, open upwards so it's never cut off
-            setOpenUpward(spaceBelow < 280);
-        }
-        setOpen((v) => !v);
-    };
+        const handleOutside = (e) => {
+            if (
+                buttonRef.current && !buttonRef.current.contains(e.target) &&
+                menuRef.current && !menuRef.current.contains(e.target)
+            ) {
+                setOpen(false);
+            }
+        };
+
+        const handleScroll = (e) => {
+            if (menuRef.current && !menuRef.current.contains(e.target)) {
+                setOpen(false);
+            }
+        };
+
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') setOpen(false);
+        };
+
+        document.addEventListener('mousedown', handleOutside);
+        window.addEventListener('scroll', handleScroll, true);
+        window.addEventListener('resize', handleScroll);
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('mousedown', handleOutside);
+            window.removeEventListener('scroll', handleScroll, true);
+            window.removeEventListener('resize', handleScroll);
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [open]);
 
     const cleanPhone = (inquiry.phone || '').replace(/\D/g, '');
     const hasPhone = cleanPhone.length >= 7;
 
     const menuItem = (label, color, onClick, disabled) => (
         <button
-            onClick={() => { onClick(); setOpen(false); }}
+            onClick={(e) => { e.stopPropagation(); onClick(); setOpen(false); }}
             disabled={disabled}
             style={{
                 display: 'block', width: '100%', textAlign: 'left',
@@ -284,8 +328,9 @@ function InquiriesDropdown({ inquiry, onOpenModal, onMarkReplied, onMarkPending,
     );
 
     return (
-        <div ref={ref} onClick={(e) => e.stopPropagation()} style={{ position: 'relative', display: 'inline-block' }}>
+        <div style={{ position: 'relative', display: 'inline-block' }}>
             <button
+                ref={buttonRef}
                 onClick={toggleOpen}
                 disabled={loading}
                 style={{
@@ -297,26 +342,30 @@ function InquiriesDropdown({ inquiry, onOpenModal, onMarkReplied, onMarkPending,
                 }}
             >
                 Actions
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ transform: (open && !openUpward) || (!open && openUpward) ? 'rotate(180deg)' : open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>
                     <path d="M2 4l4 4 4-4" stroke="#64748b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
             </button>
 
-            {open && (
-                <div style={{
-                    position: 'absolute',
-                    right: 0,
-                    ...(openUpward
-                        ? { bottom: 'calc(100% + 6px)' }
-                        : { top: 'calc(100% + 6px)' }),
-                    background: '#fff',
-                    borderRadius: 12,
-                    minWidth: 195,
-                    boxShadow: '0 12px 36px rgba(0,0,0,0.16)',
-                    border: '1px solid #e2e8f0',
-                    zIndex: 9999,
-                    overflow: 'hidden',
-                }}>
+            {open && createPortal(
+                <div
+                    ref={menuRef}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                        position: 'fixed',
+                        right: `${coords.right}px`,
+                        ...(coords.openUpward
+                            ? { bottom: `${coords.bottom}px` }
+                            : { top: `${coords.top}px` }),
+                        background: '#fff',
+                        borderRadius: 12,
+                        minWidth: 195,
+                        boxShadow: '0 16px 40px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.08)',
+                        border: '1px solid #e2e8f0',
+                        zIndex: 999999,
+                        overflow: 'hidden',
+                    }}
+                >
                     {menuItem(isExpanded ? '▲ Hide Full Message' : '👁 View Details & Reply', '#2563eb', onOpenModal, false)}
                     <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
                     {hasPhone && menuItem('💬 WhatsApp Visitor', '#16a34a', () => window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent('Hi ' + inquiry.name + '! Thank you for reaching out to CitiMaids.')}`), false)}
@@ -327,7 +376,8 @@ function InquiriesDropdown({ inquiry, onOpenModal, onMarkReplied, onMarkPending,
                     {inquiry.status !== 'closed' && menuItem('✕ Mark as Closed', '#475569', onMarkClosed, loading)}
                     <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
                     {menuItem('🗑 Delete Inquiry', '#dc2626', onDelete, loading)}
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
@@ -463,13 +513,13 @@ export default function InquiriesPanel({ onPendingCountChange }) {
             </div>
 
             {/* Inquiries Table Card */}
-            <div style={{ ...card, overflow: 'hidden', width: '100%' }}>
+            <div data-card-container="true" style={{ ...card, overflow: 'hidden', width: '100%' }}>
                 <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-                    <div style={{ minWidth: 780 }}>
+                    <div style={{ minWidth: 720 }}>
                         {/* Header row */}
                         <div style={{
                             display: 'grid',
-                            gridTemplateColumns: 'minmax(220px, 1.4fr) minmax(180px, 1.3fr) 100px 105px 170px',
+                            gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 1.4fr) 90px 95px 165px',
                             gap: 12,
                             padding: '12px 18px',
                             background: '#f8fafc',
@@ -526,7 +576,7 @@ export default function InquiriesPanel({ onPendingCountChange }) {
                                             onClick={() => toggleExpand(inq.id)}
                                             style={{
                                                 display: 'grid',
-                                                gridTemplateColumns: 'minmax(220px, 1.4fr) minmax(180px, 1.3fr) 100px 105px 170px',
+                                                gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 1.4fr) 90px 95px 165px',
                                                 gap: 12,
                                                 padding: '15px 18px',
                                                 alignItems: 'center',
@@ -556,7 +606,7 @@ export default function InquiriesPanel({ onPendingCountChange }) {
                                             </div>
                                             <div style={{
                                                 fontSize: 12, color: '#64748b',
-                                                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                                                whiteSpace: 'nowrap', flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis',
                                                 marginTop: 2, fontStyle: 'italic',
                                             }}>
                                                 "{inq.message}"
