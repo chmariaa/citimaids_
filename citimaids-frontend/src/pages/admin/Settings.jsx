@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import api from '../../api/axios';
 import { formatUAEPhone } from '../../utils/formatters';
 
@@ -315,38 +316,128 @@ function GeneralSettings({ showToast }) {
 /* TAB 2: Profile Settings                          */
 /* ─────────────────────────────────────────────── */
 function ProfileSettings({ showToast }) {
-    const [form, setForm] = useState({ name: 'Admin User', email: 'admin@citimaids.com', current_password: '', new_password: '', confirm_password: '' });
+    const { user, updateUser } = useAuth();
+    const [form, setForm] = useState({
+        name: user?.name || '',
+        email: user?.email || '',
+        current_password: '',
+        new_password: '',
+        confirm_password: '',
+    });
+    const [role, setRole] = useState(user?.role || 'Administrator');
     const [saving, setSaving] = useState(false);
+
+    useEffect(() => {
+        api.get('/auth/me').then(res => {
+            if (res.data) {
+                setForm(prev => ({
+                    ...prev,
+                    name: res.data.name || prev.name,
+                    email: res.data.email || prev.email,
+                }));
+                if (res.data.role) {
+                    setRole(res.data.role);
+                }
+            }
+        }).catch(() => { });
+    }, []);
 
     const handleSave = async (e) => {
         e.preventDefault();
-        if (form.new_password && form.new_password !== form.confirm_password) {
-            showToast('New passwords do not match.', 'error'); return;
+
+        if (!form.name.trim()) {
+            showToast('Full name is required.', 'error');
+            return;
         }
+        if (!form.email.trim()) {
+            showToast('Email address is required.', 'error');
+            return;
+        }
+
+        const isChangingPassword = Boolean(form.new_password || form.current_password || form.confirm_password);
+
+        if (isChangingPassword) {
+            if (!form.current_password) {
+                showToast('Please enter your current password.', 'error');
+                return;
+            }
+            if (!form.new_password) {
+                showToast('Please enter a new password.', 'error');
+                return;
+            }
+            if (form.new_password.length < 6) {
+                showToast('New password must be at least 6 characters.', 'error');
+                return;
+            }
+            if (form.new_password !== form.confirm_password) {
+                showToast('New passwords do not match.', 'error');
+                return;
+            }
+        }
+
         setSaving(true);
-        setTimeout(() => { setSaving(false); showToast('Profile updated successfully!'); }, 800);
+        try {
+            // 1. Update Profile (Name & Email)
+            const profileRes = await api.put('/auth/profile', {
+                name: form.name.trim(),
+                email: form.email.trim(),
+            });
+            if (profileRes.data?.user && updateUser) {
+                updateUser(profileRes.data.user);
+            }
+
+            // 2. Update Password if specified
+            if (isChangingPassword) {
+                await api.put('/auth/password', {
+                    current_password: form.current_password,
+                    new_password: form.new_password,
+                });
+                setForm(prev => ({
+                    ...prev,
+                    current_password: '',
+                    new_password: '',
+                    confirm_password: '',
+                }));
+                showToast('Profile and password updated successfully!');
+            } else {
+                showToast('Profile updated successfully!');
+            }
+        } catch (err) {
+            const msg =
+                err.response?.data?.errors?.current_password?.[0] ||
+                err.response?.data?.errors?.email?.[0] ||
+                err.response?.data?.errors?.name?.[0] ||
+                err.response?.data?.message ||
+                'Failed to update profile.';
+            showToast(msg, 'error');
+        } finally {
+            setSaving(false);
+        }
     };
+
+    const initials = form.name
+        ? form.name.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()
+        : 'AD';
 
     return (
         <form onSubmit={handleSave}>
-            <SettingsCard title="Profile Settings" subtitle="Update your personal information and password.">
+            <SettingsCard title="Profile Settings" subtitle="Update your personal account credentials and password.">
                 <SectionHeader>ACCOUNT INFORMATION</SectionHeader>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 24, padding: '16px 20px', background: '#f8fafc', borderRadius: 10, border: '1px solid #e2e8f0' }}>
                     <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#3b82f6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 700 }}>
-                        {form.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                        {initials}
                     </div>
                     <div>
-                        <div style={{ fontSize: 16, fontWeight: 700, color: '#1a1f37' }}>{form.name}</div>
-                        <div style={{ fontSize: 13, color: '#64748b' }}>Administrator</div>
-                        <button type="button" style={{ fontSize: 12, color: '#3b82f6', border: 'none', background: 'none', cursor: 'pointer', padding: 0, marginTop: 4 }}>Change avatar</button>
+                        <div style={{ fontSize: 16, fontWeight: 700, color: '#1a1f37' }}>{form.name || 'Administrator'}</div>
+                        <div style={{ fontSize: 13, color: '#64748b', textTransform: 'capitalize' }}>{role || 'Staff Member'}</div>
                     </div>
                 </div>
                 <div className="settings-form-row-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
                     <Field label="Full Name">
-                        <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={inputStyle} />
+                        <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={inputStyle} required />
                     </Field>
                     <Field label="Email Address">
-                        <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} style={inputStyle} />
+                        <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} style={inputStyle} required />
                     </Field>
                 </div>
 
