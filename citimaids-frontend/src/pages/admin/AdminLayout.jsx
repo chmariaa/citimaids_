@@ -176,7 +176,7 @@ export default function AdminLayout() {
             </aside>
 
             {/* Main Content Area */}
-            <main style={{ flex: 1, marginLeft: 250, padding: '32px 36px', minHeight: '100vh', background: '#f8fafc' }}>
+            <main style={{ flex: 1, marginLeft: 250, padding: '32px 36px', minHeight: '100vh', background: '#f8fafc', minWidth: 0 }}>
                 <Outlet />
             </main>
         </div>

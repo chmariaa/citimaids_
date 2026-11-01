@@ -1,9 +1,13 @@
 import { useState } from 'react';
+import api from '../api/axios';
 import { useSettings } from '../hooks/useSettings';
 import { formatUAEPhone } from '../utils/formatters';
+
 export default function ContactPage() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const { settings } = useSettings();
 
   const addressParts = settings?.business_address ? settings.business_address.split(',') : [];
@@ -18,9 +22,20 @@ export default function ContactPage() {
   const set = (field, value) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
+    setLoading(true);
+    setError(null);
+    try {
+      await api.post('/inquiries', form);
+      setSubmitted(true);
+    } catch (err) {
+      console.error('Failed to submit inquiry:', err);
+      const msg = err.response?.data?.message || 'Failed to submit your inquiry. Please check your inputs or reach out to us directly on WhatsApp.';
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -92,30 +107,17 @@ export default function ContactPage() {
                 {
                   icon: (
                     <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#1E3A8A" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><circle cx="12" cy="11" r="3" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                   ),
-                  label: 'Central Office',
+                  label: 'Headquarters',
                   value: address,
                   href: null,
                 },
-                {
-                  icon: (
-                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#1E3A8A" strokeWidth="2">
-                      <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
-                    </svg>
-                  ),
-                  label: 'Service Schedule',
-                  value: 'Mon–Sat: 7AM–9PM | Sun: 8AM–6PM',
-                  href: null,
-                },
               ].filter(Boolean).map(({ icon, label, value, href }) => (
-                <div
-                  key={label}
-                  className="flex items-start gap-4 bg-white rounded-2xl p-4.5 border border-slate-100"
-                  style={{ boxShadow: '0 2px 10px rgba(10,35,66,0.03)' }}
-                >
-                  <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center text-lg flex-shrink-0">
+                <div key={label} className="flex items-start gap-4 p-4 rounded-xl bg-white border border-slate-100 shadow-sm">
+                  <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5">
                     {icon}
                   </div>
                   <div>
@@ -168,6 +170,7 @@ export default function ContactPage() {
                 <button
                   onClick={() => {
                     setSubmitted(false);
+                    setError(null);
                     setForm({ name: '', email: '', phone: '', message: '' });
                   }}
                   className="text-blue-800 font-bold text-sm hover:underline"
@@ -178,6 +181,11 @@ export default function ContactPage() {
             ) : (
               <>
                 <h2 className="text-xl font-bold text-slate-900 mb-5">Send Us an Inquiry</h2>
+                {error && (
+                  <div className="mb-4 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold leading-relaxed">
+                    {error}
+                  </div>
+                )}
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
                     <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">Full Name</label>
@@ -225,10 +233,18 @@ export default function ContactPage() {
                   </div>
                   <button
                     type="submit"
-                    className="w-full py-3.5 rounded-xl font-bold text-white text-sm transition-all hover:scale-105 shadow-md"
+                    disabled={loading}
+                    className="w-full py-3.5 rounded-xl font-bold text-white text-sm transition-all hover:scale-105 shadow-md flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                     style={{ background: 'linear-gradient(135deg,#0A2342,#1E3A8A)' }}
                   >
-                    Submit Inquiry
+                    {loading ? (
+                      <>
+                        <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Submitting Inquiry...
+                      </>
+                    ) : (
+                      'Submit Inquiry'
+                    )}
                   </button>
                 </form>
               </>

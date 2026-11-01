@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\ClientController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\InquiryController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ReportsController;
 use App\Http\Controllers\Api\ServiceController;
@@ -30,6 +31,9 @@ Route::get('/settings', [SettingController::class, 'index']);
 // Public reviews (approved only)
 Route::get('/reviews', [ReviewController::class, 'index']);
 Route::post('/reviews', [ReviewController::class, 'store']);
+
+// Public inquiries submission (contact / quote requests)
+Route::post('/inquiries', [InquiryController::class, 'store']);
 
 // ─── Protected Routes (Sanctum Auth Required) ─────────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {
@@ -69,7 +73,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/services/{id}', [ServiceController::class, 'destroy']);
     Route::post('/services/reorder', [ServiceController::class, 'reorder']);
 
-
     // Settings (admin CRUD)
     Route::put('/settings', [SettingController::class, 'update']);
 
@@ -78,6 +81,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/reviews/{id}', [ReviewController::class, 'update']);
     Route::patch('/reviews/{id}/status', [ReviewController::class, 'updateStatus']);
     Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
+
+    // Inquiries (admin management & responses)
+    Route::get('/admin/inquiries', [InquiryController::class, 'adminIndex']);
+    Route::get('/inquiries/{id}', [InquiryController::class, 'show']);
+    Route::patch('/inquiries/{id}/status', [InquiryController::class, 'updateStatus']);
+    Route::put('/inquiries/{id}', [InquiryController::class, 'update']);
+    Route::delete('/inquiries/{id}', [InquiryController::class, 'destroy']);
 
     // Payments
     Route::get('/payments', [PaymentController::class, 'index']);
