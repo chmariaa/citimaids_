@@ -176,6 +176,8 @@ Full API reference → [docs/backend/routes.md](docs-site/docs/backend/routes.md
 
 ## 🧪 Testing & Quality Assurance
 
+> 📋 **Team Routine Checklist**: See [QA_CHECKLIST.md](QA_CHECKLIST.md) for our daily coding checklist, pull request review steps, and pre-demo verification guide.
+
 CitiMaids includes a full suite of quality assurance, testing, and static analysis tools across both backend and frontend layers.
 
 ### 1. Backend Testing & Quality (`citimaids-api`)
