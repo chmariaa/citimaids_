@@ -22,7 +22,9 @@ export default function ServiceDetailPage() {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-6 pt-32">
         <h2 className="text-3xl font-black text-slate-900 mb-3">Service Not Found</h2>
-        <p className="text-slate-500 text-base mb-6">The requested cleaning service could not be located.</p>
+        <p className="text-slate-500 text-base mb-6">
+          The requested cleaning service could not be located.
+        </p>
         <Link
           to="/services"
           className="px-7 py-3 rounded-xl bg-[#0A2342] text-white font-bold text-sm shadow-md"
@@ -45,7 +47,8 @@ export default function ServiceDetailPage() {
           className="w-full h-full object-cover"
           onError={(e) => {
             e.currentTarget.onerror = null;
-            e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&auto=format&fit=crop&q=80';
+            e.currentTarget.src =
+              'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&auto=format&fit=crop&q=80';
           }}
         />
         <div className="hero-gradient-overlay absolute inset-0" />
@@ -73,19 +76,37 @@ export default function ServiceDetailPage() {
             <span className="text-blue-900 font-extrabold text-xs uppercase tracking-widest block mb-2">
               Service Specs
             </span>
-            <h2 className="text-3xl font-black text-slate-900 mb-6 tracking-tight">Overview & Scope</h2>
+            <h2 className="text-3xl font-black text-slate-900 mb-6 tracking-tight">
+              Overview & Scope
+            </h2>
             <p className="text-slate-600 leading-relaxed mb-12 text-base sm:text-lg">
-              {service.description} Our trained and police-vetted specialists bring 5-star hotel cleaning standards, UAE-approved eco-friendly products, and high-performance industrial equipment to ensure your living space is pristine and sanitized.
+              {service.description} Our trained and police-vetted specialists bring 5-star hotel
+              cleaning standards, UAE-approved eco-friendly products, and high-performance
+              industrial equipment to ensure your living space is pristine and sanitized.
             </p>
 
             {/* Process */}
-            <h3 className="text-2xl font-black text-slate-900 mb-6 tracking-tight">Our 4-Step Standard</h3>
+            <h3 className="text-2xl font-black text-slate-900 mb-6 tracking-tight">
+              Our 4-Step Standard
+            </h3>
             <div className="space-y-4">
               {[
-                { title: 'Prompt Arrival', desc: 'Uniformed crew arrives on time with all vacuums, mops, and eco detergents.' },
-                { title: 'Property Inspection', desc: 'Customized assessment of key priority zones and high-touch areas.' },
-                { title: 'Methodical Deep Clean', desc: 'Systematic room-by-room degreasing, scrubbing, sanitization, and dust removal.' },
-                { title: 'Supervisor Sign-Off', desc: 'Final checklist walkthrough to guarantee your 100% satisfaction.' },
+                {
+                  title: 'Prompt Arrival',
+                  desc: 'Uniformed crew arrives on time with all vacuums, mops, and eco detergents.',
+                },
+                {
+                  title: 'Property Inspection',
+                  desc: 'Customized assessment of key priority zones and high-touch areas.',
+                },
+                {
+                  title: 'Methodical Deep Clean',
+                  desc: 'Systematic room-by-room degreasing, scrubbing, sanitization, and dust removal.',
+                },
+                {
+                  title: 'Supervisor Sign-Off',
+                  desc: 'Final checklist walkthrough to guarantee your 100% satisfaction.',
+                },
               ].map((step, i) => (
                 <div
                   key={step.title}
@@ -147,7 +168,10 @@ export default function ServiceDetailPage() {
                   'Hospital-grade eco detergents',
                   'Free cancellation up to 24 hours',
                 ].map((b) => (
-                  <div key={b} className="text-xs text-slate-600 font-semibold flex items-center gap-2">
+                  <div
+                    key={b}
+                    className="text-xs text-slate-600 font-semibold flex items-center gap-2"
+                  >
                     <span className="text-emerald-500 font-bold">✓</span>
                     <span>{b}</span>
                   </div>
@@ -162,7 +186,9 @@ export default function ServiceDetailPage() {
       {related.length > 0 && (
         <section className="py-24 bg-slate-50 border-t border-slate-200/80">
           <div className="max-w-7xl mx-auto px-6 sm:px-8">
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mb-10">You Might Also Need</h2>
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mb-10">
+              You Might Also Need
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
               {related.map((s) => (
                 <Link
@@ -178,7 +204,8 @@ export default function ServiceDetailPage() {
                       loading="lazy"
                       onError={(e) => {
                         e.currentTarget.onerror = null;
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&auto=format&fit=crop&q=80';
+                        e.currentTarget.src =
+                          'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&auto=format&fit=crop&q=80';
                       }}
                     />
                   </div>

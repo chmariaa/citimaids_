@@ -7,12 +7,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement("ALTER TABLE payments MODIFY COLUMN status ENUM('pending', 'paid', 'unpaid', 'failed', 'refunded', 'expired') NOT NULL DEFAULT 'pending'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE payments MODIFY COLUMN status ENUM('pending', 'paid', 'unpaid', 'failed', 'refunded', 'expired') NOT NULL DEFAULT 'pending'");
+        }
     }
 
     public function down(): void
     {
-        DB::statement("ALTER TABLE payments MODIFY COLUMN status ENUM('pending', 'paid', 'failed', 'refunded', 'expired') NOT NULL DEFAULT 'pending'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE payments MODIFY COLUMN status ENUM('pending', 'paid', 'failed', 'refunded', 'expired') NOT NULL DEFAULT 'pending'");
+        }
     }
 };
-

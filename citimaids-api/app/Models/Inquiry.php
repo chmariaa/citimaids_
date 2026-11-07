@@ -20,4 +20,3 @@ class Inquiry extends Model
         'replied_at' => 'datetime',
     ];
 }
-

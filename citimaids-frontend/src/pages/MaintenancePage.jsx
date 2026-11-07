@@ -16,7 +16,8 @@ const defaultMaintenanceServices = [
       'Outdoor paving, pergolas & lighting',
       'Seasonal plant health rejuvenation',
     ],
-    image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&h=600&fit=crop&auto=format',
+    image:
+      'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&h=600&fit=crop&auto=format',
     startingPrice: 'Contact for pricing',
   },
   {
@@ -32,7 +33,8 @@ const defaultMaintenanceServices = [
       'Soil nutrient enrichment & mulching',
       'Irrigation system flow monitoring',
     ],
-    image: 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&h=600&fit=crop&auto=format',
+    image:
+      'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&h=600&fit=crop&auto=format',
     startingPrice: 'Contact for pricing',
   },
   {
@@ -48,7 +50,8 @@ const defaultMaintenanceServices = [
       'Algae eradication & water clarifying',
       'Pump, timer & light safety inspection',
     ],
-    image: 'https://images.unsplash.com/photo-1575429198097-0414ec08e8cd?w=800&h=600&fit=crop&auto=format',
+    image:
+      'https://images.unsplash.com/photo-1575429198097-0414ec08e8cd?w=800&h=600&fit=crop&auto=format',
     startingPrice: 'Contact for pricing',
   },
 ];
@@ -63,7 +66,10 @@ export default function MaintenancePage() {
   const getFeatures = (s) => {
     if (Array.isArray(s.included) && s.included.length > 0) return s.included;
     if (Array.isArray(s.features) && s.features.length > 0) return s.features;
-    if (s.description && (s.description.includes('\n') || s.description.includes('•') || s.description.includes('- '))) {
+    if (
+      s.description &&
+      (s.description.includes('\n') || s.description.includes('•') || s.description.includes('- '))
+    ) {
       const lines = s.description
         .split('\n')
         .map((l) => l.replace(/^[\s•\-\*]+/, '').trim())
@@ -89,9 +95,12 @@ export default function MaintenancePage() {
           <span className="inline-block px-4 py-1.5 rounded-full bg-white/15 text-xs font-semibold uppercase tracking-widest mb-4 backdrop-blur-sm">
             Villa & Outdoor Solutions
           </span>
-          <h1 className="text-4xl sm:text-5xl font-extrabold mb-3 tracking-tight">Maintenance Services</h1>
+          <h1 className="text-4xl sm:text-5xl font-extrabold mb-3 tracking-tight">
+            Maintenance Services
+          </h1>
           <p className="text-blue-100 text-sm sm:text-base leading-relaxed">
-            Professional landscape contracting, weekly garden care, and swimming pool maintenance across Abu Dhabi.
+            Professional landscape contracting, weekly garden care, and swimming pool maintenance
+            across Abu Dhabi.
           </p>
         </div>
       </div>
@@ -126,8 +135,12 @@ export default function MaintenancePage() {
               <div className="w-12 h-12 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-xl">
                 !
               </div>
-              <h3 className="font-extrabold text-slate-900 text-lg mb-2">Unable to load services</h3>
-              <p className="text-slate-500 text-sm mb-6">There was a problem reaching the server. Please try again.</p>
+              <h3 className="font-extrabold text-slate-900 text-lg mb-2">
+                Unable to load services
+              </h3>
+              <p className="text-slate-500 text-sm mb-6">
+                There was a problem reaching the server. Please try again.
+              </p>
               <button
                 onClick={refetch}
                 className="px-6 py-2.5 rounded-xl bg-blue-950 text-white font-bold text-sm shadow hover:bg-blue-900 transition-all"
@@ -139,25 +152,35 @@ export default function MaintenancePage() {
             maintenanceServices.map((s, i) => {
               const features = getFeatures(s);
               const title = s.title || s.name;
-              const imageUrl = s.image || 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&h=600&fit=crop&auto=format';
-              const startingPrice = s.startingPrice || (s.basePrice > 0 ? `AED ${s.basePrice} / session` : null);
+              const imageUrl =
+                s.image ||
+                'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&h=600&fit=crop&auto=format';
+              const startingPrice =
+                s.startingPrice || (s.basePrice > 0 ? `AED ${s.basePrice} / session` : null);
 
               return (
-                <Reveal key={s.id || s.slug || i} delay={i * 80} direction={i % 2 === 0 ? 'left' : 'right'}>
+                <Reveal
+                  key={s.id || s.slug || i}
+                  delay={i * 80}
+                  direction={i % 2 === 0 ? 'left' : 'right'}
+                >
                   <div
                     className={`bg-white rounded-2xl overflow-hidden grid md:grid-cols-2 border border-slate-100 ${
                       i % 2 === 1 ? 'md:grid-flow-dense' : ''
                     }`}
                     style={{ boxShadow: '0 4px 24px rgba(10,35,66,0.06)' }}
                   >
-                    <div className={`h-64 md:h-auto bg-slate-100 overflow-hidden relative ${i % 2 === 1 ? 'md:col-start-2' : ''}`}>
+                    <div
+                      className={`h-64 md:h-auto bg-slate-100 overflow-hidden relative ${i % 2 === 1 ? 'md:col-start-2' : ''}`}
+                    >
                       <img
                         src={imageUrl}
                         alt={title}
                         className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                         onError={(e) => {
                           e.currentTarget.onerror = null;
-                          e.currentTarget.src = 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&h=600&fit=crop&auto=format';
+                          e.currentTarget.src =
+                            'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&h=600&fit=crop&auto=format';
                         }}
                       />
                       {startingPrice && (
@@ -171,13 +194,20 @@ export default function MaintenancePage() {
                     </div>
                     <div className="p-8 md:p-12 flex flex-col justify-center">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs font-bold text-blue-800 uppercase tracking-widest">Outdoor Excellence</span>
+                        <span className="text-xs font-bold text-blue-800 uppercase tracking-widest">
+                          Outdoor Excellence
+                        </span>
                       </div>
-                      <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-4">{title}</h2>
+                      <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-4">
+                        {title}
+                      </h2>
                       <p className="text-slate-600 leading-relaxed mb-6 text-sm">{s.description}</p>
                       <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-8">
                         {features.map((f, idx) => (
-                          <li key={idx} className="flex items-center gap-2 text-xs sm:text-sm text-slate-700">
+                          <li
+                            key={idx}
+                            className="flex items-center gap-2 text-xs sm:text-sm text-slate-700"
+                          >
                             <span className="text-emerald-500 font-bold">✓</span>
                             {f}
                           </li>
@@ -216,9 +246,12 @@ export default function MaintenancePage() {
         style={{ background: 'linear-gradient(135deg,#0A2342 0%,#1E3A8A 100%)' }}
       >
         <div className="max-w-xl mx-auto px-6">
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">Looking for an Annual Villa Contract?</h2>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">
+            Looking for an Annual Villa Contract?
+          </h2>
           <p className="text-blue-100 text-sm mb-7 leading-relaxed">
-            We offer consolidated maintenance contracts combining home cleaning, landscape maintenance, and pool care with discounted rates.
+            We offer consolidated maintenance contracts combining home cleaning, landscape
+            maintenance, and pool care with discounted rates.
           </p>
           <Link
             to="/contact"

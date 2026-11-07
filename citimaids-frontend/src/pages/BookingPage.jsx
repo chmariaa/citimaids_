@@ -4,7 +4,11 @@ import { useServices } from '../hooks/useServices';
 import api from '../api/axios';
 import { formatUAEPhone } from '../utils/formatters';
 import DatePicker, { toYMD, formatFriendlyDate } from '../components/booking/DatePicker';
-import TimePicker, { isSlotPassedToday, isTimeWithinWorkingHours, DEFAULT_TIME_SLOTS } from '../components/booking/TimePicker';
+import TimePicker, {
+  isSlotPassedToday,
+  isTimeWithinWorkingHours,
+  DEFAULT_TIME_SLOTS,
+} from '../components/booking/TimePicker';
 
 const STEPS = [
   { key: 'service', label: 'Service', icon: StepServiceIcon },
@@ -14,12 +18,16 @@ const STEPS = [
   { key: 'review', label: 'Review', icon: StepReviewIcon },
 ];
 
-const timeSlots = [
-  '7:00 AM', '9:00 AM', '11:00 AM',
-  '1:00 PM', '3:00 PM', '5:00 PM',
-];
+const timeSlots = ['7:00 AM', '9:00 AM', '11:00 AM', '1:00 PM', '3:00 PM', '5:00 PM'];
 
-const propertyTypes = ['Apartment', 'Villa', 'Office', 'Studio', 'Townhouse', 'Commercial Facility'];
+const propertyTypes = [
+  'Apartment',
+  'Villa',
+  'Office',
+  'Studio',
+  'Townhouse',
+  'Commercial Facility',
+];
 
 export const uaeDistricts = {
   'Abu Dhabi': [
@@ -38,7 +46,7 @@ export const uaeDistricts = {
     'Mohammed Bin Zayed City',
     'Other Abu Dhabi Area',
   ],
-  'Dubai': [
+  Dubai: [
     'Downtown Dubai',
     'Dubai Marina',
     'Jumeirah Beach Residence (JBR)',
@@ -56,7 +64,7 @@ export const uaeDistricts = {
     'Deira / Bur Dubai',
     'Other Dubai Area',
   ],
-  'Sharjah': [
+  Sharjah: [
     'Al Majaz',
     'Al Nahda',
     'Al Qasimia',
@@ -183,7 +191,7 @@ export default function BookingPage() {
   const [contactErrors, setContactErrors] = useState({});
   const [timeError, setTimeError] = useState(null);
   const [data, setData] = useState({
-    serviceId: null,          // will be set once services load (DB integer id)
+    serviceId: null, // will be set once services load (DB integer id)
     propertyType: 'Apartment',
     rooms: '2',
     bathrooms: '2',
@@ -203,15 +211,21 @@ export default function BookingPage() {
   useEffect(() => {
     if (services.length === 0) return;
     // Check if the current serviceId is valid in the loaded active services
-    const currentValid = data.serviceId !== null && services.some((s) => s.id === data.serviceId || String(s.id) === String(data.serviceId));
+    const currentValid =
+      data.serviceId !== null &&
+      services.some((s) => s.id === data.serviceId || String(s.id) === String(data.serviceId));
     if (currentValid) return; // already set to a valid active service
 
     let picked = services[0];
 
     if (preselectedServiceId !== undefined) {
       // Try matching by numeric DB id first, then by slug fallback
-      const byId = services.find((s) => s.id === preselectedServiceId || String(s.id) === String(preselectedServiceId));
-      const bySlug = services.find((s) => s.slug === preselectedServiceId || s.id === preselectedServiceId);
+      const byId = services.find(
+        (s) => s.id === preselectedServiceId || String(s.id) === String(preselectedServiceId)
+      );
+      const bySlug = services.find(
+        (s) => s.slug === preselectedServiceId || s.id === preselectedServiceId
+      );
       picked = byId || bySlug || services[0];
       if (picked?.category) {
         setSelectedCategory(picked.category);
@@ -226,7 +240,13 @@ export default function BookingPage() {
   }, [services, preselectedServiceId, data.serviceId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const categoryCounts = useMemo(() => {
-    const counts = { all: services.length, residential: 0, commercial: 0, specialized: 0, maintenance: 0 };
+    const counts = {
+      all: services.length,
+      residential: 0,
+      commercial: 0,
+      specialized: 0,
+      maintenance: 0,
+    };
     services.forEach((s) => {
       if (counts[s.category] !== undefined) counts[s.category]++;
       else counts[s.category] = 1;
@@ -255,7 +275,11 @@ export default function BookingPage() {
   const estimate = useMemo(() => {
     if (!selectedService) return { hours: '—', total: 0, note: '' };
     if (selectedService.rateUnit === 'flat') {
-      return { hours: 'Full Day', total: selectedService.basePrice, note: 'Guaranteed Flat Handover Rate' };
+      return {
+        hours: 'Full Day',
+        total: selectedService.basePrice,
+        note: 'Guaranteed Flat Handover Rate',
+      };
     }
     if (selectedService.rateUnit === 'item' || selectedService.rateUnit === 'session') {
       return { hours: 'Per Service', total: selectedService.basePrice, note: 'Starting Base Rate' };
@@ -270,7 +294,11 @@ export default function BookingPage() {
       else estimatedHours = 6;
     }
     const total = Math.round(estimatedHours * selectedService.basePrice);
-    return { hours: `~${estimatedHours} hrs`, total, note: `Estimated based on ${data.propertyType} (${data.rooms} Bed)` };
+    return {
+      hours: `~${estimatedHours} hrs`,
+      total,
+      note: `Estimated based on ${data.propertyType} (${data.rooms} Bed)`,
+    };
   }, [selectedService, data.propertyType, data.rooms]);
 
   // Pure check — no side effects, safe to call in render / disabled prop
@@ -304,11 +332,15 @@ export default function BookingPage() {
         return;
       }
       if (!isTimeWithinWorkingHours(data.time)) {
-        setTimeError('CitiMaids operating hours are 7:00 AM – 8:30 PM. We do not accept bookings outside working hours.');
+        setTimeError(
+          'CitiMaids operating hours are 7:00 AM – 8:30 PM. We do not accept bookings outside working hours.'
+        );
         return;
       }
       if (isSlotPassedToday(data.date, data.time)) {
-        setTimeError('The selected time has already passed for today. Please pick an upcoming time slot.');
+        setTimeError(
+          'The selected time has already passed for today. Please pick an upcoming time slot.'
+        );
         return;
       }
       setTimeError(null);
@@ -318,18 +350,19 @@ export default function BookingPage() {
       if (!data.name.trim()) errs.name = 'Full name is required.';
       if (!data.phone.trim()) errs.phone = 'Phone number is required.';
       else if (!/^[\d\s\+\-\(\)]{7,}$/.test(data.phone)) errs.phone = 'Enter a valid phone number.';
-      if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errs.email = 'Enter a valid email address.';
+      if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email))
+        errs.email = 'Enter a valid email address.';
       setContactErrors(errs);
       if (Object.keys(errs).length > 0) return;
     }
     setStep((s) => s + 1);
   };
 
-
   const handleConfirm = async () => {
     setSubmitLoading(true);
     let bookingId = 'CM-' + Date.now().toString().slice(-5);
-    const formattedAddress = `${data.district ? data.district + ', ' : ''}${data.streetAddress}${data.city ? ', ' + data.city : ''}${data.zipCode ? ' ' + data.zipCode : ''}`.trim();
+    const formattedAddress =
+      `${data.district ? data.district + ', ' : ''}${data.streetAddress}${data.city ? ', ' + data.city : ''}${data.zipCode ? ' ' + data.zipCode : ''}`.trim();
     try {
       const payload = {
         // Client Details
@@ -391,25 +424,61 @@ export default function BookingPage() {
   }, [selectedService]);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f8fafc', fontFamily: "'Inter', -apple-system, sans-serif" }}>
+    <div
+      style={{
+        minHeight: '100vh',
+        background: '#f8fafc',
+        fontFamily: "'Inter', -apple-system, sans-serif",
+      }}
+    >
       {/* ═══ Hero Banner ═══ */}
-      <div style={{
-        background: 'linear-gradient(135deg, #061429 0%, #0A2342 50%, #1E3A8A 100%)',
-        padding: 'clamp(72px, 10vw, 96px) 20px clamp(48px, 7vw, 56px)',
-        textAlign: 'center',
-      }}>
+      <div
+        style={{
+          background: 'linear-gradient(135deg, #061429 0%, #0A2342 50%, #1E3A8A 100%)',
+          padding: 'clamp(72px, 10vw, 96px) 20px clamp(48px, 7vw, 56px)',
+          textAlign: 'center',
+        }}
+      >
         <div style={{ maxWidth: 560, margin: '0 auto' }}>
-          <div style={{
-            width: 48, height: 48, borderRadius: 14,
-            background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(12px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 16px', border: '1px solid rgba(255,255,255,0.15)',
-          }}>
-            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#60a5fa" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+          <div
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 14,
+              background: 'rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(12px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px',
+              border: '1px solid rgba(255,255,255,0.15)',
+            }}
+          >
+            <svg
+              width="24"
+              height="24"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="#60a5fa"
+              strokeWidth="2"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+              />
             </svg>
           </div>
-          <h1 style={{ color: '#fff', fontSize: 32, fontWeight: 800, margin: '0 0 6px', fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.5px' }}>
+          <h1
+            style={{
+              color: '#fff',
+              fontSize: 32,
+              fontWeight: 800,
+              margin: '0 0 6px',
+              fontFamily: "'Plus Jakarta Sans', sans-serif",
+              letterSpacing: '-0.5px',
+            }}
+          >
             Book a Cleaning
           </h1>
           <p style={{ color: '#93c5fd', fontSize: 14, fontWeight: 500, margin: 0 }}>
@@ -419,56 +488,111 @@ export default function BookingPage() {
       </div>
 
       {/* ═══ Step Progress Bar ═══ */}
-      <div style={{ maxWidth: 720, margin: '-24px auto 0', padding: '0 12px', position: 'relative', zIndex: 10 }}>
-        <div style={{
-          background: '#fff', borderRadius: 20, padding: 'clamp(14px, 3vw, 20px) clamp(12px, 4vw, 28px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 8px 32px rgba(10,35,66,0.08)',
-          border: '1px solid #e2e8f0',
-          gap: 0,
-          overflow: 'hidden',
-        }}>
+      <div
+        style={{
+          maxWidth: 720,
+          margin: '-24px auto 0',
+          padding: '0 12px',
+          position: 'relative',
+          zIndex: 10,
+        }}
+      >
+        <div
+          style={{
+            background: '#fff',
+            borderRadius: 20,
+            padding: 'clamp(14px, 3vw, 20px) clamp(12px, 4vw, 28px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 8px 32px rgba(10,35,66,0.08)',
+            border: '1px solid #e2e8f0',
+            gap: 0,
+            overflow: 'hidden',
+          }}
+        >
           {STEPS.map((s, i) => {
             const isDone = i < step;
             const isCurrent = i === step;
             return (
-              <div key={s.key} style={{ display: 'flex', alignItems: 'center', flex: i < STEPS.length - 1 ? 1 : 'none', minWidth: 0 }}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 0, width: 'clamp(40px, 10vw, 56px)' }}>
-                  <div style={{
-                    width: 'clamp(28px, 6vw, 36px)', height: 'clamp(28px, 6vw, 36px)', borderRadius: '50%',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    flexShrink: 0,
-                    background: isDone ? '#0A2342' : isCurrent ? '#0A2342' : '#e2e8f0',
-                    color: isDone || isCurrent ? '#fff' : '#94a3b8',
-                    transition: 'all 0.3s',
-                    boxShadow: isCurrent ? '0 4px 12px rgba(10,35,66,0.25)' : 'none',
-                  }}>
+              <div
+                key={s.key}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  flex: i < STEPS.length - 1 ? 1 : 'none',
+                  minWidth: 0,
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    minWidth: 0,
+                    width: 'clamp(40px, 10vw, 56px)',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 'clamp(28px, 6vw, 36px)',
+                      height: 'clamp(28px, 6vw, 36px)',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      background: isDone ? '#0A2342' : isCurrent ? '#0A2342' : '#e2e8f0',
+                      color: isDone || isCurrent ? '#fff' : '#94a3b8',
+                      transition: 'all 0.3s',
+                      boxShadow: isCurrent ? '0 4px 12px rgba(10,35,66,0.25)' : 'none',
+                    }}
+                  >
                     {isDone ? (
-                      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <svg
+                        width="14"
+                        height="14"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                      >
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
                     ) : (
                       <s.icon />
                     )}
                   </div>
-                  <span style={{
-                    fontSize: 'clamp(8px, 1.8vw, 10px)', fontWeight: 700, marginTop: 4, textAlign: 'center',
-                    color: isDone ? '#0A2342' : isCurrent ? '#0A2342' : '#94a3b8',
-                    letterSpacing: 0.2,
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    maxWidth: '100%',
-                  }}>{s.label}</span>
+                  <span
+                    style={{
+                      fontSize: 'clamp(8px, 1.8vw, 10px)',
+                      fontWeight: 700,
+                      marginTop: 4,
+                      textAlign: 'center',
+                      color: isDone ? '#0A2342' : isCurrent ? '#0A2342' : '#94a3b8',
+                      letterSpacing: 0.2,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      maxWidth: '100%',
+                    }}
+                  >
+                    {s.label}
+                  </span>
                 </div>
                 {i < STEPS.length - 1 && (
-                  <div style={{
-                    flex: 1, height: 2, margin: '0 3px',
-                    background: isDone ? '#0A2342' : '#e2e8f0',
-                    borderRadius: 1, transition: 'background 0.3s',
-                    marginBottom: 20,
-                    minWidth: 4,
-                  }} />
+                  <div
+                    style={{
+                      flex: 1,
+                      height: 2,
+                      margin: '0 3px',
+                      background: isDone ? '#0A2342' : '#e2e8f0',
+                      borderRadius: 1,
+                      transition: 'background 0.3s',
+                      marginBottom: 20,
+                      minWidth: 4,
+                    }}
+                  />
                 )}
               </div>
             );
@@ -477,24 +601,42 @@ export default function BookingPage() {
       </div>
 
       {/* ═══ Main Content (Form + Order Reflection Sidebar) ═══ */}
-      <div className="booking-grid" style={{
-        maxWidth: 1080, margin: '32px auto 64px', padding: '0 clamp(12px, 4vw, 24px)',
-        display: 'grid', gap: 28,
-        alignItems: 'start',
-        width: '100%',
-      }}>
+      <div
+        className="booking-grid"
+        style={{
+          maxWidth: 1080,
+          margin: '32px auto 64px',
+          padding: '0 clamp(12px, 4vw, 24px)',
+          display: 'grid',
+          gap: 28,
+          alignItems: 'start',
+          width: '100%',
+        }}
+      >
         {/* ── Left: Form Card ── */}
-        <div style={{
-          background: '#fff', borderRadius: 20, padding: 'clamp(20px, 5vw, 36px) clamp(16px, 5vw, 32px)',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 4px 24px rgba(10,35,66,0.04)',
-          minWidth: 0,
-          overflow: 'visible',
-          transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
-        }}>
+        <div
+          style={{
+            background: '#fff',
+            borderRadius: 20,
+            padding: 'clamp(20px, 5vw, 36px) clamp(16px, 5vw, 32px)',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 4px 24px rgba(10,35,66,0.04)',
+            minWidth: 0,
+            overflow: 'visible',
+            transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
+        >
           {/* Step Label */}
           <div style={{ marginBottom: 8 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: '#2563eb', textTransform: 'uppercase', letterSpacing: 1.2 }}>
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                color: '#2563eb',
+                textTransform: 'uppercase',
+                letterSpacing: 1.2,
+              }}
+            >
               Step {step + 1}
             </span>
           </div>
@@ -502,11 +644,20 @@ export default function BookingPage() {
           {/* ── STEP 0: Choose Service ── */}
           {step === 0 && (
             <div>
-              <h2 style={{ fontSize: 26, fontWeight: 800, color: '#0A2342', margin: '0 0 4px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              <h2
+                style={{
+                  fontSize: 26,
+                  fontWeight: 800,
+                  color: '#0A2342',
+                  margin: '0 0 4px',
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                }}
+              >
                 Select Your Service
               </h2>
               <p style={{ color: '#64748b', fontSize: 13, margin: '0 0 20px' }}>
-                Choose from our certified residential, commercial, and outdoor maintenance services across Abu Dhabi.
+                Choose from our certified residential, commercial, and outdoor maintenance services
+                across Abu Dhabi.
               </p>
 
               {/* Category Filter Pills (Horizontal scrollable with wheel, drag, and arrow buttons) */}
@@ -540,7 +691,14 @@ export default function BookingPage() {
                     aria-label="Scroll left"
                     title="Scroll left"
                   >
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <svg
+                      width="14"
+                      height="14"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                     </svg>
                   </button>
@@ -597,14 +755,16 @@ export default function BookingPage() {
                         }}
                       >
                         <span>{tab.label}</span>
-                        <span style={{
-                          fontSize: 10,
-                          fontWeight: 800,
-                          padding: '1px 7px',
-                          borderRadius: 10,
-                          background: isActive ? 'rgba(255,255,255,0.22)' : '#e2e8f0',
-                          color: isActive ? '#ffffff' : '#64748b',
-                        }}>
+                        <span
+                          style={{
+                            fontSize: 10,
+                            fontWeight: 800,
+                            padding: '1px 7px',
+                            borderRadius: 10,
+                            background: isActive ? 'rgba(255,255,255,0.22)' : '#e2e8f0',
+                            color: isActive ? '#ffffff' : '#64748b',
+                          }}
+                        >
                           {count}
                         </span>
                       </button>
@@ -641,7 +801,14 @@ export default function BookingPage() {
                     aria-label="Scroll right"
                     title="Scroll right"
                   >
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <svg
+                      width="14"
+                      height="14"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                     </svg>
                   </button>
@@ -653,16 +820,31 @@ export default function BookingPage() {
                 /* Skeleton loader while services fetch */
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   {[1, 2, 3, 4, 5, 6].map((n) => (
-                    <div key={n} style={{
-                      height: 110, borderRadius: 16, background: '#f1f5f9',
-                      animation: 'pulse 1.5s ease-in-out infinite',
-                    }} />
+                    <div
+                      key={n}
+                      style={{
+                        height: 110,
+                        borderRadius: 16,
+                        background: '#f1f5f9',
+                        animation: 'pulse 1.5s ease-in-out infinite',
+                      }}
+                    />
                   ))}
                   <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.45} }`}</style>
                 </div>
               ) : filteredServices.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '36px 16px', background: '#f8fafc', borderRadius: 16, border: '1px dashed #cbd5e1' }}>
-                  <p style={{ color: '#64748b', fontSize: 13, margin: 0 }}>No services currently available in this category.</p>
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: '36px 16px',
+                    background: '#f8fafc',
+                    borderRadius: 16,
+                    border: '1px dashed #cbd5e1',
+                  }}
+                >
+                  <p style={{ color: '#64748b', fontSize: 13, margin: 0 }}>
+                    No services currently available in this category.
+                  </p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
@@ -694,87 +876,128 @@ export default function BookingPage() {
                             ? '0 6px 20px rgba(10,35,66,0.10)'
                             : '0 1px 3px rgba(0,0,0,0.02)',
                           cursor: 'pointer',
-                          transition: 'border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease',
+                          transition:
+                            'border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease',
                         }}
                       >
                         {/* ── Always-visible header row ── */}
                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
                           {/* Left: badge + title */}
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <span style={{
-                              fontSize: 10,
-                              fontWeight: 800,
-                              textTransform: 'uppercase',
-                              letterSpacing: 0.5,
-                              padding: '2px 7px',
-                              borderRadius: 5,
-                              background: catBadge.bg,
-                              color: catBadge.color,
-                              display: 'inline-block',
-                              marginBottom: 6,
-                            }}>
+                            <span
+                              style={{
+                                fontSize: 10,
+                                fontWeight: 800,
+                                textTransform: 'uppercase',
+                                letterSpacing: 0.5,
+                                padding: '2px 7px',
+                                borderRadius: 5,
+                                background: catBadge.bg,
+                                color: catBadge.color,
+                                display: 'inline-block',
+                                marginBottom: 6,
+                              }}
+                            >
                               {catBadge.label}
                             </span>
-                            <div style={{
-                              fontWeight: 800,
-                              fontSize: 14,
-                              color: '#0A2342',
-                              lineHeight: 1.3,
-                            }}>
+                            <div
+                              style={{
+                                fontWeight: 800,
+                                fontSize: 14,
+                                color: '#0A2342',
+                                lineHeight: 1.3,
+                              }}
+                            >
                               {s.title}
                             </div>
                           </div>
 
                           {/* Right: radio + chevron */}
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                            <div style={{
-                              width: 18, height: 18, borderRadius: '50%',
-                              border: isSelected ? '5px solid #0A2342' : '2px solid #cbd5e1',
-                              background: '#fff',
-                              transition: 'border 0.2s',
-                            }} />
+                          <div
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              gap: 6,
+                              flexShrink: 0,
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: 18,
+                                height: 18,
+                                borderRadius: '50%',
+                                border: isSelected ? '5px solid #0A2342' : '2px solid #cbd5e1',
+                                background: '#fff',
+                                transition: 'border 0.2s',
+                              }}
+                            />
                             {/* Chevron */}
                             <svg
-                              width="14" height="14" viewBox="0 0 24 24" fill="none"
-                              stroke={isExpanded ? '#0A2342' : '#94a3b8'} strokeWidth="2.5"
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke={isExpanded ? '#0A2342' : '#94a3b8'}
+                              strokeWidth="2.5"
                               style={{
-                                transition: 'transform 0.3s cubic-bezier(0.16,1,0.3,1), stroke 0.2s',
+                                transition:
+                                  'transform 0.3s cubic-bezier(0.16,1,0.3,1), stroke 0.2s',
                                 transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
                               }}
                             >
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M19 9l-7 7-7-7"
+                              />
                             </svg>
                           </div>
                         </div>
 
                         {/* ── Collapsible description (CSS grid animation) ── */}
-                        <div style={{
-                          display: 'grid',
-                          gridTemplateRows: isExpanded ? '1fr' : '0fr',
-                          transition: 'grid-template-rows 0.35s cubic-bezier(0.16,1,0.3,1)',
-                        }}>
+                        <div
+                          style={{
+                            display: 'grid',
+                            gridTemplateRows: isExpanded ? '1fr' : '0fr',
+                            transition: 'grid-template-rows 0.35s cubic-bezier(0.16,1,0.3,1)',
+                          }}
+                        >
                           <div style={{ overflow: 'hidden' }}>
-                            <div style={{
-                              fontSize: 12,
-                              color: '#64748b',
-                              lineHeight: 1.5,
-                              paddingTop: 10,
-                            }}>
+                            <div
+                              style={{
+                                fontSize: 12,
+                                color: '#64748b',
+                                lineHeight: 1.5,
+                                paddingTop: 10,
+                              }}
+                            >
                               {s.description}
                             </div>
                           </div>
                         </div>
 
                         {/* ── Rate footer ── */}
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          paddingTop: 10,
-                          marginTop: 8,
-                          borderTop: isSelected ? '1px solid rgba(10,35,66,0.08)' : '1px solid #f1f5f9',
-                        }}>
-                          <span style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            paddingTop: 10,
+                            marginTop: 8,
+                            borderTop: isSelected
+                              ? '1px solid rgba(10,35,66,0.08)'
+                              : '1px solid #f1f5f9',
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: 11,
+                              fontWeight: 700,
+                              color: '#94a3b8',
+                              textTransform: 'uppercase',
+                            }}
+                          >
                             Starting Rate
                           </span>
                           <span style={{ fontSize: 13, fontWeight: 800, color: '#2563eb' }}>
@@ -792,7 +1015,15 @@ export default function BookingPage() {
           {/* ── STEP 1: Date & Time ── */}
           {step === 1 && (
             <div>
-              <h2 style={{ fontSize: 26, fontWeight: 800, color: '#0A2342', margin: '0 0 4px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              <h2
+                style={{
+                  fontSize: 26,
+                  fontWeight: 800,
+                  color: '#0A2342',
+                  margin: '0 0 4px',
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                }}
+              >
                 When works for you?
               </h2>
               <p style={{ color: '#64748b', fontSize: 13, margin: '0 0 24px' }}>
@@ -822,21 +1053,35 @@ export default function BookingPage() {
               />
 
               {timeError && (
-                <div style={{
-                  marginTop: 14,
-                  padding: '10px 14px',
-                  borderRadius: 10,
-                  background: '#fff1f2',
-                  border: '1px solid #fecdd3',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  fontSize: 12,
-                  color: '#be123c',
-                  fontWeight: 600,
-                }}>
-                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" style={{ flexShrink: 0 }}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                <div
+                  style={{
+                    marginTop: 14,
+                    padding: '10px 14px',
+                    borderRadius: 10,
+                    background: '#fff1f2',
+                    border: '1px solid #fecdd3',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    fontSize: 12,
+                    color: '#be123c',
+                    fontWeight: 600,
+                  }}
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    style={{ flexShrink: 0 }}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
                   </svg>
                   <span>{timeError}</span>
                 </div>
@@ -847,7 +1092,15 @@ export default function BookingPage() {
           {/* ── STEP 2: Address ── */}
           {step === 2 && (
             <div>
-              <h2 style={{ fontSize: 26, fontWeight: 800, color: '#0A2342', margin: '0 0 4px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              <h2
+                style={{
+                  fontSize: 26,
+                  fontWeight: 800,
+                  color: '#0A2342',
+                  margin: '0 0 4px',
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                }}
+              >
                 Where shall we clean?
               </h2>
               <p style={{ color: '#64748b', fontSize: 13, margin: '0 0 28px' }}>
@@ -902,7 +1155,17 @@ export default function BookingPage() {
               {/* Zip Code / Makani */}
               <div style={{ marginTop: 16 }}>
                 <span style={labelStyle}>
-                  Zip Code / Makani <span style={{ color: '#94a3b8', fontWeight: 400, textTransform: 'none', fontSize: 11 }}>(optional)</span>
+                  Zip Code / Makani{' '}
+                  <span
+                    style={{
+                      color: '#94a3b8',
+                      fontWeight: 400,
+                      textTransform: 'none',
+                      fontSize: 11,
+                    }}
+                  >
+                    (optional)
+                  </span>
                 </span>
                 <input
                   type="text"
@@ -916,7 +1179,17 @@ export default function BookingPage() {
               {/* Access Notes */}
               <div style={{ marginTop: 16 }}>
                 <span style={labelStyle}>
-                  Access Notes <span style={{ color: '#94a3b8', fontWeight: 400, textTransform: 'none', fontSize: 11 }}>(optional)</span>
+                  Access Notes{' '}
+                  <span
+                    style={{
+                      color: '#94a3b8',
+                      fontWeight: 400,
+                      textTransform: 'none',
+                      fontSize: 11,
+                    }}
+                  >
+                    (optional)
+                  </span>
                 </span>
                 <textarea
                   value={data.notes}
@@ -932,7 +1205,15 @@ export default function BookingPage() {
           {/* ── STEP 3: Contact ── */}
           {step === 3 && (
             <div>
-              <h2 style={{ fontSize: 26, fontWeight: 800, color: '#0A2342', margin: '0 0 4px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              <h2
+                style={{
+                  fontSize: 26,
+                  fontWeight: 800,
+                  color: '#0A2342',
+                  margin: '0 0 4px',
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                }}
+              >
                 How do we reach you?
               </h2>
               <p style={{ color: '#64748b', fontSize: 13, margin: '0 0 28px' }}>
@@ -941,55 +1222,123 @@ export default function BookingPage() {
 
               <span style={labelStyle}>Full Name</span>
               <input
-                type="text" value={data.name}
-                onChange={(e) => { set('name', e.target.value); if (contactErrors.name) setContactErrors((p) => ({ ...p, name: '' })); }}
+                type="text"
+                value={data.name}
+                onChange={(e) => {
+                  set('name', e.target.value);
+                  if (contactErrors.name) setContactErrors((p) => ({ ...p, name: '' }));
+                }}
                 placeholder="e.g. Mohammed Al Mansoori"
-                style={{ ...inputStyle, ...(contactErrors.name ? { borderColor: '#fca5a5', background: '#fff5f5' } : {}) }}
+                style={{
+                  ...inputStyle,
+                  ...(contactErrors.name ? { borderColor: '#fca5a5', background: '#fff5f5' } : {}),
+                }}
               />
-              {contactErrors.name && <p style={{ margin: '6px 0 0', fontSize: 12, color: '#dc2626', fontWeight: 500 }}>{contactErrors.name}</p>}
+              {contactErrors.name && (
+                <p style={{ margin: '6px 0 0', fontSize: 12, color: '#dc2626', fontWeight: 500 }}>
+                  {contactErrors.name}
+                </p>
+              )}
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 16 }}>
+              <div
+                style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 16 }}
+              >
                 <div>
                   <span style={labelStyle}>Email</span>
                   <input
-                    type="email" value={data.email}
-                    onChange={(e) => { set('email', e.target.value); if (contactErrors.email) setContactErrors((p) => ({ ...p, email: '' })); }}
+                    type="email"
+                    value={data.email}
+                    onChange={(e) => {
+                      set('email', e.target.value);
+                      if (contactErrors.email) setContactErrors((p) => ({ ...p, email: '' }));
+                    }}
                     placeholder="client@email.com"
-                    style={{ ...inputStyle, ...(contactErrors.email ? { borderColor: '#fca5a5', background: '#fff5f5' } : {}) }}
+                    style={{
+                      ...inputStyle,
+                      ...(contactErrors.email
+                        ? { borderColor: '#fca5a5', background: '#fff5f5' }
+                        : {}),
+                    }}
                   />
-                  {contactErrors.email && <p style={{ margin: '6px 0 0', fontSize: 12, color: '#dc2626', fontWeight: 500 }}>{contactErrors.email}</p>}
+                  {contactErrors.email && (
+                    <p
+                      style={{ margin: '6px 0 0', fontSize: 12, color: '#dc2626', fontWeight: 500 }}
+                    >
+                      {contactErrors.email}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <span style={labelStyle}>Phone</span>
                   <input
-                    type="tel" value={data.phone}
-                    onChange={(e) => { set('phone', formatUAEPhone(e.target.value)); if (contactErrors.phone) setContactErrors((p) => ({ ...p, phone: '' })); }}
+                    type="tel"
+                    value={data.phone}
+                    onChange={(e) => {
+                      set('phone', formatUAEPhone(e.target.value));
+                      if (contactErrors.phone) setContactErrors((p) => ({ ...p, phone: '' }));
+                    }}
                     placeholder="+971 50 000 0000"
-                    style={{ ...inputStyle, ...(contactErrors.phone ? { borderColor: '#fca5a5', background: '#fff5f5' } : {}) }}
+                    style={{
+                      ...inputStyle,
+                      ...(contactErrors.phone
+                        ? { borderColor: '#fca5a5', background: '#fff5f5' }
+                        : {}),
+                    }}
                   />
-                  {contactErrors.phone && <p style={{ margin: '6px 0 0', fontSize: 12, color: '#dc2626', fontWeight: 500 }}>{contactErrors.phone}</p>}
+                  {contactErrors.phone && (
+                    <p
+                      style={{ margin: '6px 0 0', fontSize: 12, color: '#dc2626', fontWeight: 500 }}
+                    >
+                      {contactErrors.phone}
+                    </p>
+                  )}
                 </div>
               </div>
-
             </div>
           )}
 
           {/* ── STEP 4: Review & Confirm ── */}
           {step === 4 && (
             <div>
-              <h2 style={{ fontSize: 26, fontWeight: 800, color: '#0A2342', margin: '0 0 4px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              <h2
+                style={{
+                  fontSize: 26,
+                  fontWeight: 800,
+                  color: '#0A2342',
+                  margin: '0 0 4px',
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                }}
+              >
                 Review & confirm
               </h2>
               <p style={{ color: '#64748b', fontSize: 13, margin: '0 0 28px' }}>
                 One last look before your sanctuary is restored.
               </p>
 
-              <div style={{ borderRadius: 16, border: '1px solid #e2e8f0', overflow: 'hidden', marginBottom: 24 }}>
+              <div
+                style={{
+                  borderRadius: 16,
+                  border: '1px solid #e2e8f0',
+                  overflow: 'hidden',
+                  marginBottom: 24,
+                }}
+              >
                 {[
                   {
                     icon: (
-                      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#2563eb" strokeWidth="2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                      <svg
+                        width="15"
+                        height="15"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="#2563eb"
+                        strokeWidth="2"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+                        />
                       </svg>
                     ),
                     label: 'SERVICE',
@@ -997,8 +1346,16 @@ export default function BookingPage() {
                   },
                   {
                     icon: (
-                      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#2563eb" strokeWidth="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
+                      <svg
+                        width="15"
+                        height="15"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="#2563eb"
+                        strokeWidth="2"
+                      >
+                        <rect x="3" y="4" width="18" height="18" rx="2" />
+                        <path d="M16 2v4M8 2v4M3 10h18" />
                       </svg>
                     ),
                     label: 'DATE',
@@ -1006,8 +1363,16 @@ export default function BookingPage() {
                   },
                   {
                     icon: (
-                      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#2563eb" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
+                      <svg
+                        width="15"
+                        height="15"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="#2563eb"
+                        strokeWidth="2"
+                      >
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 6v6l4 2" />
                       </svg>
                     ),
                     label: 'TIME',
@@ -1015,8 +1380,20 @@ export default function BookingPage() {
                   },
                   {
                     icon: (
-                      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#2563eb" strokeWidth="2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><circle cx="12" cy="11" r="3" />
+                      <svg
+                        width="15"
+                        height="15"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="#2563eb"
+                        strokeWidth="2"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <circle cx="12" cy="11" r="3" />
                       </svg>
                     ),
                     label: 'ADDRESS',
@@ -1024,56 +1401,129 @@ export default function BookingPage() {
                   },
                   {
                     icon: (
-                      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#2563eb" strokeWidth="2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      <svg
+                        width="15"
+                        height="15"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="#2563eb"
+                        strokeWidth="2"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
                       </svg>
                     ),
                     label: 'CONTACT',
                     value: `${data.name}${data.phone ? ' · ' + data.phone : ''}`,
                   },
                 ].map((row, i) => (
-                  <div key={row.label} style={{
-                    display: 'flex', alignItems: 'center', gap: 14,
-                    padding: '14px 20px',
-                    background: i % 2 === 0 ? '#f8fafc' : '#fff',
-                    borderBottom: i < 4 ? '1px solid #f1f5f9' : 'none',
-                  }}>
+                  <div
+                    key={row.label}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 14,
+                      padding: '14px 20px',
+                      background: i % 2 === 0 ? '#f8fafc' : '#fff',
+                      borderBottom: i < 4 ? '1px solid #f1f5f9' : 'none',
+                    }}
+                  >
                     <span style={{ fontSize: 14 }}>{row.icon}</span>
                     <div>
-                      <div style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.8 }}>{row.label}</div>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: '#0A2342', marginTop: 1 }}>{row.value}</div>
+                      <div
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 700,
+                          color: '#94a3b8',
+                          textTransform: 'uppercase',
+                          letterSpacing: 0.8,
+                        }}
+                      >
+                        {row.label}
+                      </div>
+                      <div
+                        style={{ fontSize: 14, fontWeight: 600, color: '#0A2342', marginTop: 1 }}
+                      >
+                        {row.value}
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
 
               {/* Payment Info */}
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 14,
-                padding: '16px 20px', borderRadius: 14,
-                background: '#ecfdf5', border: '1px solid #bbf7d0',
-              }}>
-                <div style={{
-                  width: 40, height: 40, borderRadius: 10,
-                  background: '#d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#059669" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 14,
+                  padding: '16px 20px',
+                  borderRadius: 14,
+                  background: '#ecfdf5',
+                  border: '1px solid #bbf7d0',
+                }}
+              >
+                <div
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 10,
+                    background: '#d1fae5',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="#059669"
+                    strokeWidth="2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                    />
                   </svg>
                 </div>
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: '#064e3b' }}>Pay after your clean</div>
-                  <div style={{ fontSize: 12, color: '#065f46' }}>No charge today. Secure payment collected on completion.</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#064e3b' }}>
+                    Pay after your clean
+                  </div>
+                  <div style={{ fontSize: 12, color: '#065f46' }}>
+                    No charge today. Secure payment collected on completion.
+                  </div>
                 </div>
               </div>
 
               {/* Grand Total */}
-              <div style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                marginTop: 20, paddingTop: 20, borderTop: '2px solid #e2e8f0',
-              }}>
-                <span style={{ fontSize: 14, color: '#64748b', fontWeight: 600 }}>Total due on completion</span>
-                <span style={{ fontSize: 28, fontWeight: 900, color: '#0A2342', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginTop: 20,
+                  paddingTop: 20,
+                  borderTop: '2px solid #e2e8f0',
+                }}
+              >
+                <span style={{ fontSize: 14, color: '#64748b', fontWeight: 600 }}>
+                  Total due on completion
+                </span>
+                <span
+                  style={{
+                    fontSize: 28,
+                    fontWeight: 900,
+                    color: '#0A2342',
+                    fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  }}
+                >
                   AED {estimate.total}
                 </span>
               </div>
@@ -1081,25 +1531,43 @@ export default function BookingPage() {
           )}
 
           {/* ── Navigation Buttons ── */}
-          <div style={{
-            display: 'flex',
-            justifyContent: step > 0 ? 'space-between' : 'flex-end',
-            alignItems: 'center',
-            marginTop: 32, paddingTop: 24, borderTop: '1px solid #f1f5f9',
-          }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: step > 0 ? 'space-between' : 'flex-end',
+              alignItems: 'center',
+              marginTop: 32,
+              paddingTop: 24,
+              borderTop: '1px solid #f1f5f9',
+            }}
+          >
             {step > 0 && (
               <button
                 type="button"
                 onClick={() => setStep((s) => s - 1)}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  padding: '12px 20px', borderRadius: 12,
-                  border: '1.5px solid #e2e8f0', background: '#fff',
-                  color: '#334155', fontSize: 13, fontWeight: 700,
-                  cursor: 'pointer', transition: 'all 0.15s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '12px 20px',
+                  borderRadius: 12,
+                  border: '1.5px solid #e2e8f0',
+                  background: '#fff',
+                  color: '#334155',
+                  fontSize: 13,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s',
                 }}
               >
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <svg
+                  width="14"
+                  height="14"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                 </svg>
                 Back
@@ -1112,18 +1580,32 @@ export default function BookingPage() {
                 disabled={!isStepValid()}
                 onClick={validateAndProceed}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  padding: '12px 28px', borderRadius: 12,
-                  background: isStepValid() ? 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)' : '#e2e8f0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '12px 28px',
+                  borderRadius: 12,
+                  background: isStepValid()
+                    ? 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)'
+                    : '#e2e8f0',
                   color: isStepValid() ? '#fff' : '#94a3b8',
-                  border: 'none', fontSize: 13, fontWeight: 700,
+                  border: 'none',
+                  fontSize: 13,
+                  fontWeight: 700,
                   cursor: isStepValid() ? 'pointer' : 'not-allowed',
                   boxShadow: isStepValid() ? '0 4px 14px rgba(10,35,66,0.25)' : 'none',
                   transition: 'all 0.15s',
                 }}
               >
                 Continue
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <svg
+                  width="14"
+                  height="14"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
               </button>
@@ -1133,10 +1615,16 @@ export default function BookingPage() {
                 disabled={submitLoading}
                 onClick={handleConfirm}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  padding: '14px 32px', borderRadius: 12,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '14px 32px',
+                  borderRadius: 12,
                   background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)',
-                  color: '#fff', border: 'none', fontSize: 14, fontWeight: 800,
+                  color: '#fff',
+                  border: 'none',
+                  fontSize: 14,
+                  fontWeight: 800,
                   cursor: submitLoading ? 'not-allowed' : 'pointer',
                   opacity: submitLoading ? 0.7 : 1,
                   boxShadow: '0 6px 20px rgba(10,35,66,0.3)',
@@ -1145,7 +1633,14 @@ export default function BookingPage() {
               >
                 {submitLoading ? 'Submitting...' : 'Confirm Appointment'}
                 {!submitLoading && (
-                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <svg
+                    width="16"
+                    height="16"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                  >
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 )}
@@ -1156,31 +1651,66 @@ export default function BookingPage() {
 
         {/* ── Right: Order Reflection Sidebar ── */}
         <div style={{ position: 'sticky', top: 100, minWidth: 0 }}>
-          <div style={{
-            background: '#fff', borderRadius: 20, overflow: 'hidden',
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 4px 24px rgba(10,35,66,0.04)',
-          }}>
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 20,
+              overflow: 'hidden',
+              border: '1px solid #e2e8f0',
+              boxShadow: '0 4px 24px rgba(10,35,66,0.04)',
+            }}
+          >
             {/* Sidebar header */}
-            <div style={{
-              padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 10,
-              borderBottom: '1px solid #f1f5f9', background: '#f8fafc',
-            }}>
-              <div style={{
-                width: 32, height: 32, borderRadius: '50%', background: '#0A2342',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#60a5fa" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            <div
+              style={{
+                padding: '16px 20px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                borderBottom: '1px solid #f1f5f9',
+                background: '#f8fafc',
+              }}
+            >
+              <div
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  background: '#0A2342',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="#60a5fa"
+                  strokeWidth="2"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                  />
                 </svg>
               </div>
-              <span style={{ fontSize: 14, fontWeight: 800, color: '#0A2342' }}>Order Reflection</span>
+              <span style={{ fontSize: 14, fontWeight: 800, color: '#0A2342' }}>
+                Order Reflection
+              </span>
             </div>
 
             {/* Service Image */}
-            <div style={{ height: 160, overflow: 'hidden', position: 'relative',
-              background: selectedService ? 'transparent' : '#e2e8f0'
-            }}>
+            <div
+              style={{
+                height: 160,
+                overflow: 'hidden',
+                position: 'relative',
+                background: selectedService ? 'transparent' : '#e2e8f0',
+              }}
+            >
               {selectedService && (
                 <img
                   src={selectedService.image}
@@ -1188,65 +1718,139 @@ export default function BookingPage() {
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   onError={(e) => {
                     e.currentTarget.onerror = null;
-                    e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&auto=format&fit=crop&q=80';
+                    e.currentTarget.src =
+                      'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&auto=format&fit=crop&q=80';
                   }}
                 />
               )}
-              <div style={{
-                position: 'absolute', bottom: 0, left: 0, right: 0,
-                background: 'linear-gradient(transparent, rgba(0,0,0,0.6))',
-                padding: '24px 16px 12px',
-              }}>
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  background: 'linear-gradient(transparent, rgba(0,0,0,0.6))',
+                  padding: '24px 16px 12px',
+                }}
+              >
                 <div style={{ color: '#fff', fontSize: 15, fontWeight: 800 }}>
                   {selectedService?.title || 'Select a service'}
                 </div>
-                <div style={{ color: '#93c5fd', fontSize: 11, fontWeight: 600 }}>Freshness Index {freshnessIndex}</div>
+                <div style={{ color: '#93c5fd', fontSize: 11, fontWeight: 600 }}>
+                  Freshness Index {freshnessIndex}
+                </div>
               </div>
             </div>
 
             {/* Summary details */}
             <div style={{ padding: '16px 20px' }}>
               {[
-                { icon: CalendarSmallIcon, label: 'Date', value: data.date ? formatFriendlyDate(data.date) : '—' },
+                {
+                  icon: CalendarSmallIcon,
+                  label: 'Date',
+                  value: data.date ? formatFriendlyDate(data.date) : '—',
+                },
                 { icon: ClockSmallIcon, label: 'Time', value: data.time || '—' },
-                { icon: PinSmallIcon, label: 'Address', value: data.streetAddress ? `${data.district}, ${data.city}` : '—' },
+                {
+                  icon: PinSmallIcon,
+                  label: 'Address',
+                  value: data.streetAddress ? `${data.district}, ${data.city}` : '—',
+                },
               ].map((row) => (
-                <div key={row.label} style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                  padding: '8px 0', borderBottom: '1px solid #f8fafc',
-                }}>
+                <div
+                  key={row.label}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '8px 0',
+                    borderBottom: '1px solid #f8fafc',
+                  }}
+                >
                   <row.icon />
                   <div>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.6 }}>{row.label}</div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: '#0A2342' }}>{row.value}</div>
+                    <div
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 700,
+                        color: '#94a3b8',
+                        textTransform: 'uppercase',
+                        letterSpacing: 0.6,
+                      }}
+                    >
+                      {row.label}
+                    </div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: '#0A2342' }}>
+                      {row.value}
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
 
             {/* Price */}
-            <div style={{
-              padding: '16px 20px', borderTop: '1px solid #f1f5f9',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            }}>
+            <div
+              style={{
+                padding: '16px 20px',
+                borderTop: '1px solid #f1f5f9',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
               <div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.8 }}>Service base</div>
+                <div
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: '#94a3b8',
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.8,
+                  }}
+                >
+                  Service base
+                </div>
                 <div style={{ fontSize: 11, color: '#64748b', marginTop: 1 }}>{estimate.hours}</div>
               </div>
-              <div style={{ fontSize: 22, fontWeight: 900, color: '#0A2342', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              <div
+                style={{
+                  fontSize: 22,
+                  fontWeight: 900,
+                  color: '#0A2342',
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                }}
+              >
                 AED {estimate.total}
               </div>
             </div>
           </div>
 
           {/* Trust badge below sidebar */}
-          <div style={{
-            marginTop: 12, padding: '12px 16px', borderRadius: 12,
-            background: '#eff6ff', border: '1px solid #dbeafe',
-            display: 'flex', alignItems: 'center', gap: 8,
-          }}>
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2563eb" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          <div
+            style={{
+              marginTop: 12,
+              padding: '12px 16px',
+              borderRadius: 12,
+              background: '#eff6ff',
+              border: '1px solid #dbeafe',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            <svg
+              width="14"
+              height="14"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="#2563eb"
+              strokeWidth="2"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+              />
             </svg>
             <span style={{ fontSize: 11, fontWeight: 600, color: '#1e40af' }}>
               Built with CitiMaids 🇦🇪
@@ -1318,24 +1922,54 @@ const selectStyle = {
 
 function StepServiceIcon() {
   return (
-    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+    <svg
+      width="16"
+      height="16"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+      />
     </svg>
   );
 }
 
 function StepDateIcon() {
   return (
-    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-      <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
+    <svg
+      width="16"
+      height="16"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <rect x="3" y="4" width="18" height="18" rx="2" />
+      <path d="M16 2v4M8 2v4M3 10h18" />
     </svg>
   );
 }
 
 function StepAddressIcon() {
   return (
-    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+    <svg
+      width="16"
+      height="16"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+      />
       <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
   );
@@ -1343,16 +1977,38 @@ function StepAddressIcon() {
 
 function StepContactIcon() {
   return (
-    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+    <svg
+      width="16"
+      height="16"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+      />
     </svg>
   );
 }
 
 function StepReviewIcon() {
   return (
-    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+    <svg
+      width="16"
+      height="16"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+      />
     </svg>
   );
 }
@@ -1364,7 +2020,8 @@ function StepReviewIcon() {
 function CalendarSmallIcon() {
   return (
     <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2563eb" strokeWidth="2">
-      <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
+      <rect x="3" y="4" width="18" height="18" rx="2" />
+      <path d="M16 2v4M8 2v4M3 10h18" />
     </svg>
   );
 }
@@ -1372,7 +2029,8 @@ function CalendarSmallIcon() {
 function ClockSmallIcon() {
   return (
     <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2563eb" strokeWidth="2">
-      <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 6v6l4 2" />
     </svg>
   );
 }
@@ -1380,7 +2038,11 @@ function ClockSmallIcon() {
 function PinSmallIcon() {
   return (
     <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2563eb" strokeWidth="2">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+      />
       <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
   );

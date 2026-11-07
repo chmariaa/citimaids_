@@ -63,10 +63,9 @@ export default function Navbar() {
             <Link
               key={l.to}
               to={l.to}
-              className={`text-sm font-semibold tracking-wide transition-all duration-200 relative py-1 ${isActive(l.to)
-                  ? 'text-sky-300 font-bold'
-                  : 'text-white/80 hover:text-white'
-                }`}
+              className={`text-sm font-semibold tracking-wide transition-all duration-200 relative py-1 ${
+                isActive(l.to) ? 'text-sky-300 font-bold' : 'text-white/80 hover:text-white'
+              }`}
             >
               {l.label}
               {isActive(l.to) && (
@@ -90,19 +89,34 @@ export default function Navbar() {
               stroke="currentColor"
               strokeWidth={2}
             >
-              <rect x="5" y="11" width="14" height="10" rx="2" strokeLinecap="round" strokeLinejoin="round" />
+              <rect
+                x="5"
+                y="11"
+                width="14"
+                height="10"
+                rx="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
               <path d="M8 11V7a4 4 0 018 0v4" strokeLinecap="round" strokeLinejoin="round" />
               <path d="M12 15v2" strokeLinecap="round" />
             </svg>
             <span>Staff Portal</span>
           </Link>
-          <Link
-            to="/book"
-            className="btn-3d-nav group"
-          >
+          <Link to="/book" className="btn-3d-nav group">
             <span>Book Now</span>
-            <svg className="w-4 h-4 text-blue-900 group-hover:text-white transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            <svg
+              className="w-4 h-4 text-blue-900 group-hover:text-white transition-all duration-200"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M14 5l7 7m0 0l-7 7m7-7H3"
+              />
             </svg>
           </Link>
         </div>
@@ -115,9 +129,19 @@ export default function Navbar() {
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             {open ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M6 18L18 6M6 6l12 12"
+              />
             ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
             )}
           </svg>
         </button>
@@ -130,19 +154,17 @@ export default function Navbar() {
             <Link
               key={l.to}
               to={l.to}
-              className={`px-4 py-3 rounded-xl text-sm font-bold transition-colors ${isActive(l.to)
+              className={`px-4 py-3 rounded-xl text-sm font-bold transition-colors ${
+                isActive(l.to)
                   ? 'bg-blue-600/30 text-sky-300 border border-blue-500/30'
                   : 'text-white/80 hover:bg-white/10'
-                }`}
+              }`}
             >
               {l.label}
             </Link>
           ))}
           <div className="pt-4 border-t border-white/10 flex flex-col gap-3">
-            <Link
-              to="/book"
-              className="btn-3d-primary w-full text-center py-3"
-            >
+            <Link to="/book" className="btn-3d-primary w-full text-center py-3">
               <span>Book Now</span>
             </Link>
             <Link
@@ -156,7 +178,15 @@ export default function Navbar() {
                 stroke="currentColor"
                 strokeWidth={2}
               >
-                <rect x="5" y="11" width="14" height="10" rx="2" strokeLinecap="round" strokeLinejoin="round" />
+                <rect
+                  x="5"
+                  y="11"
+                  width="14"
+                  height="10"
+                  rx="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
                 <path d="M8 11V7a4 4 0 018 0v4" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M12 15v2" strokeLinecap="round" />
               </svg>

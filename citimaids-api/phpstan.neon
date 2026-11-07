@@ -1,0 +1,10 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app/
+
+    # Level 1 focuses on catching critical bugs (undefined methods, wrong properties, undefined variables)
+    # without overwhelming a student team with strict PHPDoc typing.
+    level: 1

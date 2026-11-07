@@ -5,20 +5,20 @@
 
 /* ── Brand Colors ─── */
 export const brand = {
-  navy:     '#0A2342',
+  navy: '#0A2342',
   midnight: '#061429',
-  midBlue:  '#1E3A8A',
-  royal:    '#2563eb',
-  sky:      '#60a5fa',
+  midBlue: '#1E3A8A',
+  royal: '#2563eb',
+  sky: '#60a5fa',
   skyLight: '#93c5fd',
-  softBg:   '#f8fafc',
-  border:   '#e2e8f0',
+  softBg: '#f8fafc',
+  border: '#e2e8f0',
 };
 
 /* ── Typography ─── */
 export const fonts = {
   heading: "'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif",
-  body:    "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+  body: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
 };
 
 /* ── Reusable Inline Styles ─── */
@@ -121,12 +121,12 @@ export const tdRow = {
 
 export const statusBadge = (status) => {
   const map = {
-    pending:   { color: '#b45309', bg: '#fef3c7', border: '#fcd34d', label: 'Pending' },
+    pending: { color: '#b45309', bg: '#fef3c7', border: '#fcd34d', label: 'Pending' },
     confirmed: { color: '#1d4ed8', bg: '#dbeafe', border: '#93c5fd', label: 'Confirmed' },
     completed: { color: '#047857', bg: '#d1fae5', border: '#86efac', label: 'Completed' },
     cancelled: { color: '#b91c1c', bg: '#fee2e2', border: '#fca5a5', label: 'Cancelled' },
-    active:    { color: '#047857', bg: '#d1fae5', border: '#86efac', label: 'Active' },
-    inactive:  { color: '#64748b', bg: '#f1f5f9', border: '#cbd5e1', label: 'Inactive' },
+    active: { color: '#047857', bg: '#d1fae5', border: '#86efac', label: 'Active' },
+    inactive: { color: '#64748b', bg: '#f1f5f9', border: '#cbd5e1', label: 'Inactive' },
   };
   const s = map[status] || map.pending;
   return {
@@ -184,7 +184,9 @@ export const tabBtn = (isActive) => ({
   padding: '8px 16px',
   borderRadius: 10,
   border: isActive ? 'none' : `1.5px solid ${brand.border}`,
-  background: isActive ? `linear-gradient(135deg, ${brand.navy} 0%, ${brand.midBlue} 100%)` : '#fff',
+  background: isActive
+    ? `linear-gradient(135deg, ${brand.navy} 0%, ${brand.midBlue} 100%)`
+    : '#fff',
   color: isActive ? '#fff' : '#64748b',
   fontSize: 12,
   fontWeight: 700,

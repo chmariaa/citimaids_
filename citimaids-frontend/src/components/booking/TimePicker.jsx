@@ -15,15 +15,17 @@ export const DEFAULT_TIME_SLOTS = [
 /**
  * Operating hours: 7:00 AM (420 min) to 8:30 PM (1230 min)
  */
-export const OPERATING_HOURS_START = 7 * 60;       // 7:00 AM
-export const OPERATING_HOURS_END = 20 * 60 + 30;   // 8:30 PM
+export const OPERATING_HOURS_START = 7 * 60; // 7:00 AM
+export const OPERATING_HOURS_END = 20 * 60 + 30; // 8:30 PM
 
 /**
  * Parse time string (e.g. "9:00 AM", "10:30 PM") into minutes from midnight
  */
 export function parseTimeToMinutes(timeStr) {
   if (!timeStr) return null;
-  const match = String(timeStr).trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  const match = String(timeStr)
+    .trim()
+    .match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
   if (!match) return null;
   let hours = parseInt(match[1], 10);
   const minutes = parseInt(match[2], 10);
@@ -73,12 +75,7 @@ export function isSlotPassedToday(dateStr, timeStr) {
   return slotMinutes <= currentMinutes;
 }
 
-export default function TimePicker({
-  value,
-  onChange,
-  selectedDate,
-  slots = DEFAULT_TIME_SLOTS,
-}) {
+export default function TimePicker({ value, onChange, selectedDate, slots = DEFAULT_TIME_SLOTS }) {
   const isCustomTime = value && !slots.includes(value);
   const [showCustomPicker, setShowCustomPicker] = useState(() => isCustomTime);
 
@@ -121,7 +118,9 @@ export default function TimePicker({
   useEffect(() => {
     if (!value) return;
     if (!isTimeWithinWorkingHours(value)) {
-      setInlineError('CitiMaids operating hours are 7:00 AM – 8:30 PM. Please enter a time within working hours.');
+      setInlineError(
+        'CitiMaids operating hours are 7:00 AM – 8:30 PM. Please enter a time within working hours.'
+      );
       return;
     }
     if (isSlotPassedToday(selectedDate, value)) {
@@ -161,7 +160,9 @@ export default function TimePicker({
 
     // Enforce working hours strictly: 7:00 AM to 8:30 PM
     if (minutesFromMidnight < OPERATING_HOURS_START || minutesFromMidnight > OPERATING_HOURS_END) {
-      setInlineError('CitiMaids operating hours are 7:00 AM – 8:30 PM. We do not accept bookings outside working hours.');
+      setInlineError(
+        'CitiMaids operating hours are 7:00 AM – 8:30 PM. We do not accept bookings outside working hours.'
+      );
       return;
     }
 
@@ -220,13 +221,15 @@ export default function TimePicker({
     <div style={{ marginTop: 24 }}>
       {/* ── Section Title (Clean, without top Selected text badge) ── */}
       <div style={{ marginBottom: 10 }}>
-        <span style={{
-          fontSize: 11,
-          fontWeight: 700,
-          color: '#64748b',
-          textTransform: 'uppercase',
-          letterSpacing: 0.6,
-        }}>
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            color: '#64748b',
+            textTransform: 'uppercase',
+            letterSpacing: 0.6,
+          }}
+        >
           Choose a Time
         </span>
       </div>
@@ -251,22 +254,16 @@ export default function TimePicker({
                 border: isActive
                   ? '2px solid #0A2342'
                   : isPassed
-                  ? '1.5px dashed #cbd5e1'
-                  : '1.5px solid #e2e8f0',
-                background: isActive
-                  ? '#0A2342'
-                  : isPassed
-                  ? '#f8fafc'
-                  : '#ffffff',
-                color: isActive
-                  ? '#ffffff'
-                  : isPassed
-                  ? '#94a3b8'
-                  : '#334155',
+                    ? '1.5px dashed #cbd5e1'
+                    : '1.5px solid #e2e8f0',
+                background: isActive ? '#0A2342' : isPassed ? '#f8fafc' : '#ffffff',
+                color: isActive ? '#ffffff' : isPassed ? '#94a3b8' : '#334155',
                 cursor: isPassed ? 'not-allowed' : 'pointer',
                 transition: 'all 0.15s ease',
                 position: 'relative',
-                boxShadow: isActive ? '0 4px 12px rgba(10,35,66,0.15)' : '0 1px 2px rgba(0,0,0,0.02)',
+                boxShadow: isActive
+                  ? '0 4px 12px rgba(10,35,66,0.15)'
+                  : '0 1px 2px rgba(0,0,0,0.02)',
               }}
               onMouseEnter={(e) => {
                 if (!isActive && !isPassed) {
@@ -284,13 +281,15 @@ export default function TimePicker({
             >
               <div>{t}</div>
               {isPassed && (
-                <div style={{
-                  fontSize: 9,
-                  fontWeight: 800,
-                  color: '#94a3b8',
-                  textTransform: 'uppercase',
-                  marginTop: 2,
-                }}>
+                <div
+                  style={{
+                    fontSize: 9,
+                    fontWeight: 800,
+                    color: '#94a3b8',
+                    textTransform: 'uppercase',
+                    marginTop: 2,
+                  }}
+                >
                   Passed
                 </div>
               )}
@@ -311,7 +310,8 @@ export default function TimePicker({
             gap: 10,
             padding: '9px 14px',
             borderRadius: 12,
-            border: showCustomPicker || isCustomTime ? '1.5px solid #0A2342' : '1.5px solid #e2e8f0',
+            border:
+              showCustomPicker || isCustomTime ? '1.5px solid #0A2342' : '1.5px solid #e2e8f0',
             background: showCustomPicker || isCustomTime ? '#f0f7ff' : '#ffffff',
             color: '#0A2342',
             fontSize: 13,
@@ -323,7 +323,14 @@ export default function TimePicker({
           aria-expanded={showCustomPicker}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#2563eb" strokeWidth="2.2">
+            <svg
+              width="15"
+              height="15"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="#2563eb"
+              strokeWidth="2.2"
+            >
               <circle cx="12" cy="12" r="10" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
             </svg>
@@ -331,12 +338,14 @@ export default function TimePicker({
           </div>
 
           {/* Smooth Drop Arrow Chevron */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '2px',
-          }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '2px',
+            }}
+          >
             <svg
               width="14"
               height="14"
@@ -356,29 +365,35 @@ export default function TimePicker({
       </div>
 
       {/* ── Collapsible Custom Time Input Panel (Smooth CSS Grid Animation) ── */}
-      <div style={{
-        display: 'grid',
-        gridTemplateRows: showCustomPicker ? '1fr' : '0fr',
-        transition: 'grid-template-rows 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
-      }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateRows: showCustomPicker ? '1fr' : '0fr',
+          transition: 'grid-template-rows 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+        }}
+      >
         <div style={{ overflow: 'hidden' }}>
-          <div style={{
-            marginTop: 10,
-            padding: '16px 18px',
-            background: '#ffffff',
-            borderRadius: 14,
-            border: '1.5px solid #dbeafe',
-            boxShadow: '0 4px 16px rgba(10,35,66,0.04)',
-          }}>
-            <div style={{
-              fontSize: 12,
-              fontWeight: 800,
-              color: '#0A2342',
-              marginBottom: 12,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}>
+          <div
+            style={{
+              marginTop: 10,
+              padding: '16px 18px',
+              background: '#ffffff',
+              borderRadius: 14,
+              border: '1.5px solid #dbeafe',
+              boxShadow: '0 4px 16px rgba(10,35,66,0.04)',
+            }}
+          >
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 800,
+                color: '#0A2342',
+                marginBottom: 12,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
               <span>Enter Preferred Time</span>
               <span style={{ fontSize: 11, fontWeight: 600, color: '#64748b' }}>
                 Working Hours: 7:00 AM – 8:30 PM
@@ -389,7 +404,14 @@ export default function TimePicker({
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
               {/* Hour Input Box */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: '#94a3b8',
+                    textTransform: 'uppercase',
+                  }}
+                >
                   Hour
                 </span>
                 <input
@@ -433,19 +455,28 @@ export default function TimePicker({
               </div>
 
               {/* Colon Separator */}
-              <div style={{
-                fontSize: 22,
-                fontWeight: 900,
-                color: '#64748b',
-                paddingTop: 16,
-                userSelect: 'none',
-              }}>
+              <div
+                style={{
+                  fontSize: 22,
+                  fontWeight: 900,
+                  color: '#64748b',
+                  paddingTop: 16,
+                  userSelect: 'none',
+                }}
+              >
                 :
               </div>
 
               {/* Minute Input Box */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: '#94a3b8',
+                    textTransform: 'uppercase',
+                  }}
+                >
                   Minute
                 </span>
                 <input
@@ -491,17 +522,26 @@ export default function TimePicker({
 
               {/* AM / PM Toggle Controls */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: '#94a3b8',
+                    textTransform: 'uppercase',
+                  }}
+                >
                   Period
                 </span>
-                <div style={{
-                  display: 'flex',
-                  height: 44,
-                  borderRadius: 10,
-                  border: '1.5px solid #cbd5e1',
-                  overflow: 'hidden',
-                  background: '#f8fafc',
-                }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    height: 44,
+                    borderRadius: 10,
+                    border: '1.5px solid #cbd5e1',
+                    overflow: 'hidden',
+                    background: '#f8fafc',
+                  }}
+                >
                   {['AM', 'PM'].map((p) => {
                     const isCurrent = periodInput === p;
                     return (
@@ -556,13 +596,24 @@ export default function TimePicker({
                     alignItems: 'center',
                     gap: 6,
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.92'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.opacity = '0.92';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.opacity = '1';
+                  }}
                   aria-label="Apply preferred time"
                 >
                   {justApplied ? (
                     <>
-                      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <svg
+                        width="15"
+                        height="15"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                      >
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
                       <span>Applied ✓</span>
@@ -576,16 +627,26 @@ export default function TimePicker({
 
             {/* Helper guidance: prompts user to tap Apply Time to reflect */}
             {hourInput && minuteInput && !justApplied && (
-              <div style={{
-                marginTop: 10,
-                fontSize: 11,
-                color: '#2563eb',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 5,
-              }}>
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2" style={{ flexShrink: 0 }}>
+              <div
+                style={{
+                  marginTop: 10,
+                  fontSize: 11,
+                  color: '#2563eb',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 5,
+                }}
+              >
+                <svg
+                  width="13"
+                  height="13"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  style={{ flexShrink: 0 }}
+                >
                   <circle cx="12" cy="12" r="10" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3" />
                 </svg>
@@ -594,16 +655,26 @@ export default function TimePicker({
             )}
 
             {justApplied && (
-              <div style={{
-                marginTop: 10,
-                fontSize: 11,
-                color: '#059669',
-                fontWeight: 700,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 5,
-              }}>
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" style={{ flexShrink: 0 }}>
+              <div
+                style={{
+                  marginTop: 10,
+                  fontSize: 11,
+                  color: '#059669',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 5,
+                }}
+              >
+                <svg
+                  width="13"
+                  height="13"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  style={{ flexShrink: 0 }}
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
                 <span>Preferred time applied and reflected in your order summary!</span>
@@ -615,22 +686,36 @@ export default function TimePicker({
 
       {/* ── Inline Validation Error Message ── */}
       {inlineError && (
-        <div style={{
-          marginTop: 12,
-          padding: '10px 14px',
-          borderRadius: 10,
-          background: '#fff1f2',
-          border: '1px solid #fecdd3',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          fontSize: 12,
-          color: '#be123c',
-          fontWeight: 600,
-          animation: 'errorFadeIn 0.2s ease',
-        }}>
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" style={{ flexShrink: 0 }}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        <div
+          style={{
+            marginTop: 12,
+            padding: '10px 14px',
+            borderRadius: 10,
+            background: '#fff1f2',
+            border: '1px solid #fecdd3',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            fontSize: 12,
+            color: '#be123c',
+            fontWeight: 600,
+            animation: 'errorFadeIn 0.2s ease',
+          }}
+        >
+          <svg
+            width="16"
+            height="16"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth="2"
+            style={{ flexShrink: 0 }}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
           </svg>
           <span>{inlineError}</span>
         </div>

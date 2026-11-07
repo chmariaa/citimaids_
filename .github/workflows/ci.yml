@@ -1,0 +1,108 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ "main", "master", "develop" ]
+  pull_request:
+    branches: [ "main", "master", "develop" ]
+
+jobs:
+  # ─── 1. Laravel Backend Quality & Tests ─────────────────────────────────────
+  backend:
+    name: Backend (PHP 8.4, Pint, PHPUnit)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: citimaids-api
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP and Extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, sqlite3, bcmath
+          coverage: none
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: citimaids-api/vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('citimaids-api/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer Dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Copy Environment File
+        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+
+      - name: Generate Application Key
+        run: php artisan key:generate --no-interaction
+
+      - name: Run Laravel Pint (Code Style)
+        run: vendor/bin/pint --test
+
+      - name: Run PHPUnit Tests (SQLite in-memory)
+        run: vendor/bin/phpunit
+
+  # ─── 2. React Frontend Unit Tests & Build ───────────────────────────────────
+  frontend:
+    name: Frontend (Node 22, Vitest, Build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: citimaids-frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: citimaids-frontend/package-lock.json
+
+      - name: Install NPM Dependencies
+        run: npm ci
+
+      - name: Run Prettier Formatting Check
+        run: npm run format:check
+
+      - name: Run Vitest Component Tests
+        run: npm run test
+
+      - name: Build React SPA
+        run: npm run build
+
+  # ─── 3. End-to-End & Accessibility Tests ────────────────────────────────────
+  e2e:
+    name: E2E & Accessibility (Playwright)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: citimaids-frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: citimaids-frontend/package-lock.json
+
+      - name: Install NPM Dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium --with-deps
+
+      - name: Run Playwright E2E Tests
+        run: npm run test:e2e

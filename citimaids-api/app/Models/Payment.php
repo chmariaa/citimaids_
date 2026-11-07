@@ -23,9 +23,9 @@ class Payment extends Model
     ];
 
     protected $casts = [
-        'amount'                  => 'decimal:2',
+        'amount' => 'decimal:2',
         'payment_link_expires_at' => 'datetime',
-        'paid_at'                 => 'datetime',
+        'paid_at' => 'datetime',
     ];
 
     /* ─── Relationships ─── */
@@ -52,15 +52,15 @@ class Payment extends Model
      */
     public static function generateReference(): string
     {
-        $date  = Carbon::now()->format('Ymd');
-        $last  = static::where('reference_number', 'like', "PAY-{$date}-%")
-                       ->orderByDesc('id')
-                       ->value('reference_number');
+        $date = Carbon::now()->format('Ymd');
+        $last = static::where('reference_number', 'like', "PAY-{$date}-%")
+            ->orderByDesc('id')
+            ->value('reference_number');
 
         $seq = 1;
         if ($last) {
             $parts = explode('-', $last);
-            $seq   = (int) end($parts) + 1;
+            $seq = (int) end($parts) + 1;
         }
 
         return sprintf('PAY-%s-%04d', $date, $seq);

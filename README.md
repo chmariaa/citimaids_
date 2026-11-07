@@ -172,6 +172,79 @@ Full API reference → [docs/backend/routes.md](docs-site/docs/backend/routes.md
 
 --- -->
 
+---
+
+## 🧪 Testing & Quality Assurance
+
+CitiMaids includes a full suite of quality assurance, testing, and static analysis tools across both backend and frontend layers.
+
+### 1. Backend Testing & Quality (`citimaids-api`)
+
+Navigate to `citimaids-api` before running:
+
+```powershell
+cd citimaids-api
+
+# Run PHPUnit tests (uses fast, non-destructive SQLite in-memory)
+composer test
+# or: vendor/bin/phpunit
+
+# Check PHP code style with Laravel Pint
+composer lint
+# or: vendor/bin/pint --test
+
+# Automatically fix code formatting with Laravel Pint
+composer lint:fix
+# or: vendor/bin/pint
+
+# Run static analysis with Larastan (PHPStan for Laravel)
+composer phpstan
+
+# Run dependency security audit
+composer audit
+```
+
+### 2. Frontend Testing & Quality (`citimaids-frontend`)
+
+Navigate to `citimaids-frontend` before running:
+
+```powershell
+cd citimaids-frontend
+
+# Run Vitest unit & component tests
+npm run test
+
+# Run Vitest in interactive watch mode (reruns on file changes)
+npm run test:watch
+
+# Run Playwright End-to-End (E2E) & accessibility tests
+npm run test:e2e
+
+# Run Playwright with interactive visual UI
+npm run test:e2e:ui
+
+# Check code formatting with Prettier
+npm run format:check
+
+# Automatically fix formatting with Prettier
+npm run format
+
+# Run ESLint linter
+npm run lint
+
+# Run security audit on npm dependencies
+npm run audit
+```
+
+### 3. Continuous Integration (CI)
+
+A GitHub Actions pipeline (`.github/workflows/ci.yml`) runs automatically on every push and pull request to `main`, `master`, and `develop` branches:
+- **Backend Job**: Sets up PHP 8.4, verifies Laravel Pint formatting, and executes PHPUnit against in-memory SQLite.
+- **Frontend Job**: Sets up Node 22, checks Prettier formatting, runs Vitest component tests, and builds the Vite production bundle.
+- **E2E Job**: Boots the Vite server and runs Playwright Chromium browser tests with automated Axe accessibility audits.
+
+---
+
 ##  Contributing
 
 Contributions are welcome! Please read the [Contributing Guide](docs-site/docs/contributing/guide.md) before submitting a pull request.

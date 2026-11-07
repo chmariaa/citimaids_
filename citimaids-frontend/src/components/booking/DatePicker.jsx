@@ -30,8 +30,18 @@ export function formatFriendlyDate(dateStr) {
 }
 
 const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
 const WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
@@ -175,15 +185,17 @@ export default function DatePicker({
       }}
     >
       {label && (
-        <label style={{
-          display: 'block',
-          fontSize: 11,
-          fontWeight: 700,
-          color: '#64748b',
-          textTransform: 'uppercase',
-          letterSpacing: 0.6,
-          marginBottom: 8,
-        }}>
+        <label
+          style={{
+            display: 'block',
+            fontSize: 11,
+            fontWeight: 700,
+            color: '#64748b',
+            textTransform: 'uppercase',
+            letterSpacing: 0.6,
+            marginBottom: 8,
+          }}
+        >
           {label}
         </label>
       )}
@@ -213,34 +225,45 @@ export default function DatePicker({
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
           {/* Calendar Icon */}
-          <div style={{
-            width: 34,
-            height: 34,
-            borderRadius: 10,
-            background: isOpen ? '#0A2342' : '#eff6ff',
-            color: isOpen ? '#ffffff' : '#2563eb',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            transition: 'all 0.2s',
-          }}>
-            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+          <div
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 10,
+              background: isOpen ? '#0A2342' : '#eff6ff',
+              color: isOpen ? '#ffffff' : '#2563eb',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              transition: 'all 0.2s',
+            }}
+          >
+            <svg
+              width="18"
+              height="18"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <rect x="3" y="4" width="18" height="18" rx="2" />
               <path strokeLinecap="round" d="M16 2v4M8 2v4M3 10h18" />
             </svg>
           </div>
 
           <div style={{ minWidth: 0 }}>
-            <div style={{
-              fontSize: 14,
-              fontWeight: 700,
-              color: '#0A2342',
-              fontFamily: "'Plus Jakarta Sans', sans-serif",
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}>
+            <div
+              style={{
+                fontSize: 14,
+                fontWeight: 700,
+                color: '#0A2342',
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
               {formatFriendlyDate(value)}
             </div>
             <div style={{ fontSize: 11, color: '#64748b', marginTop: 1 }}>
@@ -250,14 +273,16 @@ export default function DatePicker({
         </div>
 
         {/* Right Chevron Arrow */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-          marginLeft: 8,
-          padding: '4px',
-        }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            marginLeft: 8,
+            padding: '4px',
+          }}
+        >
           <svg
             width="15"
             height="15"
@@ -297,14 +322,16 @@ export default function DatePicker({
           }}
         >
           {/* Popover Header */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: 14,
-            paddingBottom: 12,
-            borderBottom: '1px solid #f1f5f9',
-          }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: 14,
+              paddingBottom: 12,
+              borderBottom: '1px solid #f1f5f9',
+            }}
+          >
             <button
               type="button"
               onClick={handlePrevMonth}
@@ -324,19 +351,28 @@ export default function DatePicker({
               }}
               aria-label="Previous month"
             >
-              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+              <svg
+                width="14"
+                height="14"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
 
             <div style={{ textAlign: 'center' }}>
-              <span style={{
-                fontSize: 15,
-                fontWeight: 800,
-                color: '#0A2342',
-                fontFamily: "'Plus Jakarta Sans', sans-serif",
-                letterSpacing: '-0.2px',
-              }}>
+              <span
+                style={{
+                  fontSize: 15,
+                  fontWeight: 800,
+                  color: '#0A2342',
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  letterSpacing: '-0.2px',
+                }}
+              >
                 {MONTH_NAMES[viewMonth]} {viewYear}
               </span>
             </div>
@@ -359,20 +395,29 @@ export default function DatePicker({
               }}
               aria-label="Next month"
             >
-              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+              <svg
+                width="14"
+                height="14"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </button>
           </div>
 
           {/* Weekday Labels Grid */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(7, 1fr)',
-            gap: 4,
-            marginBottom: 8,
-            textAlign: 'center',
-          }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(7, 1fr)',
+              gap: 4,
+              marginBottom: 8,
+              textAlign: 'center',
+            }}
+          >
             {WEEKDAYS.map((wd) => (
               <div
                 key={wd}
@@ -390,12 +435,14 @@ export default function DatePicker({
           </div>
 
           {/* Days Grid */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(7, 1fr)',
-            gap: 4,
-            textAlign: 'center',
-          }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(7, 1fr)',
+              gap: 4,
+              textAlign: 'center',
+            }}
+          >
             {calendarDays.map((item, idx) => {
               if (!item.isCurrentMonth) {
                 return <div key={`empty-${idx}`} style={{ height: 38 }} />;
@@ -417,20 +464,16 @@ export default function DatePicker({
                     border: isSelected
                       ? '2px solid #0A2342'
                       : isToday
-                      ? '1.5px solid #2563eb'
-                      : '1px solid transparent',
-                    background: isSelected
-                      ? '#0A2342'
-                      : isToday
-                      ? '#eff6ff'
-                      : 'transparent',
+                        ? '1.5px solid #2563eb'
+                        : '1px solid transparent',
+                    background: isSelected ? '#0A2342' : isToday ? '#eff6ff' : 'transparent',
                     color: isSelected
                       ? '#ffffff'
                       : isPast
-                      ? '#cbd5e1'
-                      : isToday
-                      ? '#1d4ed8'
-                      : '#1e293b',
+                        ? '#cbd5e1'
+                        : isToday
+                          ? '#1d4ed8'
+                          : '#1e293b',
                     fontSize: 13,
                     fontWeight: isSelected || isToday ? 800 : 600,
                     cursor: isPast ? 'not-allowed' : 'pointer',
@@ -456,14 +499,16 @@ export default function DatePicker({
                 >
                   <span>{item.day}</span>
                   {isToday && !isSelected && (
-                    <span style={{
-                      position: 'absolute',
-                      bottom: 3,
-                      width: 4,
-                      height: 4,
-                      borderRadius: '50%',
-                      background: '#2563eb',
-                    }} />
+                    <span
+                      style={{
+                        position: 'absolute',
+                        bottom: 3,
+                        width: 4,
+                        height: 4,
+                        borderRadius: '50%',
+                        background: '#2563eb',
+                      }}
+                    />
                   )}
                 </button>
               );

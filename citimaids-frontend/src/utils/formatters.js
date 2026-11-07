@@ -17,8 +17,8 @@ export const formatUAEPhone = (value) => {
   } else if (!cleaned.startsWith('+')) {
     cleaned = '+971' + cleaned;
   } else if (cleaned.startsWith('+') && !cleaned.startsWith('+971')) {
-     // If they typed +something else, force +971
-     cleaned = '+971' + cleaned.substring(1);
+    // If they typed +something else, force +971
+    cleaned = '+971' + cleaned.substring(1);
   }
 
   let digits = cleaned.substring(4);

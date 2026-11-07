@@ -145,11 +145,17 @@ function FAQCard({ q, a, index }) {
         <div className="flex items-center justify-between p-6 gap-4">
           <span className="font-bold text-slate-900 text-base sm:text-lg">{q}</span>
           <div
-            className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 ${open ? 'bg-[#0A2342] text-white rotate-180 shadow-md' : 'bg-slate-100 text-slate-500'
-              }`}
+            className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
+              open ? 'bg-[#0A2342] text-white rotate-180 shadow-md' : 'bg-slate-100 text-slate-500'
+            }`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </div>
         </div>
@@ -173,13 +179,21 @@ export default function HomePage() {
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewError, setReviewError] = useState(null);
-  const [reviewForm, setReviewForm] = useState({ name: '', whatsapp: '', location: '', stars: 5, text: '' });
+  const [reviewForm, setReviewForm] = useState({
+    name: '',
+    whatsapp: '',
+    location: '',
+    stars: 5,
+    text: '',
+  });
   // Safely extract city from the address or default to 'Abu Dhabi'
   const addressParts = settings?.business_address ? settings.business_address.split(',') : [];
   const city = addressParts.length > 1 ? addressParts[1].trim() : 'Abu Dhabi';
 
   const businessName = settings?.business_name || 'CitiMaids';
-  const description = settings?.description || "From luxury villas and private apartments to corporate offices across Abu Dhabi, CitiMaids delivers hospital-grade sanitization and spotless finishing tailored to your schedule.";
+  const description =
+    settings?.description ||
+    'From luxury villas and private apartments to corporate offices across Abu Dhabi, CitiMaids delivers hospital-grade sanitization and spotless finishing tailored to your schedule.';
 
   return (
     <div>
@@ -194,7 +208,7 @@ export default function HomePage() {
           ref={(el) => {
             if (el) {
               el.muted = true;
-              el.play().catch(() => { });
+              el.play().catch(() => {});
             }
           }}
           className="absolute inset-0 w-full h-full object-cover scale-105 pointer-events-none"
@@ -222,10 +236,12 @@ export default function HomePage() {
 
             {/* Main Headline */}
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-white leading-[1.08] tracking-tight mb-6">
-              Immaculate Spaces.<br />
+              Immaculate Spaces.
+              <br />
               <span className="bg-gradient-to-r from-sky-300 via-blue-200 to-white bg-clip-text text-transparent">
                 Trusted Cleaners
-              </span><br />
+              </span>
+              <br />
               <span className="text-xl sm:text-3xl lg:text-4xl font-semibold opacity-90">
                 in UAE's biggest cities: Abu Dhabi, Dubai, and Sharjah.
               </span>
@@ -241,20 +257,24 @@ export default function HomePage() {
 
             {/* Primary Action Buttons */}
             <div className="flex flex-wrap items-center gap-4 mb-12">
-              <Link
-                to="/book"
-                className="btn-3d-primary group text-sm sm:text-base"
-              >
+              <Link to="/book" className="btn-3d-primary group text-sm sm:text-base">
                 <span>Book a Cleaning</span>
-                <svg className="w-4 h-4 text-blue-900 group-hover:text-white transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                <svg
+                  className="w-4 h-4 text-blue-900 group-hover:text-white transition-all duration-200"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2.5}
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  />
                 </svg>
               </Link>
 
-              <Link
-                to="/services"
-                className="btn-3d-secondary group text-sm sm:text-base"
-              >
+              <Link to="/services" className="btn-3d-secondary group text-sm sm:text-base">
                 <span>Explore Services</span>
               </Link>
             </div>
@@ -263,32 +283,69 @@ export default function HomePage() {
             <div className="flex flex-wrap gap-3">
               {[
                 {
-                  label: 'AED 1M Insurance', icon: (
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  label: 'AED 1M Insurance',
+                  icon: (
+                    <svg
+                      width="14"
+                      height="14"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                      />
                     </svg>
-                  )
+                  ),
                 },
                 {
-                  label: 'Emirates ID Verified', icon: (
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  label: 'Emirates ID Verified',
+                  icon: (
+                    <svg
+                      width="14"
+                      height="14"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                      />
                     </svg>
-                  )
+                  ),
                 },
                 {
-                  label: '4.9 / 5 Rating', icon: (
+                  label: '4.9 / 5 Rating',
+                  icon: (
                     <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                     </svg>
-                  )
+                  ),
                 },
                 {
-                  label: 'Same-Day Slots Available', icon: (
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  label: 'Same-Day Slots Available',
+                  icon: (
+                    <svg
+                      width="14"
+                      height="14"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M13 10V3L4 14h7v7l9-11h-7z"
+                      />
                     </svg>
-                  )
+                  ),
                 },
               ].map((b) => (
                 <div
@@ -337,7 +394,8 @@ export default function HomePage() {
                 Setting the Standard in UAE
               </h2>
               <p className="text-slate-500 mt-4 text-sm sm:text-base leading-relaxed">
-                We combine vetted cleaners, 5-star hotel hygiene standards, and modern online booking so you never have to worry about cleaning again.
+                We combine vetted cleaners, 5-star hotel hygiene standards, and modern online
+                booking so you never have to worry about cleaning again.
               </p>
             </div>
           </Reveal>
@@ -345,9 +403,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {whyUs.map((item, i) => (
               <Reveal key={item.title} delay={i * 80}>
-                <div
-                  className="rounded-3xl p-8 bg-slate-50 border border-slate-200/80 hover:border-blue-400 hover:bg-white hover:-translate-y-2 hover:shadow-2xl transition-all duration-300 h-full flex flex-col justify-between"
-                >
+                <div className="rounded-3xl p-8 bg-slate-50 border border-slate-200/80 hover:border-blue-400 hover:bg-white hover:-translate-y-2 hover:shadow-2xl transition-all duration-300 h-full flex flex-col justify-between">
                   <div>
                     <div
                       className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-lg"
@@ -358,9 +414,7 @@ export default function HomePage() {
                     <h3 className="font-extrabold text-slate-900 text-lg mb-3 leading-snug">
                       {item.title}
                     </h3>
-                    <p className="text-slate-600 text-sm leading-relaxed">
-                      {item.desc}
-                    </p>
+                    <p className="text-slate-600 text-sm leading-relaxed">{item.desc}</p>
                   </div>
                 </div>
               </Reveal>
@@ -381,7 +435,8 @@ export default function HomePage() {
                 Before & After Transformations
               </h2>
               <p className="text-slate-500 mt-4 text-sm sm:text-base leading-relaxed">
-                Drag the divider handle horizontally on either frame to inspect the gleaming CitiMaids transformation.
+                Drag the divider handle horizontally on either frame to inspect the gleaming
+                CitiMaids transformation.
               </p>
             </div>
           </Reveal>
@@ -424,7 +479,8 @@ export default function HomePage() {
                 The CitiMaids Promise
               </h2>
               <p className="text-slate-300 mt-4 text-sm sm:text-base leading-relaxed">
-                Four stringent security and quality standards every cleaner satisfies before entering your residence.
+                Four stringent security and quality standards every cleaner satisfies before
+                entering your residence.
               </p>
             </div>
           </Reveal>
@@ -464,7 +520,12 @@ export default function HomePage() {
               >
                 <span>View all {services.length} services</span>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2.5}
+                    d="M9 5l7 7-7 7"
+                  />
                 </svg>
               </Link>
             </div>
@@ -473,9 +534,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {services.slice(0, 6).map((service, i) => (
               <Reveal key={service.id} delay={i * 60}>
-                <div
-                  className="bg-white rounded-3xl overflow-hidden border border-slate-200/80 group transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl h-full flex flex-col justify-between"
-                >
+                <div className="bg-white rounded-3xl overflow-hidden border border-slate-200/80 group transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl h-full flex flex-col justify-between">
                   <div>
                     <div className="h-52 bg-slate-100 overflow-hidden relative">
                       <img
@@ -485,7 +544,8 @@ export default function HomePage() {
                         loading="lazy"
                         onError={(e) => {
                           e.currentTarget.onerror = null;
-                          e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&auto=format&fit=crop&q=80';
+                          e.currentTarget.src =
+                            'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&auto=format&fit=crop&q=80';
                         }}
                       />
                       <div
@@ -497,14 +557,18 @@ export default function HomePage() {
                       </div>
                     </div>
                     <div className="p-7">
-                      <h3 className="font-extrabold text-slate-900 text-xl mb-2.5">{service.title}</h3>
+                      <h3 className="font-extrabold text-slate-900 text-xl mb-2.5">
+                        {service.title}
+                      </h3>
                       <p className="text-slate-600 text-sm mb-6 leading-relaxed line-clamp-2">
                         {service.description}
                       </p>
                       <ul className="space-y-2 mb-6 text-xs sm:text-sm text-slate-700">
                         {(service.included || []).slice(0, 3).map((inc) => (
                           <li key={inc} className="flex items-start gap-2.5">
-                            <span className="text-emerald-600 font-bold text-base leading-none">✓</span>
+                            <span className="text-emerald-600 font-bold text-base leading-none">
+                              ✓
+                            </span>
                             <span>{inc}</span>
                           </li>
                         ))}
@@ -514,8 +578,12 @@ export default function HomePage() {
 
                   <div className="p-7 pt-0 flex items-center justify-between border-t border-slate-100 pt-5">
                     <div>
-                      <span className="text-xs text-slate-400 block font-bold uppercase tracking-wider">Rate</span>
-                      <span className="text-blue-950 font-black text-base">{service.startingPrice}</span>
+                      <span className="text-xs text-slate-400 block font-bold uppercase tracking-wider">
+                        Rate
+                      </span>
+                      <span className="text-blue-950 font-black text-base">
+                        {service.startingPrice}
+                      </span>
                     </div>
                     <Link
                       to={`/services/${service.id}`}
@@ -619,7 +687,10 @@ export default function HomePage() {
           {reviewsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[0, 1, 2].map((i) => (
-                <div key={i} className="bg-slate-100 rounded-3xl p-8 border border-slate-200/60 animate-pulse h-56" />
+                <div
+                  key={i}
+                  className="bg-slate-100 rounded-3xl p-8 border border-slate-200/60 animate-pulse h-56"
+                />
               ))}
             </div>
           ) : reviews.length === 0 ? (
@@ -637,9 +708,7 @@ export default function HomePage() {
                   .join('');
                 return (
                   <Reveal key={r.id} delay={i * 80}>
-                    <div
-                      className="bg-slate-50 rounded-3xl p-8 border border-slate-200/80 flex flex-col justify-between h-full shadow-sm hover:shadow-lg transition-all"
-                    >
+                    <div className="bg-slate-50 rounded-3xl p-8 border border-slate-200/80 flex flex-col justify-between h-full shadow-sm hover:shadow-lg transition-all">
                       <div>
                         <div className="flex gap-1 text-amber-400 mb-5">
                           {Array.from({ length: r.stars }).map((_, j) => (
@@ -653,7 +722,9 @@ export default function HomePage() {
                       <div className="flex items-center gap-4 pt-5 border-t border-slate-200">
                         <div
                           className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-extrabold text-sm flex-shrink-0 shadow-md"
-                          style={{ background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)' }}
+                          style={{
+                            background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)',
+                          }}
                         >
                           {initials}
                         </div>
@@ -687,52 +758,66 @@ export default function HomePage() {
                 </div>
                 <div>
                   <h3 className="font-extrabold text-slate-900 text-xl">Leave a Client Review</h3>
-                  <p className="text-slate-500 text-xs">Share your experience with {businessName}</p>
+                  <p className="text-slate-500 text-xs">
+                    Share your experience with {businessName}
+                  </p>
                 </div>
               </div>
 
-              <form onSubmit={async (e) => {
-                e.preventDefault();
-                setReviewSubmitting(true);
-                setReviewError(null);
-                try {
-                  await submitReview({
-                    name:     reviewForm.name,
-                    whatsapp: reviewForm.whatsapp,
-                    location: reviewForm.location,
-                    stars:    reviewForm.stars,
-                    body:     reviewForm.text,
-                  });
-                  setReviewSubmitted(true);
-                  setReviewForm({ name: '', whatsapp: '', location: '', stars: 5, text: '' });
-                  setTimeout(() => {
-                    setReviewSubmitted(false);
-                    setShowReviewModal(false);
-                  }, 3000);
-                } catch (err) {
-                  setReviewError('Something went wrong. Please try again.');
-                } finally {
-                  setReviewSubmitting(false);
-                }
-              }} className="space-y-4">
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  setReviewSubmitting(true);
+                  setReviewError(null);
+                  try {
+                    await submitReview({
+                      name: reviewForm.name,
+                      whatsapp: reviewForm.whatsapp,
+                      location: reviewForm.location,
+                      stars: reviewForm.stars,
+                      body: reviewForm.text,
+                    });
+                    setReviewSubmitted(true);
+                    setReviewForm({ name: '', whatsapp: '', location: '', stars: 5, text: '' });
+                    setTimeout(() => {
+                      setReviewSubmitted(false);
+                      setShowReviewModal(false);
+                    }, 3000);
+                  } catch (err) {
+                    setReviewError('Something went wrong. Please try again.');
+                  } finally {
+                    setReviewSubmitting(false);
+                  }
+                }}
+                className="space-y-4"
+              >
                 {reviewSubmitted ? (
                   <div className="p-6 bg-emerald-50 border border-emerald-200 rounded-2xl text-center">
-                    <div className="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto mb-3 font-bold text-xl">✓</div>
-                    <h4 className="font-bold text-emerald-900 text-base">Thank You for Your Feedback!</h4>
-                    <p className="text-emerald-700 text-xs mt-1">Your review has been submitted and will appear once approved by our team.</p>
+                    <div className="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto mb-3 font-bold text-xl">
+                      ✓
+                    </div>
+                    <h4 className="font-bold text-emerald-900 text-base">
+                      Thank You for Your Feedback!
+                    </h4>
+                    <p className="text-emerald-700 text-xs mt-1">
+                      Your review has been submitted and will appear once approved by our team.
+                    </p>
                   </div>
                 ) : (
                   <>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Rating</label>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                        Rating
+                      </label>
                       <div className="flex gap-2 text-2xl">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <button
                             key={star}
                             type="button"
                             onClick={() => setReviewForm({ ...reviewForm, stars: star })}
-                            className={`transition-all transform hover:scale-110 ${star <= reviewForm.stars ? 'text-amber-400' : 'text-slate-200'
-                              }`}
+                            className={`transition-all transform hover:scale-110 ${
+                              star <= reviewForm.stars ? 'text-amber-400' : 'text-slate-200'
+                            }`}
                           >
                             ★
                           </button>
@@ -741,7 +826,9 @@ export default function HomePage() {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Your Full Name</label>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                        Your Full Name
+                      </label>
                       <input
                         type="text"
                         required
@@ -753,7 +840,10 @@ export default function HomePage() {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">WhatsApp Number <span className="normal-case font-normal text-slate-400">(optional)</span></label>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                        WhatsApp Number{' '}
+                        <span className="normal-case font-normal text-slate-400">(optional)</span>
+                      </label>
                       <input
                         type="tel"
                         placeholder="e.g. +971501234567"
@@ -764,7 +854,9 @@ export default function HomePage() {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Location / District</label>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                        Location / District
+                      </label>
                       <input
                         type="text"
                         placeholder="e.g. Al Reem Island, Abu Dhabi"
@@ -775,7 +867,9 @@ export default function HomePage() {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Your Review</label>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                        Your Review
+                      </label>
                       <textarea
                         required
                         rows={4}
@@ -849,19 +943,27 @@ export default function HomePage() {
               Ready for a Spotless Home or Office?
             </h2>
             <p className="text-sky-100 text-base sm:text-lg max-w-xl mx-auto mb-10 leading-relaxed">
-              Book your professional cleaning service today. Our dispatch team confirms all appointments within 30 minutes.
+              Book your professional cleaning service today. Our dispatch team confirms all
+              appointments within 30 minutes.
             </p>
           </Reveal>
 
           <Reveal delay={100}>
             <div className="flex flex-wrap gap-4 justify-center items-center">
-              <Link
-                to="/book"
-                className="btn-3d-primary group text-base"
-              >
+              <Link to="/book" className="btn-3d-primary group text-base">
                 <span>Book Now</span>
-                <svg className="w-4 h-4 text-blue-900 group-hover:text-white transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                <svg
+                  className="w-4 h-4 text-blue-900 group-hover:text-white transition-all duration-200"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2.5}
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  />
                 </svg>
               </Link>
               <a

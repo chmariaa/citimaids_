@@ -17,46 +17,53 @@ export default class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '30px',
-          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-          background: '#f8fafc',
-          color: '#0A2342',
-          textAlign: 'center',
-        }}>
-          <div style={{
-            background: '#ffffff',
-            padding: '40px',
-            borderRadius: '20px',
-            boxShadow: '0 10px 30px rgba(10, 35, 66, 0.08)',
-            maxWidth: '520px',
-            width: '100%',
-            border: '1px solid #e2e8f0',
-          }}>
-            <div style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '50%',
-              background: '#fee2e2',
-              color: '#dc2626',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 20px',
-              fontSize: '24px',
-            }}>
+        <div
+          style={{
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '30px',
+            fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+            background: '#f8fafc',
+            color: '#0A2342',
+            textAlign: 'center',
+          }}
+        >
+          <div
+            style={{
+              background: '#ffffff',
+              padding: '40px',
+              borderRadius: '20px',
+              boxShadow: '0 10px 30px rgba(10, 35, 66, 0.08)',
+              maxWidth: '520px',
+              width: '100%',
+              border: '1px solid #e2e8f0',
+            }}
+          >
+            <div
+              style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '50%',
+                background: '#fee2e2',
+                color: '#dc2626',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 20px',
+                fontSize: '24px',
+              }}
+            >
               ⚠️
             </div>
             <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 10px', color: '#0A2342' }}>
               Something went wrong
             </h2>
             <p style={{ fontSize: '14px', color: '#64748b', margin: '0 0 24px', lineHeight: 1.6 }}>
-              {this.state.error?.message || 'An unexpected rendering error occurred. Please refresh or navigate back.'}
+              {this.state.error?.message ||
+                'An unexpected rendering error occurred. Please refresh or navigate back.'}
             </p>
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
               <button

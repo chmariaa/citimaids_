@@ -1,12 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useSettings } from '../hooks/useSettings';
 import Reveal from '../components/Reveal';
-import {
-  AwardIcon,
-  ShieldCheckIcon,
-  LeafIcon,
-  UserCheckIcon,
-} from '../components/icons/Icons';
+import { AwardIcon, ShieldCheckIcon, LeafIcon, UserCheckIcon } from '../components/icons/Icons';
 
 const values = [
   {
@@ -40,11 +35,13 @@ const stats = [
 
 export default function AboutPage() {
   const { settings } = useSettings();
-  
+
   const addressParts = settings?.business_address ? settings.business_address.split(',') : [];
   const city = addressParts.length > 1 ? addressParts[1].trim() : 'Abu Dhabi';
   const businessName = settings?.business_name || 'CitiMaids';
-  const description = settings?.description || "From luxury villas and private apartments to corporate offices across Abu Dhabi, CitiMaids delivers hospital-grade sanitization and spotless finishing tailored to your schedule.";
+  const description =
+    settings?.description ||
+    'From luxury villas and private apartments to corporate offices across Abu Dhabi, CitiMaids delivers hospital-grade sanitization and spotless finishing tailored to your schedule.';
   const phone = settings?.contact_number || '';
   const additionalPhone = settings?.additional_number || '';
   const email = settings?.business_email || '';
@@ -61,9 +58,12 @@ export default function AboutPage() {
           <span className="inline-block px-4 py-1.5 rounded-full bg-white/15 text-xs font-semibold uppercase tracking-widest mb-4 backdrop-blur-sm">
             Our Story
           </span>
-          <h1 className="text-4xl sm:text-5xl font-extrabold mb-3 tracking-tight">About {businessName}</h1>
+          <h1 className="text-4xl sm:text-5xl font-extrabold mb-3 tracking-tight">
+            About {businessName}
+          </h1>
           <p className="text-blue-100 text-sm sm:text-base leading-relaxed">
-            {city} and two other cities' trusted professional cleaning partner, delivering spotless homes and commercial spaces since 2018.
+            {city} and two other cities' trusted professional cleaning partner, delivering spotless
+            homes and commercial spaces since 2018.
           </p>
         </div>
       </div>
@@ -72,15 +72,21 @@ export default function AboutPage() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
           <div>
-            <span className="text-blue-800 font-bold text-xs uppercase tracking-widest">Who We Are</span>
+            <span className="text-blue-800 font-bold text-xs uppercase tracking-widest">
+              Who We Are
+            </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-2 mb-6">
               Serving {city} and Two Other Cities' Homes & Offices with Pride
             </h2>
             <p className="text-slate-600 leading-relaxed mb-4 text-sm sm:text-base">
-              {businessName} was founded in {city} with a straightforward mission: to provide UAE residents with reliable, honest, and high-standard cleaning services they can trust with their personal homes.
+              {businessName} was founded in {city} with a straightforward mission: to provide UAE
+              residents with reliable, honest, and high-standard cleaning services they can trust
+              with their personal homes.
             </p>
             <p className="text-slate-600 leading-relaxed mb-4 text-sm sm:text-base">
-              Over the years, we have expanded from a modest crew to a dedicated fleet of fully licensed, background-checked, and highly trained cleaning specialists serving hundreds of residences and businesses every week.
+              Over the years, we have expanded from a modest crew to a dedicated fleet of fully
+              licensed, background-checked, and highly trained cleaning specialists serving hundreds
+              of residences and businesses every week.
             </p>
             <p className="text-slate-600 leading-relaxed mb-8 text-sm sm:text-base">
               {description}
@@ -103,12 +109,22 @@ export default function AboutPage() {
                 style={{ objectPosition: 'center 20%' }}
               />
             </div>
-            <div
-              className="absolute -bottom-6 -right-6 bg-white rounded-2xl px-6 py-4 shadow-xl border border-slate-100 hidden sm:block"
-            >
+            <div className="absolute -bottom-6 -right-6 bg-white rounded-2xl px-6 py-4 shadow-xl border border-slate-100 hidden sm:block">
               <div className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#1E3A8A" strokeWidth="2.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><circle cx="12" cy="11" r="3" />
+                <svg
+                  width="20"
+                  height="20"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="#1E3A8A"
+                  strokeWidth="2.5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  />
+                  <circle cx="12" cy="11" r="3" />
                 </svg>
                 Musrif HQ
               </div>
@@ -119,7 +135,10 @@ export default function AboutPage() {
       </section>
 
       {/* Stats Bar */}
-      <section style={{ background: 'linear-gradient(135deg,#0A2342 0%,#1E3A8A 100%)' }} className="py-12">
+      <section
+        style={{ background: 'linear-gradient(135deg,#0A2342 0%,#1E3A8A 100%)' }}
+        className="py-12"
+      >
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
             {stats.map((s) => (
@@ -136,7 +155,9 @@ export default function AboutPage() {
       <section className="py-20 bg-slate-50">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-14">
-            <span className="text-blue-800 font-bold text-xs uppercase tracking-widest">Our Foundation</span>
+            <span className="text-blue-800 font-bold text-xs uppercase tracking-widest">
+              Our Foundation
+            </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-2">Core Values</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -162,36 +183,79 @@ export default function AboutPage() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
           <div>
-            <span className="text-blue-800 font-bold text-xs uppercase tracking-widest">Headquarters</span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-2 mb-6">Our Abu Dhabi Hub</h2>
+            <span className="text-blue-800 font-bold text-xs uppercase tracking-widest">
+              Headquarters
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-2 mb-6">
+              Our Abu Dhabi Hub
+            </h2>
             <div className="space-y-4 mb-8">
               <div className="flex items-start gap-4 p-4.5 bg-slate-50 rounded-2xl border border-slate-100">
                 <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-900 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><circle cx="12" cy="11" r="3" />
+                  <svg
+                    width="18"
+                    height="18"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                    />
+                    <circle cx="12" cy="11" r="3" />
                   </svg>
                 </div>
                 <div>
                   <div className="font-bold text-slate-900 text-sm">Head Office</div>
-                  <div className="text-slate-600 text-xs sm:text-sm">Musrif Area, Abu Dhabi, United Arab Emirates</div>
+                  <div className="text-slate-600 text-xs sm:text-sm">
+                    Musrif Area, Abu Dhabi, United Arab Emirates
+                  </div>
                 </div>
               </div>
               <div className="flex items-start gap-4 p-4.5 bg-slate-50 rounded-2xl border border-slate-100">
                 <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-900 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  <svg
+                    width="18"
+                    height="18"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    />
                   </svg>
                 </div>
                 <div>
                   <div className="font-bold text-slate-900 text-sm">Email</div>
                   {email && (
                     <div className="text-slate-600 text-xs sm:text-sm">
-                      <a href={`https://mail.google.com/mail/?view=cm&fs=1&to=${email}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 hover:underline">{email}</a>
+                      <a
+                        href={`https://mail.google.com/mail/?view=cm&fs=1&to=${email}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-blue-600 hover:underline"
+                      >
+                        {email}
+                      </a>
                     </div>
                   )}
                   {additionalEmail && (
                     <div className="text-slate-600 text-xs sm:text-sm mt-1">
-                      <a href={`https://mail.google.com/mail/?view=cm&fs=1&to=${additionalEmail}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 hover:underline">{additionalEmail}</a>
+                      <a
+                        href={`https://mail.google.com/mail/?view=cm&fs=1&to=${additionalEmail}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-blue-600 hover:underline"
+                      >
+                        {additionalEmail}
+                      </a>
                     </div>
                   )}
                 </div>
@@ -199,20 +263,41 @@ export default function AboutPage() {
 
               <div className="flex items-start gap-4 p-4.5 bg-slate-50 rounded-2xl border border-slate-100">
                 <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-900 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  <svg
+                    width="18"
+                    height="18"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                    />
                   </svg>
                 </div>
                 <div>
                   <div className="font-bold text-slate-900 text-sm">Phone</div>
                   {phone && (
                     <div className="text-slate-600 text-xs sm:text-sm">
-                      <a href={`tel:${phone.replace(/\s+/g, '')}`} className="hover:text-blue-600 hover:underline">{phone}</a>
+                      <a
+                        href={`tel:${phone.replace(/\s+/g, '')}`}
+                        className="hover:text-blue-600 hover:underline"
+                      >
+                        {phone}
+                      </a>
                     </div>
                   )}
                   {additionalPhone && (
                     <div className="text-slate-600 text-xs sm:text-sm mt-1">
-                      <a href={`tel:${additionalPhone.replace(/\s+/g, '')}`} className="hover:text-blue-600 hover:underline">{additionalPhone}</a>
+                      <a
+                        href={`tel:${additionalPhone.replace(/\s+/g, '')}`}
+                        className="hover:text-blue-600 hover:underline"
+                      >
+                        {additionalPhone}
+                      </a>
                     </div>
                   )}
                 </div>
@@ -220,26 +305,45 @@ export default function AboutPage() {
 
               <div className="flex items-start gap-4 p-4.5 bg-slate-50 rounded-2xl border border-slate-100">
                 <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-900 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
+                  <svg
+                    width="18"
+                    height="18"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 6v6l4 2" />
                   </svg>
                 </div>
                 <div>
                   <div className="font-bold text-slate-900 text-sm">Operation Hours</div>
-                  <div className="text-slate-600 text-xs sm:text-sm">Monday – Saturday: 7:00 AM – 9:00 PM</div>
+                  <div className="text-slate-600 text-xs sm:text-sm">
+                    Monday – Saturday: 7:00 AM – 9:00 PM
+                  </div>
                   <div className="text-slate-600 text-xs sm:text-sm">Sunday: 8:00 AM – 6:00 PM</div>
                 </div>
               </div>
               <div className="flex items-start gap-4 p-4.5 bg-slate-50 rounded-2xl border border-slate-100">
                 <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-900 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+                  <svg
+                    width="18"
+                    height="18"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
                   </svg>
                 </div>
                 <div>
                   <div className="font-bold text-slate-900 text-sm">Service Coverage</div>
                   <div className="text-slate-600 text-xs sm:text-sm">
-                    Al Reem Island, Saadiyat, Yas Island, Al Khalidiyah, Corniche, Al Raha, Mushrif, Khalifa City A, and beyond.
+                    Al Reem Island, Saadiyat, Yas Island, Al Khalidiyah, Corniche, Al Raha, Mushrif,
+                    Khalifa City A, and beyond.
                   </div>
                 </div>
               </div>
@@ -259,7 +363,8 @@ export default function AboutPage() {
               className="w-full h-full object-cover"
               onError={(e) => {
                 e.currentTarget.onerror = null;
-                e.currentTarget.src = 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=80';
+                e.currentTarget.src =
+                  'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=80';
               }}
             />
           </div>

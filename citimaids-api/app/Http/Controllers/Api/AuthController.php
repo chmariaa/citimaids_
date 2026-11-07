@@ -13,7 +13,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email'    => 'required|email',
+            'email' => 'required|email',
             'password' => 'required',
         ]);
 
@@ -28,7 +28,7 @@ class AuthController extends Controller
         $token = $user->createToken('citimaids-admin')->plainTextToken;
 
         return response()->json([
-            'user'  => $user,
+            'user' => $user,
             'token' => $token,
         ]);
     }
@@ -50,15 +50,15 @@ class AuthController extends Controller
         $user = $request->user();
 
         $validated = $request->validate([
-            'name'  => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,'.$user->id,
         ]);
 
         $user->update($validated);
 
         return response()->json([
             'message' => 'Profile updated successfully.',
-            'user'    => $user->fresh(),
+            'user' => $user->fresh(),
         ]);
     }
 
@@ -68,7 +68,7 @@ class AuthController extends Controller
 
         $request->validate([
             'current_password' => 'required|string',
-            'new_password'     => 'required|string|min:6',
+            'new_password' => 'required|string|min:6',
         ]);
 
         if (! Hash::check($request->current_password, $user->password)) {

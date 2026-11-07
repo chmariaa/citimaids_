@@ -3,9 +3,9 @@ import { useState, useRef, useCallback } from 'react';
 export default function BeforeAfterSlider({
   beforeImage,
   afterImage,
-  label = "Living Room Deep Clean",
-  beforeLabel = "BEFORE",
-  afterLabel = "AFTER",
+  label = 'Living Room Deep Clean',
+  beforeLabel = 'BEFORE',
+  afterLabel = 'AFTER',
 }) {
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
@@ -57,7 +57,8 @@ export default function BeforeAfterSlider({
           loading="lazy"
           onError={(e) => {
             e.currentTarget.onerror = null;
-            e.currentTarget.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900&auto=format&fit=crop&q=80';
+            e.currentTarget.src =
+              'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900&auto=format&fit=crop&q=80';
           }}
         />
 
@@ -73,7 +74,8 @@ export default function BeforeAfterSlider({
           loading="lazy"
           onError={(e) => {
             e.currentTarget.onerror = null;
-            e.currentTarget.src = 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=900&auto=format&fit=crop&q=80';
+            e.currentTarget.src =
+              'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=900&auto=format&fit=crop&q=80';
           }}
         />
 
@@ -93,11 +95,14 @@ export default function BeforeAfterSlider({
           className="absolute top-0 bottom-0 w-1 bg-white shadow-2xl pointer-events-none z-20"
           style={{ left: `${sliderPosition}%` }}
         >
-          <div
-            className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-white shadow-2xl flex items-center justify-center border-2 border-slate-900 text-slate-900 transition-transform duration-150 group-hover:scale-110"
-          >
+          <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-white shadow-2xl flex items-center justify-center border-2 border-slate-900 text-slate-900 transition-transform duration-150 group-hover:scale-110">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 9l-4 3 4 3m8-6l4 3-4 3" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M8 9l-4 3 4 3m8-6l4 3-4 3"
+              />
             </svg>
           </div>
         </div>
@@ -106,7 +111,9 @@ export default function BeforeAfterSlider({
       {/* Footer Info */}
       <div className="p-4 sm:p-5 flex items-center justify-between bg-slate-50 border-t border-slate-100">
         <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-blue-800 block">Verified Result</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-blue-800 block">
+            Verified Result
+          </span>
           <h4 className="font-extrabold text-slate-900 text-sm sm:text-base">{label}</h4>
         </div>
         <div className="flex items-center gap-1.5 text-xs text-slate-500 font-semibold bg-white px-3 py-1.5 rounded-xl border border-slate-200">
