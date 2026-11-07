@@ -23,7 +23,7 @@ class PaymentController extends Controller
 
         // ── Filters ──
         if ($request->filled('service_id') && $request->service_id !== 'all') {
-            $query->whereHas('booking', fn($bq) => $bq->where('service_id', $request->service_id));
+            $query->whereHas('booking', fn ($bq) => $bq->where('service_id', $request->service_id));
         }
         if ($request->filled('status')) {
             $status = $request->status;
@@ -52,13 +52,13 @@ class PaymentController extends Controller
             $s = trim($request->search);
             $query->where(function ($q) use ($s) {
                 $q->where('reference_number', 'like', "%{$s}%")
-                  ->orWhere('external_reference', 'like', "%{$s}%")
-                  ->orWhere('amount', 'like', "%{$s}%")
-                  ->orWhere('status', 'like', "%{$s}%")
-                  ->orWhere('payment_method', 'like', "%{$s}%")
-                  ->orWhereHas('client', fn($cq) => $cq->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%")->orWhere('contact_number', 'like', "%{$s}%"))
-                  ->orWhereHas('booking', fn($bq) => $bq->where('id', 'like', "%{$s}%"))
-                  ->orWhereHas('booking.service', fn($sq) => $sq->where('name', 'like', "%{$s}%"));
+                    ->orWhere('external_reference', 'like', "%{$s}%")
+                    ->orWhere('amount', 'like', "%{$s}%")
+                    ->orWhere('status', 'like', "%{$s}%")
+                    ->orWhere('payment_method', 'like', "%{$s}%")
+                    ->orWhereHas('client', fn ($cq) => $cq->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%")->orWhere('contact_number', 'like', "%{$s}%"))
+                    ->orWhereHas('booking', fn ($bq) => $bq->where('id', 'like', "%{$s}%"))
+                    ->orWhereHas('booking.service', fn ($sq) => $sq->where('name', 'like', "%{$s}%"));
             });
         }
 
@@ -96,9 +96,9 @@ class PaymentController extends Controller
 
         // Validate
         $request->validate([
-            'amount'         => 'nullable|numeric|min:1',
+            'amount' => 'nullable|numeric|min:1',
             'payment_method' => 'nullable|in:adcb_pace_pay,bank_transfer,cash,card',
-            'notes'          => 'nullable|string|max:1000',
+            'notes' => 'nullable|string|max:1000',
         ]);
 
         $amount = (float) ($request->amount ?? $booking->total_amount ?? $booking->service?->base_price ?? 350);
@@ -106,41 +106,41 @@ class PaymentController extends Controller
 
         // Create payment record
         $payment = Payment::create([
-            'booking_id'       => $booking->id,
-            'client_id'        => $booking->client_id,
-            'amount'           => $amount,
-            'currency'         => 'AED',
-            'payment_method'   => $paymentMethod,
-            'status'           => 'unpaid',
+            'booking_id' => $booking->id,
+            'client_id' => $booking->client_id,
+            'amount' => $amount,
+            'currency' => 'AED',
+            'payment_method' => $paymentMethod,
+            'status' => 'unpaid',
             'reference_number' => Payment::generateReference(),
-            'notes'            => $request->notes ?? "Invoice generated for Booking #{$booking->id}",
+            'notes' => $request->notes ?? "Invoice generated for Booking #{$booking->id}",
         ]);
 
         // If ADCB Pace Pay, generate the payment link
         if ($paymentMethod === 'adcb_pace_pay') {
-            $adcb   = new AdcbPacePayService();
+            $adcb = new AdcbPacePayService;
             $result = $adcb->generatePaymentLink($payment);
 
             $payment->update([
-                'payment_link'            => $result['link'],
+                'payment_link' => $result['link'],
                 'payment_link_expires_at' => $result['expires_at'],
-                'external_reference'      => $result['external_reference'],
+                'external_reference' => $result['external_reference'],
             ]);
         }
 
         // Create initial charge transaction
         Transaction::create([
-            'payment_id'           => $payment->id,
-            'type'                 => 'charge',
-            'amount'               => $payment->amount,
-            'status'               => 'pending',
-            'description'          => "Payment created for Booking #{$booking->id}",
+            'payment_id' => $payment->id,
+            'type' => 'charge',
+            'amount' => $payment->amount,
+            'status' => 'pending',
+            'description' => "Payment created for Booking #{$booking->id}",
             'processed_by_user_id' => $request->user()?->id,
         ]);
 
         // Update booking payment info
         $booking->update([
-            'total_amount'   => $amount,
+            'total_amount' => $amount,
             'payment_status' => 'unpaid',
             'payment_method' => $paymentMethod,
         ]);
@@ -171,7 +171,7 @@ class PaymentController extends Controller
         $methodLabel = $this->formatPaymentMethodLabel($rawMethod);
 
         $payment->update([
-            'status'  => $newStatus,
+            'status' => $newStatus,
             'paid_at' => $newStatus === 'paid' ? now() : $payment->paid_at,
         ]);
 
@@ -207,7 +207,7 @@ class PaymentController extends Controller
         }
 
         $request->validate([
-            'amount' => 'nullable|numeric|min:0.01|max:' . $payment->amount,
+            'amount' => 'nullable|numeric|min:0.01|max:'.$payment->amount,
             'reason' => 'nullable|string|max:500',
         ]);
 
@@ -216,11 +216,11 @@ class PaymentController extends Controller
         // If ADCB Pace Pay, process through the gateway
         $gatewayResponse = null;
         if ($payment->payment_method === 'adcb_pace_pay') {
-            $adcb   = new AdcbPacePayService();
+            $adcb = new AdcbPacePayService;
             $result = $adcb->processRefund($payment, $refundAmount);
             $gatewayResponse = $result['raw'];
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 return response()->json([
                     'message' => 'Gateway refund failed',
                     'details' => $result['raw'],
@@ -230,12 +230,12 @@ class PaymentController extends Controller
 
         // Create refund transaction
         Transaction::create([
-            'payment_id'           => $payment->id,
-            'type'                 => 'refund',
-            'amount'               => $refundAmount,
-            'status'               => 'success',
-            'gateway_response'     => $gatewayResponse,
-            'description'          => $request->get('reason', 'Refund processed'),
+            'payment_id' => $payment->id,
+            'type' => 'refund',
+            'amount' => $refundAmount,
+            'status' => 'success',
+            'gateway_response' => $gatewayResponse,
+            'description' => $request->get('reason', 'Refund processed'),
             'processed_by_user_id' => $request->user()?->id,
         ]);
 
@@ -273,13 +273,13 @@ class PaymentController extends Controller
         $payment = Payment::with(['booking', 'transactions'])->findOrFail($id);
 
         $request->validate([
-            'status'             => 'nullable|string|in:pending,paid,unpaid,failed,refunded,expired',
-            'amount'             => 'nullable|numeric|min:0',
-            'payment_method'     => 'nullable|string|max:50',
-            'reference_number'   => 'nullable|string|max:100',
+            'status' => 'nullable|string|in:pending,paid,unpaid,failed,refunded,expired',
+            'amount' => 'nullable|numeric|min:0',
+            'payment_method' => 'nullable|string|max:50',
+            'reference_number' => 'nullable|string|max:100',
             'external_reference' => 'nullable|string|max:100',
-            'notes'              => 'nullable|string|max:2000',
-            'description'        => 'nullable|string|max:1000',
+            'notes' => 'nullable|string|max:2000',
+            'description' => 'nullable|string|max:1000',
         ]);
 
         $updateData = $request->only(['amount', 'reference_number', 'external_reference', 'notes']);
@@ -355,15 +355,15 @@ class PaymentController extends Controller
         ?string $customDescription = null
     ): Transaction {
         $amount = (float) $payment->amount;
-        $ref = $payment->reference_number ?: ("INV-" . $payment->id);
+        $ref = $payment->reference_number ?: ('INV-'.$payment->id);
 
         // Status mapping rules:
         $txStatus = match ($status) {
-            'paid'     => 'success',
-            'unpaid'   => 'failed',
-            'pending'  => 'pending',
+            'paid' => 'success',
+            'unpaid' => 'failed',
+            'pending' => 'pending',
             'refunded' => 'success',
-            default    => ($status === 'failed' ? 'failed' : 'pending'),
+            default => ($status === 'failed' ? 'failed' : 'pending'),
         };
 
         $txType = ($status === 'refunded') ? 'refund' : 'charge';
@@ -389,11 +389,11 @@ class PaymentController extends Controller
 
             $existingPayload = is_array($primary->gateway_response) ? $primary->gateway_response : [];
             $updatedPayload = array_merge($existingPayload, [
-                'payment_method'      => $methodLabel,
-                'method_code'         => $methodCode,
-                'status'              => $txStatus,
-                'amount'              => $amount,
-                'invoice_ref'         => $ref,
+                'payment_method' => $methodLabel,
+                'method_code' => $methodCode,
+                'status' => $txStatus,
+                'amount' => $amount,
+                'invoice_ref' => $ref,
                 'updated_in_place_at' => now()->toIso8601String(),
             ]);
 
@@ -402,10 +402,10 @@ class PaymentController extends Controller
             }
 
             $txUpdates = [
-                'type'             => $txType,
-                'status'           => $txStatus,
-                'amount'           => $amount,
-                'description'      => $description,
+                'type' => $txType,
+                'status' => $txStatus,
+                'amount' => $amount,
+                'description' => $description,
                 'gateway_response' => $updatedPayload,
             ];
 
@@ -425,19 +425,19 @@ class PaymentController extends Controller
 
         // If no linked transaction exists yet, create the single linked record
         return Transaction::create([
-            'payment_id'           => $payment->id,
-            'type'                 => $txType,
-            'amount'               => $amount,
-            'status'               => $txStatus,
-            'description'          => $description,
-            'gateway_response'     => [
+            'payment_id' => $payment->id,
+            'type' => $txType,
+            'amount' => $amount,
+            'status' => $txStatus,
+            'description' => $description,
+            'gateway_response' => [
                 'payment_method' => $methodLabel,
-                'method_code'    => $methodCode,
-                'status'         => $txStatus,
-                'amount'         => $amount,
-                'invoice_ref'    => $ref,
-                'notes'          => $notes,
-                'recorded_at'    => now()->toIso8601String(),
+                'method_code' => $methodCode,
+                'status' => $txStatus,
+                'amount' => $amount,
+                'invoice_ref' => $ref,
+                'notes' => $notes,
+                'recorded_at' => now()->toIso8601String(),
             ],
             'processed_by_user_id' => $userId,
         ]);
@@ -453,12 +453,13 @@ class PaymentController extends Controller
         }
 
         $m = strtolower(trim($method));
+
         return match ($m) {
-            'cash'                      => 'Cash',
-            'card', 'credit_card'       => 'Credit Card',
-            'bank_transfer', 'bank'     => 'Bank Transfer',
-            'online', 'adcb_pace_pay'   => 'Online Gateway',
-            default                     => ucwords(str_replace('_', ' ', $method)),
+            'cash' => 'Cash',
+            'card', 'credit_card' => 'Credit Card',
+            'bank_transfer', 'bank' => 'Bank Transfer',
+            'online', 'adcb_pace_pay' => 'Online Gateway',
+            default => ucwords(str_replace('_', ' ', $method)),
         };
     }
 
@@ -472,12 +473,13 @@ class PaymentController extends Controller
         }
 
         $m = strtolower(trim($method));
+
         return match ($m) {
-            'cash'                      => 'cash',
-            'card', 'credit_card'       => 'card',
-            'bank_transfer', 'bank'     => 'bank_transfer',
-            'online', 'adcb_pace_pay'   => 'adcb_pace_pay',
-            default                     => $method,
+            'cash' => 'cash',
+            'card', 'credit_card' => 'card',
+            'bank_transfer', 'bank' => 'bank_transfer',
+            'online', 'adcb_pace_pay' => 'adcb_pace_pay',
+            default => $method,
         };
     }
 }

@@ -5,99 +5,185 @@ import api from '../../api/axios';
 import { formatUAEPhone } from '../../utils/formatters';
 
 const TABS = [
-    {
-        id: 'general',
-        label: 'General Settings',
-        icon: (
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><circle cx="12" cy="12" r="3" />
-            </svg>
-        ),
-    },
-    {
-        id: 'profile',
-        label: 'Profile Settings',
-        icon: (
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-        ),
-    },
-    {
-        id: 'admins',
-        label: 'Admin Accounts',
-        icon: (
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-        ),
-    },
-    {
-        id: 'booking-status',
-        label: 'Booking Statuses',
-        icon: (
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-            </svg>
-        ),
-    },
-    {
-        id: 'booking-form',
-        label: 'Booking Form',
-        icon: (
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-        ),
-    },
-    {
-        id: 'notifications',
-        label: 'Notifications',
-        icon: (
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-        ),
-    },
-    {
-        id: 'security',
-        label: 'Security',
-        icon: (
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-        ),
-    },
-    {
-        id: 'preferences',
-        label: 'System Preferences',
-        icon: (
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" />
-            </svg>
-        ),
-    },
+  {
+    id: 'general',
+    label: 'General Settings',
+    icon: (
+      <svg
+        width="16"
+        height="16"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+        />
+        <circle cx="12" cy="12" r="3" />
+      </svg>
+    ),
+  },
+  {
+    id: 'profile',
+    label: 'Profile Settings',
+    icon: (
+      <svg
+        width="16"
+        height="16"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+        />
+      </svg>
+    ),
+  },
+  {
+    id: 'admins',
+    label: 'Admin Accounts',
+    icon: (
+      <svg
+        width="16"
+        height="16"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+        />
+      </svg>
+    ),
+  },
+  {
+    id: 'booking-status',
+    label: 'Booking Statuses',
+    icon: (
+      <svg
+        width="16"
+        height="16"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+        />
+      </svg>
+    ),
+  },
+  {
+    id: 'booking-form',
+    label: 'Booking Form',
+    icon: (
+      <svg
+        width="16"
+        height="16"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+        />
+      </svg>
+    ),
+  },
+  {
+    id: 'notifications',
+    label: 'Notifications',
+    icon: (
+      <svg
+        width="16"
+        height="16"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+        />
+      </svg>
+    ),
+  },
+  {
+    id: 'security',
+    label: 'Security',
+    icon: (
+      <svg
+        width="16"
+        height="16"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+        />
+      </svg>
+    ),
+  },
+  {
+    id: 'preferences',
+    label: 'System Preferences',
+    icon: (
+      <svg
+        width="16"
+        height="16"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
+        <rect x="2" y="3" width="20" height="14" rx="2" />
+        <path d="M8 21h8M12 17v4" />
+      </svg>
+    ),
+  },
 ];
 
 export default function Settings() {
-    const { tab } = useParams();
-    const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState(tab || 'general');
-    const [toast, setToast] = useState(null);
+  const { tab } = useParams();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState(tab || 'general');
+  const [toast, setToast] = useState(null);
 
-    const changeTab = (id) => {
-        setActiveTab(id);
-        navigate(`/admin/settings/${id}`, { replace: true });
-    };
+  const changeTab = (id) => {
+    setActiveTab(id);
+    navigate(`/admin/settings/${id}`, { replace: true });
+  };
 
-    const showToast = (msg, type = 'success') => {
-        setToast({ msg, type });
-        setTimeout(() => setToast(null), 3000);
-    };
+  const showToast = (msg, type = 'success') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
-    return (
-        <div style={{ fontFamily: "'Inter', -apple-system, sans-serif" }}>
-            <style>{`
+  return (
+    <div style={{ fontFamily: "'Inter', -apple-system, sans-serif" }}>
+      <style>{`
                 @media (max-width: 1024px) {
                     .settings-layout-grid {
                         grid-template-columns: 1fr !important;
@@ -143,890 +229,1736 @@ export default function Settings() {
                 }
             `}</style>
 
-            {toast && (
-                <div style={{
-                    position: 'fixed', top: 24, right: 24, zIndex: 9999,
-                    padding: '12px 20px', borderRadius: 10, fontSize: 14, fontWeight: 500,
-                    background: toast.type === 'success' ? '#10b981' : '#ef4444', color: '#fff',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-                }}>{toast.msg}</div>
-            )}
-
-            {/* Page Header */}
-            <div style={{ marginBottom: 24 }}>
-                <h1 style={{ fontSize: 26, fontWeight: 700, color: '#1a1f37', margin: 0 }}>Settings</h1>
-                <p style={{ color: '#64748b', fontSize: 14, margin: '4px 0 0' }}>Manage system settings and preferences</p>
-            </div>
-
-            {/* Layout */}
-            <div className="settings-layout-grid" style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: 20, alignItems: 'start' }}>
-                {/* Sidebar */}
-                <div className="settings-subnav-sidebar" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 8 }}>
-                    {TABS.map(t => (
-                        <button key={t.id} onClick={() => changeTab(t.id)} className={activeTab === t.id ? 'tab-active' : ''} style={{
-                            width: '100%', textAlign: 'left', padding: '11px 14px', border: 'none', borderRadius: 8,
-                            background: activeTab === t.id ? '#eff6ff' : 'transparent',
-                            cursor: 'pointer', marginBottom: 2, display: 'flex', alignItems: 'center', gap: 10,
-                            borderLeft: activeTab === t.id ? '3px solid #3b82f6' : '3px solid transparent',
-                            transition: 'all 0.15s',
-                        }}>
-                            <span style={{ fontSize: 15 }}>{t.icon}</span>
-                            <span style={{ fontSize: 13, fontWeight: activeTab === t.id ? 600 : 400, color: activeTab === t.id ? '#1d4ed8' : '#374151' }}>
-                                {t.label}
-                            </span>
-                            {activeTab === t.id && (
-                                <span style={{ marginLeft: 'auto', width: 6, height: 6, borderRadius: '50%', background: '#3b82f6' }} />
-                            )}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Tab Content */}
-                <div>
-                    {activeTab === 'general' && <GeneralSettings showToast={showToast} />}
-                    {activeTab === 'profile' && <ProfileSettings showToast={showToast} />}
-                    {activeTab === 'admins' && <AdminAccounts showToast={showToast} />}
-                    {activeTab === 'booking-status' && <BookingStatuses showToast={showToast} />}
-                    {activeTab === 'booking-form' && <BookingForm showToast={showToast} />}
-                    {activeTab === 'notifications' && <NotificationSettings showToast={showToast} />}
-                    {activeTab === 'security' && <SecuritySettings showToast={showToast} />}
-                    {activeTab === 'preferences' && <SystemPreferences showToast={showToast} />}
-                </div>
-            </div>
+      {toast && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 24,
+            right: 24,
+            zIndex: 9999,
+            padding: '12px 20px',
+            borderRadius: 10,
+            fontSize: 14,
+            fontWeight: 500,
+            background: toast.type === 'success' ? '#10b981' : '#ef4444',
+            color: '#fff',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+          }}
+        >
+          {toast.msg}
         </div>
-    );
+      )}
+
+      {/* Page Header */}
+      <div style={{ marginBottom: 24 }}>
+        <h1 style={{ fontSize: 26, fontWeight: 700, color: '#1a1f37', margin: 0 }}>Settings</h1>
+        <p style={{ color: '#64748b', fontSize: 14, margin: '4px 0 0' }}>
+          Manage system settings and preferences
+        </p>
+      </div>
+
+      {/* Layout */}
+      <div
+        className="settings-layout-grid"
+        style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: 20, alignItems: 'start' }}
+      >
+        {/* Sidebar */}
+        <div
+          className="settings-subnav-sidebar"
+          style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 8 }}
+        >
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => changeTab(t.id)}
+              className={activeTab === t.id ? 'tab-active' : ''}
+              style={{
+                width: '100%',
+                textAlign: 'left',
+                padding: '11px 14px',
+                border: 'none',
+                borderRadius: 8,
+                background: activeTab === t.id ? '#eff6ff' : 'transparent',
+                cursor: 'pointer',
+                marginBottom: 2,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                borderLeft: activeTab === t.id ? '3px solid #3b82f6' : '3px solid transparent',
+                transition: 'all 0.15s',
+              }}
+            >
+              <span style={{ fontSize: 15 }}>{t.icon}</span>
+              <span
+                style={{
+                  fontSize: 13,
+                  fontWeight: activeTab === t.id ? 600 : 400,
+                  color: activeTab === t.id ? '#1d4ed8' : '#374151',
+                }}
+              >
+                {t.label}
+              </span>
+              {activeTab === t.id && (
+                <span
+                  style={{
+                    marginLeft: 'auto',
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    background: '#3b82f6',
+                  }}
+                />
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab Content */}
+        <div>
+          {activeTab === 'general' && <GeneralSettings showToast={showToast} />}
+          {activeTab === 'profile' && <ProfileSettings showToast={showToast} />}
+          {activeTab === 'admins' && <AdminAccounts showToast={showToast} />}
+          {activeTab === 'booking-status' && <BookingStatuses showToast={showToast} />}
+          {activeTab === 'booking-form' && <BookingForm showToast={showToast} />}
+          {activeTab === 'notifications' && <NotificationSettings showToast={showToast} />}
+          {activeTab === 'security' && <SecuritySettings showToast={showToast} />}
+          {activeTab === 'preferences' && <SystemPreferences showToast={showToast} />}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 /* ─────────────────────────────────────────────── */
 /* TAB 1: General Settings                          */
 /* ─────────────────────────────────────────────── */
 function GeneralSettings({ showToast }) {
-    const [form, setForm] = useState({
-        business_name: 'CitiMaids Cleaning Services LLC',
-        contact_number: '+971 50 000 0000',
-        additional_number: '',
-        business_email: 'operations@citimaids.ae',
-        additional_email: '',
-        business_address: 'Al Reem Island, Abu Dhabi, United Arab Emirates',
-        description: 'Luxury residential and commercial cleaning services tailored across Abu Dhabi.',
-        timezone: 'Asia/Dubai',
-        date_format: 'MMM DD, YYYY',
-        time_format: '12h',
-        items_per_page: '10',
-    });
-    const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    business_name: 'CitiMaids Cleaning Services LLC',
+    contact_number: '+971 50 000 0000',
+    additional_number: '',
+    business_email: 'operations@citimaids.ae',
+    additional_email: '',
+    business_address: 'Al Reem Island, Abu Dhabi, United Arab Emirates',
+    description: 'Luxury residential and commercial cleaning services tailored across Abu Dhabi.',
+    timezone: 'Asia/Dubai',
+    date_format: 'MMM DD, YYYY',
+    time_format: '12h',
+    items_per_page: '10',
+  });
+  const [saving, setSaving] = useState(false);
 
-    useEffect(() => {
-        api.get('/settings').then(res => {
-            if (res.data) {
-                const s = res.data;
-                setForm(prev => ({ ...prev, ...s }));
-            }
-        }).catch(() => { });
-    }, []);
-
-    const handleSave = async (e) => {
-        e.preventDefault();
-        setSaving(true);
-        try {
-            await api.put('/settings', form);
-            showToast('Settings saved successfully!');
-        } catch {
-            showToast('Failed to save settings.', 'error');
-        } finally {
-            setSaving(false);
+  useEffect(() => {
+    api
+      .get('/settings')
+      .then((res) => {
+        if (res.data) {
+          const s = res.data;
+          setForm((prev) => ({ ...prev, ...s }));
         }
-    };
+      })
+      .catch(() => {});
+  }, []);
 
-    return (
-        <form onSubmit={handleSave}>
-            <SettingsCard title="General Settings" subtitle="Update your business information and branding.">
-                <SectionHeader>BUSINESS INFORMATION</SectionHeader>
-                <div className="settings-form-row-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-                    <Field label="Business Name">
-                        <input value={form.business_name} onChange={e => setForm({ ...form, business_name: e.target.value })} style={inputStyle} />
-                    </Field>
-                    <Field label="Contact Number">
-                        <input value={form.contact_number} onChange={e => setForm({ ...form, contact_number: formatUAEPhone(e.target.value) })} style={inputStyle} />
-                    </Field>
-                </div>
-                <div className="settings-form-row-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-                    <Field label="Business Email">
-                        <input type="email" value={form.business_email} onChange={e => setForm({ ...form, business_email: e.target.value })} style={inputStyle} />
-                    </Field>
-                    <Field label="Additional Number">
-                        <input value={form.additional_number || ''} onChange={e => setForm({ ...form, additional_number: formatUAEPhone(e.target.value) })} style={inputStyle} placeholder="Optional" />
-                    </Field>
-                </div>
-                <div className="settings-form-row-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-                    <Field label="Additional Email">
-                        <input type="email" value={form.additional_email || ''} onChange={e => setForm({ ...form, additional_email: e.target.value })} style={inputStyle} placeholder="Optional" />
-                    </Field>
-                </div>
-                <div style={{ marginBottom: 16 }}>
-                    <Field label="Business Address">
-                        <input value={form.business_address} onChange={e => setForm({ ...form, business_address: e.target.value })} style={inputStyle} />
-                    </Field>
-                </div>
-                <div style={{ marginBottom: 24 }}>
-                    <Field label="Description">
-                        <textarea rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
-                            style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit' }} />
-                    </Field>
-                </div>
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await api.put('/settings', form);
+      showToast('Settings saved successfully!');
+    } catch {
+      showToast('Failed to save settings.', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
 
-                <SectionHeader>PREFERENCES</SectionHeader>
-                <div className="settings-form-row-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 8 }}>
-                    <Field label="Time Zone">
-                        <select value={form.timezone} onChange={e => setForm({ ...form, timezone: e.target.value })} style={{ ...inputStyle, cursor: 'pointer' }}>
-                            <option value="Asia/Manila">(GMT+08:00) Asia/Manila</option>
-                            <option value="Asia/Dubai">(GMT+04:00) Asia/Dubai</option>
-                            <option value="UTC">(UTC+00:00) UTC</option>
-                        </select>
-                    </Field>
-                    <Field label="Date Format">
-                        <select value={form.date_format} onChange={e => setForm({ ...form, date_format: e.target.value })} style={{ ...inputStyle, cursor: 'pointer' }}>
-                            <option value="MMM DD, YYYY">May 18, 2025</option>
-                            <option value="MM/DD/YYYY">05/18/2025</option>
-                            <option value="DD/MM/YYYY">18/05/2025</option>
-                        </select>
-                    </Field>
-                    <Field label="Time Format">
-                        <select value={form.time_format} onChange={e => setForm({ ...form, time_format: e.target.value })} style={{ ...inputStyle, cursor: 'pointer' }}>
-                            <option value="12h">12-Hour (AM/PM)</option>
-                            <option value="24h">24-Hour</option>
-                        </select>
-                    </Field>
-                    <Field label="Items per Page">
-                        <select value={form.items_per_page} onChange={e => setForm({ ...form, items_per_page: e.target.value })} style={{ ...inputStyle, cursor: 'pointer' }}>
-                            {['10', '25', '50', '100'].map(v => <option key={v} value={v}>{v}</option>)}
-                        </select>
-                    </Field>
-                </div>
+  return (
+    <form onSubmit={handleSave}>
+      <SettingsCard
+        title="General Settings"
+        subtitle="Update your business information and branding."
+      >
+        <SectionHeader>BUSINESS INFORMATION</SectionHeader>
+        <div
+          className="settings-form-row-2"
+          style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}
+        >
+          <Field label="Business Name">
+            <input
+              value={form.business_name}
+              onChange={(e) => setForm({ ...form, business_name: e.target.value })}
+              style={inputStyle}
+            />
+          </Field>
+          <Field label="Contact Number">
+            <input
+              value={form.contact_number}
+              onChange={(e) => setForm({ ...form, contact_number: formatUAEPhone(e.target.value) })}
+              style={inputStyle}
+            />
+          </Field>
+        </div>
+        <div
+          className="settings-form-row-2"
+          style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}
+        >
+          <Field label="Business Email">
+            <input
+              type="email"
+              value={form.business_email}
+              onChange={(e) => setForm({ ...form, business_email: e.target.value })}
+              style={inputStyle}
+            />
+          </Field>
+          <Field label="Additional Number">
+            <input
+              value={form.additional_number || ''}
+              onChange={(e) =>
+                setForm({ ...form, additional_number: formatUAEPhone(e.target.value) })
+              }
+              style={inputStyle}
+              placeholder="Optional"
+            />
+          </Field>
+        </div>
+        <div
+          className="settings-form-row-2"
+          style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}
+        >
+          <Field label="Additional Email">
+            <input
+              type="email"
+              value={form.additional_email || ''}
+              onChange={(e) => setForm({ ...form, additional_email: e.target.value })}
+              style={inputStyle}
+              placeholder="Optional"
+            />
+          </Field>
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <Field label="Business Address">
+            <input
+              value={form.business_address}
+              onChange={(e) => setForm({ ...form, business_address: e.target.value })}
+              style={inputStyle}
+            />
+          </Field>
+        </div>
+        <div style={{ marginBottom: 24 }}>
+          <Field label="Description">
+            <textarea
+              rows={3}
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit' }}
+            />
+          </Field>
+        </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 24 }}>
-                    <button type="submit" disabled={saving} style={saveBtn}>{saving ? 'Saving...' : 'Save Changes'}</button>
-                </div>
-            </SettingsCard>
-        </form>
-    );
+        <SectionHeader>PREFERENCES</SectionHeader>
+        <div
+          className="settings-form-row-4"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: 16,
+            marginBottom: 8,
+          }}
+        >
+          <Field label="Time Zone">
+            <select
+              value={form.timezone}
+              onChange={(e) => setForm({ ...form, timezone: e.target.value })}
+              style={{ ...inputStyle, cursor: 'pointer' }}
+            >
+              <option value="Asia/Manila">(GMT+08:00) Asia/Manila</option>
+              <option value="Asia/Dubai">(GMT+04:00) Asia/Dubai</option>
+              <option value="UTC">(UTC+00:00) UTC</option>
+            </select>
+          </Field>
+          <Field label="Date Format">
+            <select
+              value={form.date_format}
+              onChange={(e) => setForm({ ...form, date_format: e.target.value })}
+              style={{ ...inputStyle, cursor: 'pointer' }}
+            >
+              <option value="MMM DD, YYYY">May 18, 2025</option>
+              <option value="MM/DD/YYYY">05/18/2025</option>
+              <option value="DD/MM/YYYY">18/05/2025</option>
+            </select>
+          </Field>
+          <Field label="Time Format">
+            <select
+              value={form.time_format}
+              onChange={(e) => setForm({ ...form, time_format: e.target.value })}
+              style={{ ...inputStyle, cursor: 'pointer' }}
+            >
+              <option value="12h">12-Hour (AM/PM)</option>
+              <option value="24h">24-Hour</option>
+            </select>
+          </Field>
+          <Field label="Items per Page">
+            <select
+              value={form.items_per_page}
+              onChange={(e) => setForm({ ...form, items_per_page: e.target.value })}
+              style={{ ...inputStyle, cursor: 'pointer' }}
+            >
+              {['10', '25', '50', '100'].map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </select>
+          </Field>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 24 }}>
+          <button type="submit" disabled={saving} style={saveBtn}>
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
+        </div>
+      </SettingsCard>
+    </form>
+  );
 }
 
 /* ─────────────────────────────────────────────── */
 /* TAB 2: Profile Settings                          */
 /* ─────────────────────────────────────────────── */
 function ProfileSettings({ showToast }) {
-    const { user, updateUser } = useAuth();
-    const [form, setForm] = useState({
-        name: user?.name || '',
-        email: user?.email || '',
-        current_password: '',
-        new_password: '',
-        confirm_password: '',
-    });
-    const [role, setRole] = useState(user?.role || 'Administrator');
-    const [saving, setSaving] = useState(false);
+  const { user, updateUser } = useAuth();
+  const [form, setForm] = useState({
+    name: user?.name || '',
+    email: user?.email || '',
+    current_password: '',
+    new_password: '',
+    confirm_password: '',
+  });
+  const [role, setRole] = useState(user?.role || 'Administrator');
+  const [saving, setSaving] = useState(false);
 
-    useEffect(() => {
-        api.get('/auth/me').then(res => {
-            if (res.data) {
-                setForm(prev => ({
-                    ...prev,
-                    name: res.data.name || prev.name,
-                    email: res.data.email || prev.email,
-                }));
-                if (res.data.role) {
-                    setRole(res.data.role);
-                }
-            }
-        }).catch(() => { });
-    }, []);
-
-    const handleSave = async (e) => {
-        e.preventDefault();
-
-        if (!form.name.trim()) {
-            showToast('Full name is required.', 'error');
-            return;
+  useEffect(() => {
+    api
+      .get('/auth/me')
+      .then((res) => {
+        if (res.data) {
+          setForm((prev) => ({
+            ...prev,
+            name: res.data.name || prev.name,
+            email: res.data.email || prev.email,
+          }));
+          if (res.data.role) {
+            setRole(res.data.role);
+          }
         }
-        if (!form.email.trim()) {
-            showToast('Email address is required.', 'error');
-            return;
-        }
+      })
+      .catch(() => {});
+  }, []);
 
-        const isChangingPassword = Boolean(form.new_password || form.current_password || form.confirm_password);
+  const handleSave = async (e) => {
+    e.preventDefault();
 
-        if (isChangingPassword) {
-            if (!form.current_password) {
-                showToast('Please enter your current password.', 'error');
-                return;
-            }
-            if (!form.new_password) {
-                showToast('Please enter a new password.', 'error');
-                return;
-            }
-            if (form.new_password.length < 6) {
-                showToast('New password must be at least 6 characters.', 'error');
-                return;
-            }
-            if (form.new_password !== form.confirm_password) {
-                showToast('New passwords do not match.', 'error');
-                return;
-            }
-        }
+    if (!form.name.trim()) {
+      showToast('Full name is required.', 'error');
+      return;
+    }
+    if (!form.email.trim()) {
+      showToast('Email address is required.', 'error');
+      return;
+    }
 
-        setSaving(true);
-        try {
-            // 1. Update Profile (Name & Email)
-            const profileRes = await api.put('/auth/profile', {
-                name: form.name.trim(),
-                email: form.email.trim(),
-            });
-            if (profileRes.data?.user && updateUser) {
-                updateUser(profileRes.data.user);
-            }
-
-            // 2. Update Password if specified
-            if (isChangingPassword) {
-                await api.put('/auth/password', {
-                    current_password: form.current_password,
-                    new_password: form.new_password,
-                });
-                setForm(prev => ({
-                    ...prev,
-                    current_password: '',
-                    new_password: '',
-                    confirm_password: '',
-                }));
-                showToast('Profile and password updated successfully!');
-            } else {
-                showToast('Profile updated successfully!');
-            }
-        } catch (err) {
-            const msg =
-                err.response?.data?.errors?.current_password?.[0] ||
-                err.response?.data?.errors?.email?.[0] ||
-                err.response?.data?.errors?.name?.[0] ||
-                err.response?.data?.message ||
-                'Failed to update profile.';
-            showToast(msg, 'error');
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    const initials = form.name
-        ? form.name.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()
-        : 'AD';
-
-    return (
-        <form onSubmit={handleSave}>
-            <SettingsCard title="Profile Settings" subtitle="Update your personal account credentials and password.">
-                <SectionHeader>ACCOUNT INFORMATION</SectionHeader>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 24, padding: '16px 20px', background: '#f8fafc', borderRadius: 10, border: '1px solid #e2e8f0' }}>
-                    <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#3b82f6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 700 }}>
-                        {initials}
-                    </div>
-                    <div>
-                        <div style={{ fontSize: 16, fontWeight: 700, color: '#1a1f37' }}>{form.name || 'Administrator'}</div>
-                        <div style={{ fontSize: 13, color: '#64748b', textTransform: 'capitalize' }}>{role || 'Staff Member'}</div>
-                    </div>
-                </div>
-                <div className="settings-form-row-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
-                    <Field label="Full Name">
-                        <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={inputStyle} required />
-                    </Field>
-                    <Field label="Email Address">
-                        <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} style={inputStyle} required />
-                    </Field>
-                </div>
-
-                <SectionHeader>CHANGE PASSWORD</SectionHeader>
-                <div className="settings-form-row-3" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 8 }}>
-                    <Field label="Current Password">
-                        <input type="password" placeholder="••••••••" value={form.current_password} onChange={e => setForm({ ...form, current_password: e.target.value })} style={inputStyle} />
-                    </Field>
-                    <Field label="New Password">
-                        <input type="password" placeholder="••••••••" value={form.new_password} onChange={e => setForm({ ...form, new_password: e.target.value })} style={inputStyle} />
-                    </Field>
-                    <Field label="Confirm New Password">
-                        <input type="password" placeholder="••••••••" value={form.confirm_password} onChange={e => setForm({ ...form, confirm_password: e.target.value })} style={inputStyle} />
-                    </Field>
-                </div>
-                <p style={{ fontSize: 12, color: '#94a3b8', margin: '0 0 24px' }}>Leave password fields blank to keep current password.</p>
-
-                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <button type="submit" disabled={saving} style={saveBtn}>{saving ? 'Saving...' : 'Save Changes'}</button>
-                </div>
-            </SettingsCard>
-        </form>
+    const isChangingPassword = Boolean(
+      form.new_password || form.current_password || form.confirm_password
     );
+
+    if (isChangingPassword) {
+      if (!form.current_password) {
+        showToast('Please enter your current password.', 'error');
+        return;
+      }
+      if (!form.new_password) {
+        showToast('Please enter a new password.', 'error');
+        return;
+      }
+      if (form.new_password.length < 6) {
+        showToast('New password must be at least 6 characters.', 'error');
+        return;
+      }
+      if (form.new_password !== form.confirm_password) {
+        showToast('New passwords do not match.', 'error');
+        return;
+      }
+    }
+
+    setSaving(true);
+    try {
+      // 1. Update Profile (Name & Email)
+      const profileRes = await api.put('/auth/profile', {
+        name: form.name.trim(),
+        email: form.email.trim(),
+      });
+      if (profileRes.data?.user && updateUser) {
+        updateUser(profileRes.data.user);
+      }
+
+      // 2. Update Password if specified
+      if (isChangingPassword) {
+        await api.put('/auth/password', {
+          current_password: form.current_password,
+          new_password: form.new_password,
+        });
+        setForm((prev) => ({
+          ...prev,
+          current_password: '',
+          new_password: '',
+          confirm_password: '',
+        }));
+        showToast('Profile and password updated successfully!');
+      } else {
+        showToast('Profile updated successfully!');
+      }
+    } catch (err) {
+      const msg =
+        err.response?.data?.errors?.current_password?.[0] ||
+        err.response?.data?.errors?.email?.[0] ||
+        err.response?.data?.errors?.name?.[0] ||
+        err.response?.data?.message ||
+        'Failed to update profile.';
+      showToast(msg, 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const initials = form.name
+    ? form.name
+        .split(' ')
+        .filter(Boolean)
+        .map((n) => n[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase()
+    : 'AD';
+
+  return (
+    <form onSubmit={handleSave}>
+      <SettingsCard
+        title="Profile Settings"
+        subtitle="Update your personal account credentials and password."
+      >
+        <SectionHeader>ACCOUNT INFORMATION</SectionHeader>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 20,
+            marginBottom: 24,
+            padding: '16px 20px',
+            background: '#f8fafc',
+            borderRadius: 10,
+            border: '1px solid #e2e8f0',
+          }}
+        >
+          <div
+            style={{
+              width: 64,
+              height: 64,
+              borderRadius: '50%',
+              background: '#3b82f6',
+              color: '#fff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 22,
+              fontWeight: 700,
+            }}
+          >
+            {initials}
+          </div>
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: '#1a1f37' }}>
+              {form.name || 'Administrator'}
+            </div>
+            <div style={{ fontSize: 13, color: '#64748b', textTransform: 'capitalize' }}>
+              {role || 'Staff Member'}
+            </div>
+          </div>
+        </div>
+        <div
+          className="settings-form-row-2"
+          style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}
+        >
+          <Field label="Full Name">
+            <input
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              style={inputStyle}
+              required
+            />
+          </Field>
+          <Field label="Email Address">
+            <input
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              style={inputStyle}
+              required
+            />
+          </Field>
+        </div>
+
+        <SectionHeader>CHANGE PASSWORD</SectionHeader>
+        <div
+          className="settings-form-row-3"
+          style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 8 }}
+        >
+          <Field label="Current Password">
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={form.current_password}
+              onChange={(e) => setForm({ ...form, current_password: e.target.value })}
+              style={inputStyle}
+            />
+          </Field>
+          <Field label="New Password">
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={form.new_password}
+              onChange={(e) => setForm({ ...form, new_password: e.target.value })}
+              style={inputStyle}
+            />
+          </Field>
+          <Field label="Confirm New Password">
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={form.confirm_password}
+              onChange={(e) => setForm({ ...form, confirm_password: e.target.value })}
+              style={inputStyle}
+            />
+          </Field>
+        </div>
+        <p style={{ fontSize: 12, color: '#94a3b8', margin: '0 0 24px' }}>
+          Leave password fields blank to keep current password.
+        </p>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <button type="submit" disabled={saving} style={saveBtn}>
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
+        </div>
+      </SettingsCard>
+    </form>
+  );
 }
 
 /* ─────────────────────────────────────────────── */
 /* TAB 3: Admin Accounts                            */
 /* ─────────────────────────────────────────────── */
 function AdminAccounts({ showToast }) {
-    const [admins] = useState([
-        { id: 1, name: 'Admin User', email: 'admin@citimaids.com', role: 'Super Admin', last_login: 'Sep 2, 2026, 09:10 AM', status: 'active' },
-        { id: 2, name: 'Support Staff', email: 'support@citimaids.com', role: 'Admin', last_login: 'Sep 1, 2026, 03:45 PM', status: 'active' },
-    ]);
-    const [addModal, setAddModal] = useState(false);
-    const [form, setForm] = useState({ name: '', email: '', role: 'Admin', password: '' });
+  const [admins] = useState([
+    {
+      id: 1,
+      name: 'Admin User',
+      email: 'admin@citimaids.com',
+      role: 'Super Admin',
+      last_login: 'Sep 2, 2026, 09:10 AM',
+      status: 'active',
+    },
+    {
+      id: 2,
+      name: 'Support Staff',
+      email: 'support@citimaids.com',
+      role: 'Admin',
+      last_login: 'Sep 1, 2026, 03:45 PM',
+      status: 'active',
+    },
+  ]);
+  const [addModal, setAddModal] = useState(false);
+  const [form, setForm] = useState({ name: '', email: '', role: 'Admin', password: '' });
 
-    const handleAdd = (e) => {
-        e.preventDefault();
-        setAddModal(false);
-        setForm({ name: '', email: '', role: 'Admin', password: '' });
-        showToast('Admin account created successfully!');
-    };
+  const handleAdd = (e) => {
+    e.preventDefault();
+    setAddModal(false);
+    setForm({ name: '', email: '', role: 'Admin', password: '' });
+    showToast('Admin account created successfully!');
+  };
 
-    return (
-        <div>
-            {addModal && (
-                <Overlay onClose={() => setAddModal(false)} title="Add Admin Account">
-                    <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                        <Field label="Full Name" required><input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={inputStyle} /></Field>
-                        <Field label="Email" required><input required type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} style={inputStyle} /></Field>
-                        <Field label="Role"><select value={form.role} onChange={e => setForm({ ...form, role: e.target.value })} style={{ ...inputStyle, cursor: 'pointer' }}><option>Admin</option><option>Super Admin</option></select></Field>
-                        <Field label="Password" required><input required type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} style={inputStyle} /></Field>
-                        <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
-                            <button type="button" onClick={() => setAddModal(false)} style={{ ...outlineBtn, flex: 1 }}>Cancel</button>
-                            <button type="submit" style={{ ...saveBtn, flex: 1 }}>Add Account</button>
-                        </div>
-                    </form>
-                </Overlay>
-            )}
+  return (
+    <div>
+      {addModal && (
+        <Overlay onClose={() => setAddModal(false)} title="Add Admin Account">
+          <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <Field label="Full Name" required>
+              <input
+                required
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                style={inputStyle}
+              />
+            </Field>
+            <Field label="Email" required>
+              <input
+                required
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                style={inputStyle}
+              />
+            </Field>
+            <Field label="Role">
+              <select
+                value={form.role}
+                onChange={(e) => setForm({ ...form, role: e.target.value })}
+                style={{ ...inputStyle, cursor: 'pointer' }}
+              >
+                <option>Admin</option>
+                <option>Super Admin</option>
+              </select>
+            </Field>
+            <Field label="Password" required>
+              <input
+                required
+                type="password"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                style={inputStyle}
+              />
+            </Field>
+            <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+              <button
+                type="button"
+                onClick={() => setAddModal(false)}
+                style={{ ...outlineBtn, flex: 1 }}
+              >
+                Cancel
+              </button>
+              <button type="submit" style={{ ...saveBtn, flex: 1 }}>
+                Add Account
+              </button>
+            </div>
+          </form>
+        </Overlay>
+      )}
 
-            <SettingsCard title="Admin Accounts" subtitle="Manage administrator accounts and roles.">
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-                    <button onClick={() => setAddModal(true)} style={saveBtn}>+ Add Admin</button>
-                </div>
-                <div style={{ border: '1px solid #e2e8f0', borderRadius: 10, overflow: 'hidden' }}>
-                    <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-                        <div style={{ minWidth: 620 }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr 80px', padding: '12px 20px', background: '#fafbfc', borderBottom: '1px solid #e2e8f0' }}>
-                                {['ADMIN', 'ROLE', 'LAST LOGIN', 'STATUS', 'ACTIONS'].map(h => (
-                                    <span key={h} style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.8 }}>{h}</span>
-                                ))}
-                            </div>
-                            {admins.map((admin, i) => (
-                                <div key={admin.id} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr 80px', padding: '16px 20px', borderBottom: '1px solid #f1f5f9', alignItems: 'center' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                        <div style={{ width: 36, height: 36, borderRadius: '50%', background: i === 0 ? '#3b82f6' : '#8b5cf6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700 }}>
-                                            {admin.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                                        </div>
-                                        <div>
-                                            <div style={{ fontSize: 14, fontWeight: 600, color: '#1a1f37' }}>{admin.name}</div>
-                                            <div style={{ fontSize: 12, color: '#94a3b8' }}>{admin.email}</div>
-                                        </div>
-                                    </div>
-                                    <span style={{ fontSize: 12, fontWeight: 600, color: '#3b82f6', background: '#eff6ff', padding: '3px 10px', borderRadius: 6, width: 'fit-content' }}>{admin.role}</span>
-                                    <span style={{ fontSize: 13, color: '#64748b' }}>{admin.last_login}</span>
-                                    <span style={{ fontSize: 12, fontWeight: 600, color: '#10b981', background: '#d1fae5', padding: '3px 10px', borderRadius: 6, width: 'fit-content' }}>Active</span>
-                                    <div style={{ display: 'flex', gap: 6 }}>
-                                        <SmallBtn title="Edit" icon={
-                                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
-                                                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
-                                            </svg>
-                                        } />
-                                        {i !== 0 && (
-                                            <SmallBtn title="Delete" icon={
-                                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                                    <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" />
-                                                    <path d="M10 11v6M14 11v6M9 6V4h6v2" />
-                                                </svg>
-                                            } onClick={() => showToast('Admin removed.', 'error')} />
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </SettingsCard>
+      <SettingsCard title="Admin Accounts" subtitle="Manage administrator accounts and roles.">
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+          <button onClick={() => setAddModal(true)} style={saveBtn}>
+            + Add Admin
+          </button>
         </div>
-    );
+        <div style={{ border: '1px solid #e2e8f0', borderRadius: 10, overflow: 'hidden' }}>
+          <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            <div style={{ minWidth: 620 }}>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1.5fr 1fr 1fr 1fr 80px',
+                  padding: '12px 20px',
+                  background: '#fafbfc',
+                  borderBottom: '1px solid #e2e8f0',
+                }}
+              >
+                {['ADMIN', 'ROLE', 'LAST LOGIN', 'STATUS', 'ACTIONS'].map((h) => (
+                  <span
+                    key={h}
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: '#64748b',
+                      textTransform: 'uppercase',
+                      letterSpacing: 0.8,
+                    }}
+                  >
+                    {h}
+                  </span>
+                ))}
+              </div>
+              {admins.map((admin, i) => (
+                <div
+                  key={admin.id}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1.5fr 1fr 1fr 1fr 80px',
+                    padding: '16px 20px',
+                    borderBottom: '1px solid #f1f5f9',
+                    alignItems: 'center',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div
+                      style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: '50%',
+                        background: i === 0 ? '#3b82f6' : '#8b5cf6',
+                        color: '#fff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 13,
+                        fontWeight: 700,
+                      }}
+                    >
+                      {admin.name
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')
+                        .slice(0, 2)}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: '#1a1f37' }}>
+                        {admin.name}
+                      </div>
+                      <div style={{ fontSize: 12, color: '#94a3b8' }}>{admin.email}</div>
+                    </div>
+                  </div>
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: '#3b82f6',
+                      background: '#eff6ff',
+                      padding: '3px 10px',
+                      borderRadius: 6,
+                      width: 'fit-content',
+                    }}
+                  >
+                    {admin.role}
+                  </span>
+                  <span style={{ fontSize: 13, color: '#64748b' }}>{admin.last_login}</span>
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: '#10b981',
+                      background: '#d1fae5',
+                      padding: '3px 10px',
+                      borderRadius: 6,
+                      width: 'fit-content',
+                    }}
+                  >
+                    Active
+                  </span>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <SmallBtn
+                      title="Edit"
+                      icon={
+                        <svg
+                          width="13"
+                          height="13"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                          <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                        </svg>
+                      }
+                    />
+                    {i !== 0 && (
+                      <SmallBtn
+                        title="Delete"
+                        icon={
+                          <svg
+                            width="13"
+                            height="13"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6l-1 14H6L5 6" />
+                            <path d="M10 11v6M14 11v6M9 6V4h6v2" />
+                          </svg>
+                        }
+                        onClick={() => showToast('Admin removed.', 'error')}
+                      />
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </SettingsCard>
+    </div>
+  );
 }
 
 /* ─────────────────────────────────────────────── */
 /* TAB 4: Booking Statuses                          */
 /* ─────────────────────────────────────────────── */
 function BookingStatuses({ showToast }) {
-    const [statuses, setStatuses] = useState([
-        { id: 1, label: 'Pending', color: '#f59e0b', description: 'Awaiting admin review', editable: true },
-        { id: 2, label: 'Confirmed', color: '#3b82f6', description: 'Booking is confirmed', editable: true },
-        { id: 3, label: 'Completed', color: '#10b981', description: 'Service has been completed', editable: true },
-        { id: 4, label: 'Cancelled', color: '#ef4444', description: 'Booking was cancelled', editable: true },
-    ]);
+  const [statuses, setStatuses] = useState([
+    {
+      id: 1,
+      label: 'Pending',
+      color: '#f59e0b',
+      description: 'Awaiting admin review',
+      editable: true,
+    },
+    {
+      id: 2,
+      label: 'Confirmed',
+      color: '#3b82f6',
+      description: 'Booking is confirmed',
+      editable: true,
+    },
+    {
+      id: 3,
+      label: 'Completed',
+      color: '#10b981',
+      description: 'Service has been completed',
+      editable: true,
+    },
+    {
+      id: 4,
+      label: 'Cancelled',
+      color: '#ef4444',
+      description: 'Booking was cancelled',
+      editable: true,
+    },
+  ]);
 
-    const handleColorChange = (id, newColor) => {
-        setStatuses(prev => prev.map(s => s.id === id ? { ...s, color: newColor } : s));
-    };
+  const handleColorChange = (id, newColor) => {
+    setStatuses((prev) => prev.map((s) => (s.id === id ? { ...s, color: newColor } : s)));
+  };
 
-    const handleLabelChange = (id, val) => {
-        setStatuses(prev => prev.map(s => s.id === id ? { ...s, label: val } : s));
-    };
+  const handleLabelChange = (id, val) => {
+    setStatuses((prev) => prev.map((s) => (s.id === id ? { ...s, label: val } : s)));
+  };
 
-    return (
-        <SettingsCard title="Booking Statuses" subtitle="Configure booking status labels and colors.">
-            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-                <div style={{ minWidth: 540, display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 24 }}>
-                    {statuses.map(s => (
-                        <div key={s.id} style={{ display: 'grid', gridTemplateColumns: '40px 1fr 1fr 160px', gap: 16, alignItems: 'center', padding: '16px 20px', border: '1px solid #e2e8f0', borderRadius: 10, borderLeft: `4px solid ${s.color}` }}>
-                            <span style={{ width: 14, height: 14, borderRadius: '50%', background: s.color, display: 'inline-block', boxShadow: `0 0 8px ${s.color}60` }} />
-                            <input
-                                value={s.label}
-                                onChange={e => handleLabelChange(s.id, e.target.value)}
-                                style={{ ...inputStyle, fontWeight: 600, color: s.color }}
-                            />
-                            <input
-                                value={s.description}
-                                onChange={e => setStatuses(prev => prev.map(x => x.id === s.id ? { ...x, description: e.target.value } : x))}
-                                style={{ ...inputStyle, fontSize: 13, color: '#64748b' }}
-                            />
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                <input type="color" value={s.color} onChange={e => handleColorChange(s.id, e.target.value)}
-                                    style={{ width: 36, height: 36, border: 'none', background: 'none', cursor: 'pointer', borderRadius: 6 }} />
-                                <span style={{ fontSize: 12, color: '#64748b' }}>{s.color}</span>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+  return (
+    <SettingsCard title="Booking Statuses" subtitle="Configure booking status labels and colors.">
+      <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <div
+          style={{
+            minWidth: 540,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 14,
+            marginBottom: 24,
+          }}
+        >
+          {statuses.map((s) => (
+            <div
+              key={s.id}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '40px 1fr 1fr 160px',
+                gap: 16,
+                alignItems: 'center',
+                padding: '16px 20px',
+                border: '1px solid #e2e8f0',
+                borderRadius: 10,
+                borderLeft: `4px solid ${s.color}`,
+              }}
+            >
+              <span
+                style={{
+                  width: 14,
+                  height: 14,
+                  borderRadius: '50%',
+                  background: s.color,
+                  display: 'inline-block',
+                  boxShadow: `0 0 8px ${s.color}60`,
+                }}
+              />
+              <input
+                value={s.label}
+                onChange={(e) => handleLabelChange(s.id, e.target.value)}
+                style={{ ...inputStyle, fontWeight: 600, color: s.color }}
+              />
+              <input
+                value={s.description}
+                onChange={(e) =>
+                  setStatuses((prev) =>
+                    prev.map((x) => (x.id === s.id ? { ...x, description: e.target.value } : x))
+                  )
+                }
+                style={{ ...inputStyle, fontSize: 13, color: '#64748b' }}
+              />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <input
+                  type="color"
+                  value={s.color}
+                  onChange={(e) => handleColorChange(s.id, e.target.value)}
+                  style={{
+                    width: 36,
+                    height: 36,
+                    border: 'none',
+                    background: 'none',
+                    cursor: 'pointer',
+                    borderRadius: 6,
+                  }}
+                />
+                <span style={{ fontSize: 12, color: '#64748b' }}>{s.color}</span>
+              </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <button onClick={() => showToast('Booking statuses saved!')} style={saveBtn}>Save Changes</button>
-            </div>
-        </SettingsCard>
-    );
+          ))}
+        </div>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <button onClick={() => showToast('Booking statuses saved!')} style={saveBtn}>
+          Save Changes
+        </button>
+      </div>
+    </SettingsCard>
+  );
 }
 
 /* ─────────────────────────────────────────────── */
 /* TAB 5: Booking Form                              */
 /* ─────────────────────────────────────────────── */
 function BookingForm({ showToast }) {
-    const [fields, setFields] = useState([
-        { id: 'full_name', label: 'Full Name', required: true, enabled: true, locked: true },
-        { id: 'contact_number', label: 'Contact Number', required: true, enabled: true, locked: true },
-        { id: 'email', label: 'Email Address', required: false, enabled: true, locked: false },
-        { id: 'service', label: 'Service Selection', required: true, enabled: true, locked: true },
-        { id: 'preferred_date', label: 'Preferred Date', required: true, enabled: true, locked: true },
-        { id: 'preferred_time', label: 'Preferred Time', required: false, enabled: false, locked: false },
-        { id: 'address', label: 'Service Address', required: false, enabled: true, locked: false },
-        { id: 'notes', label: 'Special Notes / Instructions', required: false, enabled: true, locked: false },
-        { id: 'number_of_rooms', label: 'Number of Rooms', required: false, enabled: false, locked: false },
-        { id: 'promo_code', label: 'Promo Code', required: false, enabled: false, locked: false },
-    ]);
+  const [fields, setFields] = useState([
+    { id: 'full_name', label: 'Full Name', required: true, enabled: true, locked: true },
+    { id: 'contact_number', label: 'Contact Number', required: true, enabled: true, locked: true },
+    { id: 'email', label: 'Email Address', required: false, enabled: true, locked: false },
+    { id: 'service', label: 'Service Selection', required: true, enabled: true, locked: true },
+    { id: 'preferred_date', label: 'Preferred Date', required: true, enabled: true, locked: true },
+    {
+      id: 'preferred_time',
+      label: 'Preferred Time',
+      required: false,
+      enabled: false,
+      locked: false,
+    },
+    { id: 'address', label: 'Service Address', required: false, enabled: true, locked: false },
+    {
+      id: 'notes',
+      label: 'Special Notes / Instructions',
+      required: false,
+      enabled: true,
+      locked: false,
+    },
+    {
+      id: 'number_of_rooms',
+      label: 'Number of Rooms',
+      required: false,
+      enabled: false,
+      locked: false,
+    },
+    { id: 'promo_code', label: 'Promo Code', required: false, enabled: false, locked: false },
+  ]);
 
-    const toggle = (id, key) => {
-        setFields(prev => prev.map(f => f.id === id && !f.locked ? { ...f, [key]: !f[key] } : f));
-    };
+  const toggle = (id, key) => {
+    setFields((prev) => prev.map((f) => (f.id === id && !f.locked ? { ...f, [key]: !f[key] } : f)));
+  };
 
-    return (
-        <SettingsCard title="Booking Form" subtitle="Configure which fields appear on the customer booking form.">
-            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-                <div style={{ minWidth: 420 }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px', gap: 0, marginBottom: 8 }}>
-                        <span style={thStyle}>FORM FIELD</span>
-                        <span style={{ ...thStyle, textAlign: 'center' }}>ENABLED</span>
-                        <span style={{ ...thStyle, textAlign: 'center' }}>REQUIRED</span>
-                    </div>
-                    {fields.map(f => (
-                        <div key={f.id} style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px', gap: 0, padding: '14px 0', borderBottom: '1px solid #f1f5f9', alignItems: 'center' }}>
-                            <div>
-                                <div style={{ fontSize: 14, fontWeight: 500, color: '#1a1f37' }}>{f.label}</div>
-                                {f.locked && <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>Required system field</div>}
-                            </div>
-                            <div style={{ textAlign: 'center' }}>
-                                <Toggle on={f.enabled} disabled={f.locked} onToggle={() => toggle(f.id, 'enabled')} />
-                            </div>
-                            <div style={{ textAlign: 'center' }}>
-                                <Toggle on={f.required} disabled={f.locked || !f.enabled} onToggle={() => toggle(f.id, 'required')} />
-                            </div>
-                        </div>
-                    ))}
-                </div>
+  return (
+    <SettingsCard
+      title="Booking Form"
+      subtitle="Configure which fields appear on the customer booking form."
+    >
+      <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <div style={{ minWidth: 420 }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 100px 100px',
+              gap: 0,
+              marginBottom: 8,
+            }}
+          >
+            <span style={thStyle}>FORM FIELD</span>
+            <span style={{ ...thStyle, textAlign: 'center' }}>ENABLED</span>
+            <span style={{ ...thStyle, textAlign: 'center' }}>REQUIRED</span>
+          </div>
+          {fields.map((f) => (
+            <div
+              key={f.id}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 100px 100px',
+                gap: 0,
+                padding: '14px 0',
+                borderBottom: '1px solid #f1f5f9',
+                alignItems: 'center',
+              }}
+            >
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 500, color: '#1a1f37' }}>{f.label}</div>
+                {f.locked && (
+                  <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>
+                    Required system field
+                  </div>
+                )}
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <Toggle
+                  on={f.enabled}
+                  disabled={f.locked}
+                  onToggle={() => toggle(f.id, 'enabled')}
+                />
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <Toggle
+                  on={f.required}
+                  disabled={f.locked || !f.enabled}
+                  onToggle={() => toggle(f.id, 'required')}
+                />
+              </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 20 }}>
-                <button onClick={() => showToast('Booking form configuration saved!')} style={saveBtn}>Save Changes</button>
-            </div>
-        </SettingsCard>
-    );
+          ))}
+        </div>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 20 }}>
+        <button onClick={() => showToast('Booking form configuration saved!')} style={saveBtn}>
+          Save Changes
+        </button>
+      </div>
+    </SettingsCard>
+  );
 }
 
 /* ─────────────────────────────────────────────── */
 /* TAB 6: Notifications                             */
 /* ─────────────────────────────────────────────── */
 function NotificationSettings({ showToast }) {
-    const [notifs, setNotifs] = useState({
-        email_new_booking: true,
-        email_status_change: true,
-        email_booking_reminder: false,
-        sms_new_booking: false,
-        sms_status_change: false,
-        daily_digest: true,
-        weekly_report: false,
-        notify_client_on_confirm: true,
-        notify_client_on_complete: true,
-    });
+  const [notifs, setNotifs] = useState({
+    email_new_booking: true,
+    email_status_change: true,
+    email_booking_reminder: false,
+    sms_new_booking: false,
+    sms_status_change: false,
+    daily_digest: true,
+    weekly_report: false,
+    notify_client_on_confirm: true,
+    notify_client_on_complete: true,
+  });
 
-    const toggle = key => setNotifs(prev => ({ ...prev, [key]: !prev[key] }));
+  const toggle = (key) => setNotifs((prev) => ({ ...prev, [key]: !prev[key] }));
 
-    const groups = [
+  const groups = [
+    {
+      title: 'Admin Email Notifications',
+      icon: (
+        <svg
+          width="16"
+          height="16"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+          />
+        </svg>
+      ),
+      items: [
         {
-            title: 'Admin Email Notifications',
-            icon: (
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-            ),
-            items: [
-                { key: 'email_new_booking', label: 'New Booking Submitted', desc: 'Get emailed when a customer submits a new booking.' },
-                { key: 'email_status_change', label: 'Booking Status Changed', desc: 'Notify when a booking status is updated.' },
-                { key: 'email_booking_reminder', label: 'Upcoming Booking Reminders', desc: 'Daily reminders for bookings scheduled tomorrow.' },
-            ],
+          key: 'email_new_booking',
+          label: 'New Booking Submitted',
+          desc: 'Get emailed when a customer submits a new booking.',
         },
         {
-            title: 'SMS Notifications',
-            icon: (
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <rect x="5" y="2" width="14" height="20" rx="2" /><path d="M12 18h.01" />
-                </svg>
-            ),
-            items: [
-                { key: 'sms_new_booking', label: 'SMS on New Booking', desc: 'Receive an SMS for every new booking.' },
-                { key: 'sms_status_change', label: 'SMS on Status Change', desc: 'Get an SMS when booking status changes.' },
-            ],
+          key: 'email_status_change',
+          label: 'Booking Status Changed',
+          desc: 'Notify when a booking status is updated.',
         },
         {
-            title: 'Reports & Digests',
-            icon: (
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-            ),
-            items: [
-                { key: 'daily_digest', label: 'Daily Summary Digest', desc: 'Daily email summary of bookings and revenue.' },
-                { key: 'weekly_report', label: 'Weekly Report', desc: 'Weekly performance report every Monday.' },
-            ],
+          key: 'email_booking_reminder',
+          label: 'Upcoming Booking Reminders',
+          desc: 'Daily reminders for bookings scheduled tomorrow.',
+        },
+      ],
+    },
+    {
+      title: 'SMS Notifications',
+      icon: (
+        <svg
+          width="16"
+          height="16"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <rect x="5" y="2" width="14" height="20" rx="2" />
+          <path d="M12 18h.01" />
+        </svg>
+      ),
+      items: [
+        {
+          key: 'sms_new_booking',
+          label: 'SMS on New Booking',
+          desc: 'Receive an SMS for every new booking.',
         },
         {
-            title: 'Client Notifications',
-            icon: (
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
-            ),
-            items: [
-                { key: 'notify_client_on_confirm', label: 'Notify Client on Confirmation', desc: 'Send client an email when their booking is confirmed.' },
-                { key: 'notify_client_on_complete', label: 'Notify Client on Completion', desc: 'Send client an email when service is completed.' },
-            ],
+          key: 'sms_status_change',
+          label: 'SMS on Status Change',
+          desc: 'Get an SMS when booking status changes.',
         },
-    ];
+      ],
+    },
+    {
+      title: 'Reports & Digests',
+      icon: (
+        <svg
+          width="16"
+          height="16"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+          />
+        </svg>
+      ),
+      items: [
+        {
+          key: 'daily_digest',
+          label: 'Daily Summary Digest',
+          desc: 'Daily email summary of bookings and revenue.',
+        },
+        {
+          key: 'weekly_report',
+          label: 'Weekly Report',
+          desc: 'Weekly performance report every Monday.',
+        },
+      ],
+    },
+    {
+      title: 'Client Notifications',
+      icon: (
+        <svg
+          width="16"
+          height="16"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+        </svg>
+      ),
+      items: [
+        {
+          key: 'notify_client_on_confirm',
+          label: 'Notify Client on Confirmation',
+          desc: 'Send client an email when their booking is confirmed.',
+        },
+        {
+          key: 'notify_client_on_complete',
+          label: 'Notify Client on Completion',
+          desc: 'Send client an email when service is completed.',
+        },
+      ],
+    },
+  ];
 
-    return (
-        <SettingsCard title="Notifications" subtitle="Configure when and how notifications are sent.">
-            {groups.map(g => (
-                <div key={g.title} style={{ marginBottom: 24 }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#374151', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                        {g.icon} {g.title}
-                    </div>
-                    <div style={{ border: '1px solid #e2e8f0', borderRadius: 10, overflow: 'hidden' }}>
-                        {g.items.map((item, i) => (
-                            <div key={item.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderBottom: i < g.items.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
-                                <div>
-                                    <div style={{ fontSize: 14, fontWeight: 500, color: '#1a1f37' }}>{item.label}</div>
-                                    <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{item.desc}</div>
-                                </div>
-                                <Toggle on={notifs[item.key]} onToggle={() => toggle(item.key)} />
-                            </div>
-                        ))}
-                    </div>
+  return (
+    <SettingsCard title="Notifications" subtitle="Configure when and how notifications are sent.">
+      {groups.map((g) => (
+        <div key={g.title} style={{ marginBottom: 24 }}>
+          <div
+            style={{
+              fontSize: 13,
+              fontWeight: 700,
+              color: '#374151',
+              marginBottom: 12,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            {g.icon} {g.title}
+          </div>
+          <div style={{ border: '1px solid #e2e8f0', borderRadius: 10, overflow: 'hidden' }}>
+            {g.items.map((item, i) => (
+              <div
+                key={item.key}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '16px 20px',
+                  borderBottom: i < g.items.length - 1 ? '1px solid #f1f5f9' : 'none',
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 500, color: '#1a1f37' }}>
+                    {item.label}
+                  </div>
+                  <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{item.desc}</div>
                 </div>
+                <Toggle on={notifs[item.key]} onToggle={() => toggle(item.key)} />
+              </div>
             ))}
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <button onClick={() => showToast('Notification preferences saved!')} style={saveBtn}>Save Changes</button>
-            </div>
-        </SettingsCard>
-    );
+          </div>
+        </div>
+      ))}
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <button onClick={() => showToast('Notification preferences saved!')} style={saveBtn}>
+          Save Changes
+        </button>
+      </div>
+    </SettingsCard>
+  );
 }
 
 /* ─────────────────────────────────────────────── */
 /* TAB 7: Security                                  */
 /* ─────────────────────────────────────────────── */
 function SecuritySettings({ showToast }) {
-    const [twoFactor, setTwoFactor] = useState(false);
-    const [sessionTimeout, setSessionTimeout] = useState('60');
-    const [loginHistory] = useState([
-        { device: 'Chrome on Windows', ip: '192.168.1.100', time: 'Sep 2, 2026 09:10 AM', status: 'success' },
-        { device: 'Firefox on Windows', ip: '192.168.1.100', time: 'Sep 1, 2026 03:45 PM', status: 'success' },
-        { device: 'Unknown Device', ip: '112.204.32.11', time: 'Aug 30, 2026 11:23 PM', status: 'failed' },
-        { device: 'Chrome on Android', ip: '192.168.1.105', time: 'Aug 28, 2026 08:00 AM', status: 'success' },
-    ]);
+  const [twoFactor, setTwoFactor] = useState(false);
+  const [sessionTimeout, setSessionTimeout] = useState('60');
+  const [loginHistory] = useState([
+    {
+      device: 'Chrome on Windows',
+      ip: '192.168.1.100',
+      time: 'Sep 2, 2026 09:10 AM',
+      status: 'success',
+    },
+    {
+      device: 'Firefox on Windows',
+      ip: '192.168.1.100',
+      time: 'Sep 1, 2026 03:45 PM',
+      status: 'success',
+    },
+    {
+      device: 'Unknown Device',
+      ip: '112.204.32.11',
+      time: 'Aug 30, 2026 11:23 PM',
+      status: 'failed',
+    },
+    {
+      device: 'Chrome on Android',
+      ip: '192.168.1.105',
+      time: 'Aug 28, 2026 08:00 AM',
+      status: 'success',
+    },
+  ]);
 
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <SettingsCard title="Security" subtitle="Configure security settings and monitor account access.">
-                {/* 2FA */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', border: '1px solid #e2e8f0', borderRadius: 10, marginBottom: 16 }}>
-                    <div>
-                        <div style={{ fontSize: 15, fontWeight: 600, color: '#1a1f37' }}>Two-Factor Authentication</div>
-                        <div style={{ fontSize: 13, color: '#64748b', marginTop: 2 }}>Add an extra layer of security to your account via authenticator app or SMS.</div>
-                    </div>
-                    <Toggle on={twoFactor} onToggle={() => setTwoFactor(v => !v)} />
-                </div>
-
-                {/* Session timeout */}
-                <div style={{ padding: '16px 20px', border: '1px solid #e2e8f0', borderRadius: 10, marginBottom: 16 }}>
-                    <div style={{ fontSize: 15, fontWeight: 600, color: '#1a1f37', marginBottom: 8 }}>Session Timeout</div>
-                    <div style={{ fontSize: 13, color: '#64748b', marginBottom: 12 }}>Automatically log out inactive sessions after the selected duration.</div>
-                    <select value={sessionTimeout} onChange={e => setSessionTimeout(e.target.value)} style={{ ...inputStyle, maxWidth: 240, cursor: 'pointer' }}>
-                        <option value="15">15 minutes</option>
-                        <option value="30">30 minutes</option>
-                        <option value="60">1 hour</option>
-                        <option value="120">2 hours</option>
-                        <option value="480">8 hours</option>
-                        <option value="0">Never</option>
-                    </select>
-                </div>
-
-                {/* Force logout */}
-                <div style={{ padding: '16px 20px', border: '1px solid #fee2e2', borderRadius: 10, background: '#fef2f2', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                        <div style={{ fontSize: 15, fontWeight: 600, color: '#dc2626' }}>Force Logout All Sessions</div>
-                        <div style={{ fontSize: 13, color: '#ef4444', marginTop: 2 }}>This will immediately log out all active admin sessions.</div>
-                    </div>
-                    <button onClick={() => showToast('All sessions have been terminated.', 'error')}
-                        style={{ ...outlineBtn, borderColor: '#ef4444', color: '#ef4444', background: '#fff' }}>
-                        Force Logout
-                    </button>
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 20 }}>
-                    <button onClick={() => showToast('Security settings saved!')} style={saveBtn}>Save Changes</button>
-                </div>
-            </SettingsCard>
-
-            {/* Login History */}
-            <SettingsCard title="Login History" subtitle="Recent login attempts to your admin account.">
-                <div style={{ border: '1px solid #e2e8f0', borderRadius: 10, overflow: 'hidden' }}>
-                    <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-                        <div style={{ minWidth: 520 }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1.2fr 80px', padding: '12px 20px', background: '#fafbfc', borderBottom: '1px solid #e2e8f0' }}>
-                                {['DEVICE', 'IP ADDRESS', 'TIME', 'RESULT'].map(h => (
-                                    <span key={h} style={thStyle}>{h}</span>
-                                ))}
-                            </div>
-                            {loginHistory.map((l, i) => (
-                                <div key={i} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1.2fr 80px', padding: '14px 20px', borderBottom: '1px solid #f1f5f9', alignItems: 'center' }}>
-                                    <span style={{ fontSize: 14, color: '#1a1f37' }}>{l.device}</span>
-                                    <span style={{ fontSize: 13, color: '#64748b', fontFamily: 'monospace' }}>{l.ip}</span>
-                                    <span style={{ fontSize: 13, color: '#64748b' }}>{l.time}</span>
-                                    <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 6, width: 'fit-content', background: l.status === 'success' ? '#d1fae5' : '#fee2e2', color: l.status === 'success' ? '#10b981' : '#ef4444' }}>
-                                        {l.status === 'success' ? '✓ Success' : '✗ Failed'}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </SettingsCard>
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <SettingsCard
+        title="Security"
+        subtitle="Configure security settings and monitor account access."
+      >
+        {/* 2FA */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '16px 20px',
+            border: '1px solid #e2e8f0',
+            borderRadius: 10,
+            marginBottom: 16,
+          }}
+        >
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: '#1a1f37' }}>
+              Two-Factor Authentication
+            </div>
+            <div style={{ fontSize: 13, color: '#64748b', marginTop: 2 }}>
+              Add an extra layer of security to your account via authenticator app or SMS.
+            </div>
+          </div>
+          <Toggle on={twoFactor} onToggle={() => setTwoFactor((v) => !v)} />
         </div>
-    );
+
+        {/* Session timeout */}
+        <div
+          style={{
+            padding: '16px 20px',
+            border: '1px solid #e2e8f0',
+            borderRadius: 10,
+            marginBottom: 16,
+          }}
+        >
+          <div style={{ fontSize: 15, fontWeight: 600, color: '#1a1f37', marginBottom: 8 }}>
+            Session Timeout
+          </div>
+          <div style={{ fontSize: 13, color: '#64748b', marginBottom: 12 }}>
+            Automatically log out inactive sessions after the selected duration.
+          </div>
+          <select
+            value={sessionTimeout}
+            onChange={(e) => setSessionTimeout(e.target.value)}
+            style={{ ...inputStyle, maxWidth: 240, cursor: 'pointer' }}
+          >
+            <option value="15">15 minutes</option>
+            <option value="30">30 minutes</option>
+            <option value="60">1 hour</option>
+            <option value="120">2 hours</option>
+            <option value="480">8 hours</option>
+            <option value="0">Never</option>
+          </select>
+        </div>
+
+        {/* Force logout */}
+        <div
+          style={{
+            padding: '16px 20px',
+            border: '1px solid #fee2e2',
+            borderRadius: 10,
+            background: '#fef2f2',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: '#dc2626' }}>
+              Force Logout All Sessions
+            </div>
+            <div style={{ fontSize: 13, color: '#ef4444', marginTop: 2 }}>
+              This will immediately log out all active admin sessions.
+            </div>
+          </div>
+          <button
+            onClick={() => showToast('All sessions have been terminated.', 'error')}
+            style={{ ...outlineBtn, borderColor: '#ef4444', color: '#ef4444', background: '#fff' }}
+          >
+            Force Logout
+          </button>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 20 }}>
+          <button onClick={() => showToast('Security settings saved!')} style={saveBtn}>
+            Save Changes
+          </button>
+        </div>
+      </SettingsCard>
+
+      {/* Login History */}
+      <SettingsCard title="Login History" subtitle="Recent login attempts to your admin account.">
+        <div style={{ border: '1px solid #e2e8f0', borderRadius: 10, overflow: 'hidden' }}>
+          <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            <div style={{ minWidth: 520 }}>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1.5fr 1fr 1.2fr 80px',
+                  padding: '12px 20px',
+                  background: '#fafbfc',
+                  borderBottom: '1px solid #e2e8f0',
+                }}
+              >
+                {['DEVICE', 'IP ADDRESS', 'TIME', 'RESULT'].map((h) => (
+                  <span key={h} style={thStyle}>
+                    {h}
+                  </span>
+                ))}
+              </div>
+              {loginHistory.map((l, i) => (
+                <div
+                  key={i}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1.5fr 1fr 1.2fr 80px',
+                    padding: '14px 20px',
+                    borderBottom: '1px solid #f1f5f9',
+                    alignItems: 'center',
+                  }}
+                >
+                  <span style={{ fontSize: 14, color: '#1a1f37' }}>{l.device}</span>
+                  <span style={{ fontSize: 13, color: '#64748b', fontFamily: 'monospace' }}>
+                    {l.ip}
+                  </span>
+                  <span style={{ fontSize: 13, color: '#64748b' }}>{l.time}</span>
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      padding: '3px 10px',
+                      borderRadius: 6,
+                      width: 'fit-content',
+                      background: l.status === 'success' ? '#d1fae5' : '#fee2e2',
+                      color: l.status === 'success' ? '#10b981' : '#ef4444',
+                    }}
+                  >
+                    {l.status === 'success' ? '✓ Success' : '✗ Failed'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </SettingsCard>
+    </div>
+  );
 }
 
 /* ─────────────────────────────────────────────── */
 /* TAB 8: System Preferences                        */
 /* ─────────────────────────────────────────────── */
 function SystemPreferences({ showToast }) {
-    const [prefs, setPrefs] = useState({
-        language: 'en',
-        currency: 'AED',
-        currency_symbol: 'AED',
-        date_format: 'MMM DD, YYYY',
-        time_format: '12h',
-        items_per_page: '10',
-        maintenance_mode: false,
-        allow_registrations: false,
-        max_bookings_per_day: '20',
-        advance_booking_days: '60',
-        min_advance_hours: '24',
-    });
+  const [prefs, setPrefs] = useState({
+    language: 'en',
+    currency: 'AED',
+    currency_symbol: 'AED',
+    date_format: 'MMM DD, YYYY',
+    time_format: '12h',
+    items_per_page: '10',
+    maintenance_mode: false,
+    allow_registrations: false,
+    max_bookings_per_day: '20',
+    advance_booking_days: '60',
+    min_advance_hours: '24',
+  });
 
-    const set = (key, val) => setPrefs(prev => ({ ...prev, [key]: val }));
+  const set = (key, val) => setPrefs((prev) => ({ ...prev, [key]: val }));
 
-    return (
-        <SettingsCard title="System Preferences" subtitle="Configure global system behavior and display settings.">
-            <SectionHeader>LOCALIZATION</SectionHeader>
-            <div className="settings-form-row-3" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 24 }}>
-                <Field label="Language">
-                    <select value={prefs.language} onChange={e => set('language', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-                        <option value="en">English</option>
-                        <option value="ar">Arabic (العربية)</option>
-                        <option value="fil">Filipino</option>
-                    </select>
-                </Field>
-                <Field label="Currency">
-                    <select value={prefs.currency} onChange={e => set('currency', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-                        <option value="AED">AED — UAE Dirham (AED)</option>
-                        <option value="USD">USD — US Dollar ($)</option>
-                        <option value="PHP">PHP — Philippine Peso (₱)</option>
-                    </select>
-                </Field>
-                <Field label="Date Format">
-                    <select value={prefs.date_format} onChange={e => set('date_format', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-                        <option value="MMM DD, YYYY">May 18, 2025</option>
-                        <option value="MM/DD/YYYY">05/18/2025</option>
-                        <option value="DD/MM/YYYY">18/05/2025</option>
-                        <option value="YYYY-MM-DD">2025-05-18</option>
-                    </select>
-                </Field>
-            </div>
+  return (
+    <SettingsCard
+      title="System Preferences"
+      subtitle="Configure global system behavior and display settings."
+    >
+      <SectionHeader>LOCALIZATION</SectionHeader>
+      <div
+        className="settings-form-row-3"
+        style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 24 }}
+      >
+        <Field label="Language">
+          <select
+            value={prefs.language}
+            onChange={(e) => set('language', e.target.value)}
+            style={{ ...inputStyle, cursor: 'pointer' }}
+          >
+            <option value="en">English</option>
+            <option value="ar">Arabic (العربية)</option>
+            <option value="fil">Filipino</option>
+          </select>
+        </Field>
+        <Field label="Currency">
+          <select
+            value={prefs.currency}
+            onChange={(e) => set('currency', e.target.value)}
+            style={{ ...inputStyle, cursor: 'pointer' }}
+          >
+            <option value="AED">AED — UAE Dirham (AED)</option>
+            <option value="USD">USD — US Dollar ($)</option>
+            <option value="PHP">PHP — Philippine Peso (₱)</option>
+          </select>
+        </Field>
+        <Field label="Date Format">
+          <select
+            value={prefs.date_format}
+            onChange={(e) => set('date_format', e.target.value)}
+            style={{ ...inputStyle, cursor: 'pointer' }}
+          >
+            <option value="MMM DD, YYYY">May 18, 2025</option>
+            <option value="MM/DD/YYYY">05/18/2025</option>
+            <option value="DD/MM/YYYY">18/05/2025</option>
+            <option value="YYYY-MM-DD">2025-05-18</option>
+          </select>
+        </Field>
+      </div>
 
-            <SectionHeader>PAGINATION & DISPLAY</SectionHeader>
-            <div className="settings-form-row-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
-                <Field label="Items Per Page">
-                    <select value={prefs.items_per_page} onChange={e => set('items_per_page', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-                        {['5', '10', '25', '50', '100'].map(v => <option key={v}>{v}</option>)}
-                    </select>
-                </Field>
-                <Field label="Time Format">
-                    <select value={prefs.time_format} onChange={e => set('time_format', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-                        <option value="12h">12-Hour (AM/PM)</option>
-                        <option value="24h">24-Hour</option>
-                    </select>
-                </Field>
-            </div>
+      <SectionHeader>PAGINATION & DISPLAY</SectionHeader>
+      <div
+        className="settings-form-row-2"
+        style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}
+      >
+        <Field label="Items Per Page">
+          <select
+            value={prefs.items_per_page}
+            onChange={(e) => set('items_per_page', e.target.value)}
+            style={{ ...inputStyle, cursor: 'pointer' }}
+          >
+            {['5', '10', '25', '50', '100'].map((v) => (
+              <option key={v}>{v}</option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Time Format">
+          <select
+            value={prefs.time_format}
+            onChange={(e) => set('time_format', e.target.value)}
+            style={{ ...inputStyle, cursor: 'pointer' }}
+          >
+            <option value="12h">12-Hour (AM/PM)</option>
+            <option value="24h">24-Hour</option>
+          </select>
+        </Field>
+      </div>
 
-            <SectionHeader>BOOKING RULES</SectionHeader>
-            <div className="settings-form-row-3" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 24 }}>
-                <Field label="Max Bookings Per Day">
-                    <input type="number" value={prefs.max_bookings_per_day} onChange={e => set('max_bookings_per_day', e.target.value)} style={inputStyle} />
-                </Field>
-                <Field label="Advance Booking (days ahead)">
-                    <input type="number" value={prefs.advance_booking_days} onChange={e => set('advance_booking_days', e.target.value)} style={inputStyle} />
-                </Field>
-                <Field label="Min Advance Notice (hours)">
-                    <input type="number" value={prefs.min_advance_hours} onChange={e => set('min_advance_hours', e.target.value)} style={inputStyle} />
-                </Field>
-            </div>
+      <SectionHeader>BOOKING RULES</SectionHeader>
+      <div
+        className="settings-form-row-3"
+        style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 24 }}
+      >
+        <Field label="Max Bookings Per Day">
+          <input
+            type="number"
+            value={prefs.max_bookings_per_day}
+            onChange={(e) => set('max_bookings_per_day', e.target.value)}
+            style={inputStyle}
+          />
+        </Field>
+        <Field label="Advance Booking (days ahead)">
+          <input
+            type="number"
+            value={prefs.advance_booking_days}
+            onChange={(e) => set('advance_booking_days', e.target.value)}
+            style={inputStyle}
+          />
+        </Field>
+        <Field label="Min Advance Notice (hours)">
+          <input
+            type="number"
+            value={prefs.min_advance_hours}
+            onChange={(e) => set('min_advance_hours', e.target.value)}
+            style={inputStyle}
+          />
+        </Field>
+      </div>
 
-            <SectionHeader>SYSTEM</SectionHeader>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
-                <NotifRow
-                    label="Maintenance Mode"
-                    desc="When enabled, the customer booking site will show a maintenance page."
-                    on={prefs.maintenance_mode}
-                    danger={prefs.maintenance_mode}
-                    onToggle={() => set('maintenance_mode', !prefs.maintenance_mode)}
-                />
-                <NotifRow
-                    label="Allow New Client Registrations"
-                    desc="Allow new clients to submit bookings through the public form."
-                    on={prefs.allow_registrations}
-                    onToggle={() => set('allow_registrations', !prefs.allow_registrations)}
-                />
-            </div>
+      <SectionHeader>SYSTEM</SectionHeader>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
+        <NotifRow
+          label="Maintenance Mode"
+          desc="When enabled, the customer booking site will show a maintenance page."
+          on={prefs.maintenance_mode}
+          danger={prefs.maintenance_mode}
+          onToggle={() => set('maintenance_mode', !prefs.maintenance_mode)}
+        />
+        <NotifRow
+          label="Allow New Client Registrations"
+          desc="Allow new clients to submit bookings through the public form."
+          on={prefs.allow_registrations}
+          onToggle={() => set('allow_registrations', !prefs.allow_registrations)}
+        />
+      </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <button onClick={() => showToast('System preferences saved!')} style={saveBtn}>Save Changes</button>
-            </div>
-        </SettingsCard>
-    );
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <button onClick={() => showToast('System preferences saved!')} style={saveBtn}>
+          Save Changes
+        </button>
+      </div>
+    </SettingsCard>
+  );
 }
 
 /* ─────────────────────────────────────────────── */
 /* Shared UI components                             */
 /* ─────────────────────────────────────────────── */
 function SettingsCard({ title, subtitle, children }) {
-    return (
-        <div className="settings-card-pad" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 28 }}>
-            <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1a1f37', margin: '0 0 4px' }}>{title}</h2>
-            <p style={{ fontSize: 13, color: '#64748b', margin: '0 0 24px' }}>{subtitle}</p>
-            {children}
-        </div>
-    );
+  return (
+    <div
+      className="settings-card-pad"
+      style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 28 }}
+    >
+      <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1a1f37', margin: '0 0 4px' }}>
+        {title}
+      </h2>
+      <p style={{ fontSize: 13, color: '#64748b', margin: '0 0 24px' }}>{subtitle}</p>
+      {children}
+    </div>
+  );
 }
 
 function Field({ label, required, children }) {
-    return (
-        <div>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 6 }}>
-                {label}{required && <span style={{ color: '#ef4444' }}> *</span>}
-            </label>
-            {children}
-        </div>
-    );
+  return (
+    <div>
+      <label
+        style={{
+          display: 'block',
+          fontSize: 13,
+          fontWeight: 600,
+          color: '#374151',
+          marginBottom: 6,
+        }}
+      >
+        {label}
+        {required && <span style={{ color: '#ef4444' }}> *</span>}
+      </label>
+      {children}
+    </div>
+  );
 }
 
 function SectionHeader({ children }) {
-    return <div style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 14, borderBottom: '1px solid #f1f5f9', paddingBottom: 8 }}>{children}</div>;
+  return (
+    <div
+      style={{
+        fontSize: 12,
+        fontWeight: 700,
+        color: '#94a3b8',
+        letterSpacing: 1,
+        textTransform: 'uppercase',
+        marginBottom: 14,
+        borderBottom: '1px solid #f1f5f9',
+        paddingBottom: 8,
+      }}
+    >
+      {children}
+    </div>
+  );
 }
 
 function Toggle({ on, onToggle, disabled }) {
-    return (
-        <button type="button" onClick={!disabled ? onToggle : undefined} style={{
-            width: 44, height: 24, borderRadius: 12, border: 'none', cursor: disabled ? 'default' : 'pointer',
-            background: on ? '#3b82f6' : '#e2e8f0', position: 'relative', transition: 'background 0.2s', flexShrink: 0,
-            opacity: disabled ? 0.5 : 1,
-        }}>
-            <span style={{
-                position: 'absolute', top: 3, left: on ? 23 : 3, width: 18, height: 18,
-                borderRadius: '50%', background: '#fff', transition: 'left 0.2s',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-            }} />
-        </button>
-    );
+  return (
+    <button
+      type="button"
+      onClick={!disabled ? onToggle : undefined}
+      style={{
+        width: 44,
+        height: 24,
+        borderRadius: 12,
+        border: 'none',
+        cursor: disabled ? 'default' : 'pointer',
+        background: on ? '#3b82f6' : '#e2e8f0',
+        position: 'relative',
+        transition: 'background 0.2s',
+        flexShrink: 0,
+        opacity: disabled ? 0.5 : 1,
+      }}
+    >
+      <span
+        style={{
+          position: 'absolute',
+          top: 3,
+          left: on ? 23 : 3,
+          width: 18,
+          height: 18,
+          borderRadius: '50%',
+          background: '#fff',
+          transition: 'left 0.2s',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+        }}
+      />
+    </button>
+  );
 }
 
 function NotifRow({ label, desc, on, onToggle, danger }) {
-    return (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', border: `1px solid ${danger && on ? '#fee2e2' : '#e2e8f0'}`, borderRadius: 10, background: danger && on ? '#fef2f2' : '#fff' }}>
-            <div>
-                <div style={{ fontSize: 14, fontWeight: 500, color: danger && on ? '#dc2626' : '#1a1f37' }}>{label}</div>
-                <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{desc}</div>
-            </div>
-            <Toggle on={on} onToggle={onToggle} />
+  return (
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '16px 20px',
+        border: `1px solid ${danger && on ? '#fee2e2' : '#e2e8f0'}`,
+        borderRadius: 10,
+        background: danger && on ? '#fef2f2' : '#fff',
+      }}
+    >
+      <div>
+        <div style={{ fontSize: 14, fontWeight: 500, color: danger && on ? '#dc2626' : '#1a1f37' }}>
+          {label}
         </div>
-    );
+        <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{desc}</div>
+      </div>
+      <Toggle on={on} onToggle={onToggle} />
+    </div>
+  );
 }
 
 function Overlay({ children, onClose, title }) {
-    return (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            onClick={e => e.target === e.currentTarget && onClose()}>
-            <div style={{ background: '#fff', borderRadius: 16, padding: 28, width: 440, maxWidth: '90vw', boxShadow: '0 25px 60px rgba(0,0,0,0.2)' }}>
-                {title && <h3 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 700, color: '#1a1f37' }}>{title}</h3>}
-                {children}
-            </div>
-        </div>
-    );
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0,0,0,0.45)',
+        zIndex: 1000,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div
+        style={{
+          background: '#fff',
+          borderRadius: 16,
+          padding: 28,
+          width: 440,
+          maxWidth: '90vw',
+          boxShadow: '0 25px 60px rgba(0,0,0,0.2)',
+        }}
+      >
+        {title && (
+          <h3 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 700, color: '#1a1f37' }}>
+            {title}
+          </h3>
+        )}
+        {children}
+      </div>
+    </div>
+  );
 }
 
 function SmallBtn({ title, onClick, icon }) {
-    return (
-        <button title={title} onClick={onClick} style={{
-            width: 30, height: 30, borderRadius: 6, border: '1px solid #e2e8f0', background: '#fff',
-            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13,
-        }}>{icon}</button>
-    );
+  return (
+    <button
+      title={title}
+      onClick={onClick}
+      style={{
+        width: 30,
+        height: 30,
+        borderRadius: 6,
+        border: '1px solid #e2e8f0',
+        background: '#fff',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 13,
+      }}
+    >
+      {icon}
+    </button>
+  );
 }
 
 /* ─────────────────────────────────────────────── */
 /* Shared styles                                    */
 /* ─────────────────────────────────────────────── */
-const inputStyle = { width: '100%', padding: '10px 12px', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 14, color: '#1a1f37', outline: 'none', boxSizing: 'border-box' };
-const saveBtn = {
-    background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)',
-    color: '#fff',
-    border: 'none',
-    borderRadius: 10,
-    padding: '10px 24px',
-    fontSize: 13.5,
-    fontWeight: 700,
-    cursor: 'pointer',
-    boxShadow: '0 4px 14px rgba(10,35,66,0.2)',
+const inputStyle = {
+  width: '100%',
+  padding: '10px 12px',
+  border: '1px solid #e2e8f0',
+  borderRadius: 8,
+  fontSize: 14,
+  color: '#1a1f37',
+  outline: 'none',
+  boxSizing: 'border-box',
 };
-const outlineBtn = { background: '#fff', color: '#374151', border: '1px solid #e2e8f0', borderRadius: 8, padding: '10px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer' };
-const thStyle = { fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.8 };
+const saveBtn = {
+  background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)',
+  color: '#fff',
+  border: 'none',
+  borderRadius: 10,
+  padding: '10px 24px',
+  fontSize: 13.5,
+  fontWeight: 700,
+  cursor: 'pointer',
+  boxShadow: '0 4px 14px rgba(10,35,66,0.2)',
+};
+const outlineBtn = {
+  background: '#fff',
+  color: '#374151',
+  border: '1px solid #e2e8f0',
+  borderRadius: 8,
+  padding: '10px 20px',
+  fontSize: 14,
+  fontWeight: 600,
+  cursor: 'pointer',
+};
+const thStyle = {
+  fontSize: 11,
+  fontWeight: 700,
+  color: '#64748b',
+  textTransform: 'uppercase',
+  letterSpacing: 0.8,
+};

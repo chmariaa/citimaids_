@@ -9,6 +9,7 @@ use App\Models\Client;
 use App\Models\Payment;
 use App\Models\Service;
 use App\Models\Transaction;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class BookingController extends Controller
@@ -26,7 +27,7 @@ class BookingController extends Controller
             $search = $request->search;
             $query->whereHas('client', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -37,27 +38,27 @@ class BookingController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'           => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'contact_number' => 'nullable|string|max:50',
-            'phone'          => 'nullable|string|max:50',
-            'email'          => 'nullable|email|max:255',
-            'address'        => 'required|string',
-            'service_id'     => 'required|exists:services,id',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+            'address' => 'required|string',
+            'service_id' => 'required|exists:services,id',
             'preferred_date' => 'nullable|date',
-            'date'           => 'nullable|date',
+            'date' => 'nullable|date',
             'preferred_time' => 'nullable|string|max:50',
-            'time'           => 'nullable|string|max:50',
-            'rates'          => 'nullable|numeric|min:0',
-            'total_amount'   => 'nullable|numeric|min:0',
-            'status'         => 'nullable|string|in:pending,confirmed,completed,cancelled',
-            'notes'          => 'nullable|string',
+            'time' => 'nullable|string|max:50',
+            'rates' => 'nullable|numeric|min:0',
+            'total_amount' => 'nullable|numeric|min:0',
+            'status' => 'nullable|string|in:pending,confirmed,completed,cancelled',
+            'notes' => 'nullable|string',
         ]);
 
         $contactNumber = $validated['contact_number'] ?? $validated['phone'] ?? $request->input('phone');
         if (empty($contactNumber)) {
             return response()->json([
                 'message' => 'The contact number or phone is required.',
-                'errors'  => ['contact_number' => ['The phone number is required.']],
+                'errors' => ['contact_number' => ['The phone number is required.']],
             ], 422);
         }
 
@@ -65,7 +66,7 @@ class BookingController extends Controller
         if (empty($preferredDate)) {
             return response()->json([
                 'message' => 'The booking date is required.',
-                'errors'  => ['preferred_date' => ['The booking date is required.']],
+                'errors' => ['preferred_date' => ['The booking date is required.']],
             ], 422);
         }
 
@@ -77,30 +78,30 @@ class BookingController extends Controller
         if (! $service) {
             return response()->json([
                 'message' => 'The selected service is currently unavailable for booking.',
-                'errors'  => ['service_id' => ['The selected service is currently inactive.']],
+                'errors' => ['service_id' => ['The selected service is currently inactive.']],
             ], 422);
         }
 
         // Create or update client record by contact number or email
         $client = Client::where('contact_number', $contactNumber)
-            ->when(!empty($validated['email']), function ($q) use ($validated) {
+            ->when(! empty($validated['email']), function ($q) use ($validated) {
                 $q->orWhere('email', $validated['email']);
             })
             ->first();
 
         if ($client) {
             $client->update([
-                'name'           => $validated['name'],
+                'name' => $validated['name'],
                 'contact_number' => $contactNumber,
-                'email'          => $validated['email'] ?? $client->email,
-                'address'        => $validated['address'] ?? $client->address,
+                'email' => $validated['email'] ?? $client->email,
+                'address' => $validated['address'] ?? $client->address,
             ]);
         } else {
             $client = Client::create([
-                'name'           => $validated['name'],
+                'name' => $validated['name'],
                 'contact_number' => $contactNumber,
-                'email'          => $validated['email'] ?? null,
-                'address'        => $validated['address'],
+                'email' => $validated['email'] ?? null,
+                'address' => $validated['address'],
             ]);
         }
 
@@ -109,54 +110,54 @@ class BookingController extends Controller
         $timeSlot = $validated['preferred_time'] ?? $validated['time'] ?? null;
 
         $booking = Booking::create([
-            'client_id'      => $client->id,
-            'service_id'     => $service->id,
+            'client_id' => $client->id,
+            'service_id' => $service->id,
             'preferred_date' => $preferredDate,
             'preferred_time' => $timeSlot,
-            'address'        => $validated['address'],
-            'notes'          => $validated['notes'] ?? null,
-            'status'         => $bookingStatus,
-            'total_amount'   => $rateAmount,
+            'address' => $validated['address'],
+            'notes' => $validated['notes'] ?? null,
+            'status' => $bookingStatus,
+            'total_amount' => $rateAmount,
             'payment_status' => 'unpaid',
             'payment_method' => 'Cash on Completion',
         ]);
 
         // Record booking detail for line-item tracking
         BookingDetail::create([
-            'booking_id'  => $booking->id,
-            'service_id'  => $service->id,
-            'quantity'    => 1,
-            'unit_price'  => $service->base_price,
+            'booking_id' => $booking->id,
+            'service_id' => $service->id,
+            'quantity' => 1,
+            'unit_price' => $service->base_price,
             'total_price' => $rateAmount,
         ]);
 
         // Auto-generate invoice in payments table
         $payment = Payment::create([
-            'booking_id'       => $booking->id,
-            'client_id'        => $client->id,
-            'amount'           => $rateAmount,
-            'currency'         => 'AED',
-            'payment_method'   => 'cash',
-            'status'           => 'unpaid',
+            'booking_id' => $booking->id,
+            'client_id' => $client->id,
+            'amount' => $rateAmount,
+            'currency' => 'AED',
+            'payment_method' => 'cash',
+            'status' => 'unpaid',
             'reference_number' => Payment::generateReference(),
-            'notes'            => "Auto-generated invoice for Booking #{$booking->id} ({$service->name})",
+            'notes' => "Auto-generated invoice for Booking #{$booking->id} ({$service->name})",
         ]);
 
         // Record initial pending charge in transactions ledger
         Transaction::create([
-            'payment_id'           => $payment->id,
-            'type'                 => 'charge',
-            'amount'               => $rateAmount,
-            'status'               => 'pending',
-            'description'          => "Initial booking charge for Booking #{$booking->id}",
+            'payment_id' => $payment->id,
+            'type' => 'charge',
+            'amount' => $rateAmount,
+            'status' => 'pending',
+            'description' => "Initial booking charge for Booking #{$booking->id}",
             'processed_by_user_id' => $request->user()?->id,
         ]);
 
         return response()->json([
-            'message'    => 'Booking request submitted successfully.',
+            'message' => 'Booking request submitted successfully.',
             'booking_id' => $booking->id,
-            'reference'  => 'CM-' . str_pad($booking->id, 5, '0', STR_PAD_LEFT),
-            'booking'    => $booking->load(['client', 'service', 'payment']),
+            'reference' => 'CM-'.str_pad($booking->id, 5, '0', STR_PAD_LEFT),
+            'booking' => $booking->load(['client', 'service', 'payment']),
         ], 201);
     }
 
@@ -173,8 +174,7 @@ class BookingController extends Controller
      *   - Masks client names (e.g., "Sarah A.") for privacy on public queries.
      *   - Returns sanitized service, scheduling, payment status, and location details.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function track(Request $request)
     {
@@ -183,9 +183,9 @@ class BookingController extends Controller
         $ref = $request->query('ref') ?? $request->query('reference');
         $phone = $request->query('phone') ?? $request->query('contact_number');
 
-        if (!$ref && !$phone) {
+        if (! $ref && ! $phone) {
             return response()->json([
-                'message' => 'Please provide a booking reference number or contact number.'
+                'message' => 'Please provide a booking reference number or contact number.',
             ], 422);
         }
 
@@ -199,15 +199,15 @@ class BookingController extends Controller
             $cleanPhone = preg_replace('/[^0-9]/', '', $phone);
             $query->whereHas('client', function ($q) use ($cleanPhone, $phone) {
                 $q->where('contact_number', 'like', "%{$cleanPhone}%")
-                  ->orWhere('contact_number', 'like', "%{$phone}%");
+                    ->orWhere('contact_number', 'like', "%{$phone}%");
             });
         }
 
         $booking = $query->latest()->first();
 
-        if (!$booking) {
+        if (! $booking) {
             return response()->json([
-                'message' => 'No booking found matching your details. Please verify your reference number or contact our dispatch team.'
+                'message' => 'No booking found matching your details. Please verify your reference number or contact our dispatch team.',
             ], 404);
         }
 
@@ -244,43 +244,44 @@ class BookingController extends Controller
 
         $timeline = array_map(function ($step, $index) use ($statusIndex, $booking) {
             $isCancelled = $booking->status === 'cancelled';
+
             return [
                 'key' => $step['key'],
                 'title' => $step['title'],
                 'description' => $step['description'],
-                'done' => !$isCancelled && $index <= $statusIndex,
-                'current' => !$isCancelled && $index === $statusIndex,
+                'done' => ! $isCancelled && $index <= $statusIndex,
+                'current' => ! $isCancelled && $index === $statusIndex,
             ];
         }, $steps, array_keys($steps));
 
         $clientName = $booking->client?->name ?? 'Valued Client';
         $parts = explode(' ', trim($clientName));
-        $maskedName = count($parts) > 1 
-            ? $parts[0] . ' ' . strtoupper(substr(end($parts), 0, 1)) . '.' 
+        $maskedName = count($parts) > 1
+            ? $parts[0].' '.strtoupper(substr(end($parts), 0, 1)).'.'
             : $parts[0];
 
         return response()->json([
-            'booking_id'      => $booking->id,
-            'reference'       => 'CM-' . str_pad($booking->id, 5, '0', STR_PAD_LEFT),
-            'status'          => $booking->status,
-            'is_cancelled'    => $booking->status === 'cancelled',
-            'client_name'     => $maskedName,
-            'contact_number'  => $booking->client?->contact_number,
-            'preferred_date'  => $booking->preferred_date,
-            'address'         => $booking->address,
-            'notes'           => $booking->notes,
-            'total_amount'    => $booking->total_amount,
-            'payment_status'  => $booking->payment_status ?? 'unpaid',
-            'payment_method'  => $booking->payment_method ?? 'Cash on Completion',
-            'service'         => [
-                'id'          => $booking->service?->id,
-                'name'        => $booking->service?->name,
-                'rate'        => $booking->service?->rate,
-                'rate_type'   => $booking->service?->rate_type,
+            'booking_id' => $booking->id,
+            'reference' => 'CM-'.str_pad($booking->id, 5, '0', STR_PAD_LEFT),
+            'status' => $booking->status,
+            'is_cancelled' => $booking->status === 'cancelled',
+            'client_name' => $maskedName,
+            'contact_number' => $booking->client?->contact_number,
+            'preferred_date' => $booking->preferred_date,
+            'address' => $booking->address,
+            'notes' => $booking->notes,
+            'total_amount' => $booking->total_amount,
+            'payment_status' => $booking->payment_status ?? 'unpaid',
+            'payment_method' => $booking->payment_method ?? 'Cash on Completion',
+            'service' => [
+                'id' => $booking->service?->id,
+                'name' => $booking->service?->name,
+                'rate' => $booking->service?->rate,
+                'rate_type' => $booking->service?->rate_type,
             ],
-            'timeline'        => $timeline,
-            'created_at'      => $booking->created_at?->format('M d, Y h:i A'),
-            'updated_at'      => $booking->updated_at?->format('M d, Y h:i A'),
+            'timeline' => $timeline,
+            'created_at' => $booking->created_at?->format('M d, Y h:i A'),
+            'updated_at' => $booking->updated_at?->format('M d, Y h:i A'),
         ]);
     }
 
@@ -294,6 +295,7 @@ class BookingController extends Controller
             'payment.transactions',
             'payments.transactions',
         ])->findOrFail($id);
+
         return response()->json($booking);
     }
 
@@ -305,7 +307,7 @@ class BookingController extends Controller
 
         $booking = Booking::findOrFail($id);
         $booking->update([
-            'status'               => $request->status,
+            'status' => $request->status,
             'processed_by_user_id' => $request->user()->id,
         ]);
 
@@ -317,36 +319,36 @@ class BookingController extends Controller
         $booking = Booking::with(['client', 'service', 'payment'])->findOrFail($id);
 
         $validated = $request->validate([
-            'name'           => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'contact_number' => 'required|string|max:50',
-            'email'          => 'nullable|email|max:255',
-            'service_id'     => 'required|exists:services,id',
+            'email' => 'nullable|email|max:255',
+            'service_id' => 'required|exists:services,id',
             'preferred_date' => 'required|date',
-            'address'        => 'required|string|max:500',
-            'status'         => 'nullable|in:pending,confirmed,completed,cancelled',
-            'total_amount'   => 'nullable|numeric|min:0',
+            'address' => 'required|string|max:500',
+            'status' => 'nullable|in:pending,confirmed,completed,cancelled',
+            'total_amount' => 'nullable|numeric|min:0',
             'payment_status' => 'nullable|string',
             'payment_method' => 'nullable|string',
-            'notes'          => 'nullable|string',
+            'notes' => 'nullable|string',
         ]);
 
         if ($booking->client) {
             $booking->client->update([
-                'name'           => $validated['name'],
+                'name' => $validated['name'],
                 'contact_number' => $validated['contact_number'],
-                'email'          => $validated['email'] ?? $booking->client->email,
-                'address'        => $validated['address'] ?? $booking->client->address,
+                'email' => $validated['email'] ?? $booking->client->email,
+                'address' => $validated['address'] ?? $booking->client->address,
             ]);
         }
 
         $bookingData = [
-            'service_id'     => $validated['service_id'],
+            'service_id' => $validated['service_id'],
             'preferred_date' => $validated['preferred_date'],
-            'address'        => $validated['address'],
-            'notes'          => $validated['notes'] ?? $booking->notes,
+            'address' => $validated['address'],
+            'notes' => $validated['notes'] ?? $booking->notes,
         ];
 
-        if (!empty($validated['status'])) {
+        if (! empty($validated['status'])) {
             $bookingData['status'] = $validated['status'];
             if ($request->user()) {
                 $bookingData['processed_by_user_id'] = $request->user()->id;
@@ -355,10 +357,10 @@ class BookingController extends Controller
         if (isset($validated['total_amount'])) {
             $bookingData['total_amount'] = $validated['total_amount'];
         }
-        if (!empty($validated['payment_status'])) {
+        if (! empty($validated['payment_status'])) {
             $bookingData['payment_status'] = $validated['payment_status'];
         }
-        if (!empty($validated['payment_method'])) {
+        if (! empty($validated['payment_method'])) {
             $bookingData['payment_method'] = $validated['payment_method'];
         }
 
@@ -369,13 +371,13 @@ class BookingController extends Controller
             if (isset($validated['total_amount'])) {
                 $paymentUpdates['amount'] = $validated['total_amount'];
             }
-            if (!empty($validated['payment_status'])) {
+            if (! empty($validated['payment_status'])) {
                 $paymentUpdates['status'] = $validated['payment_status'];
             }
-            if (!empty($validated['payment_method'])) {
+            if (! empty($validated['payment_method'])) {
                 $paymentUpdates['payment_method'] = $validated['payment_method'];
             }
-            if (!empty($paymentUpdates)) {
+            if (! empty($paymentUpdates)) {
                 $booking->payment->update($paymentUpdates);
             }
         }
@@ -389,6 +391,7 @@ class BookingController extends Controller
     public function destroy($id)
     {
         Booking::findOrFail($id)->delete();
+
         return response()->json(['message' => 'Booking deleted.']);
     }
 }

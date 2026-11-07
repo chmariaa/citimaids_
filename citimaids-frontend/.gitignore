@@ -1,3 +1,9 @@
+# Test coverage and reports
+test-results/
+playwright-report/
+blob-report/
+coverage/
+
 # Logs
 logs
 *.log

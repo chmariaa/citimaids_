@@ -48,13 +48,25 @@ export default function ServicesPage() {
       <div className="pt-36 pb-24 text-center px-6">
         <div className="max-w-sm mx-auto">
           <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-4">
-            <svg className="w-7 h-7 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z" />
+            <svg
+              className="w-7 h-7 text-red-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 9v2m0 4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z"
+              />
             </svg>
           </div>
           <h2 className="text-xl font-black text-slate-900 mb-2">Could not load services</h2>
           <p className="text-slate-500 text-sm mb-6 leading-relaxed">
-            {error ? 'There was a problem connecting to the server.' : 'No services are available right now.'}
+            {error
+              ? 'There was a problem connecting to the server.'
+              : 'No services are available right now.'}
           </p>
           <button
             onClick={refetch}
@@ -67,10 +79,7 @@ export default function ServicesPage() {
     );
   }
 
-
-  const filtered = filter === 'all'
-    ? services
-    : services?.filter((s) => s.category === filter);
+  const filtered = filter === 'all' ? services : services?.filter((s) => s.category === filter);
 
   return (
     <div>
@@ -83,9 +92,12 @@ export default function ServicesPage() {
           <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-sky-300 text-xs font-bold uppercase tracking-widest mb-4 backdrop-blur-md">
             Full Service Catalog
           </span>
-          <h1 className="text-4xl sm:text-6xl font-black mb-4 tracking-tight">Our Cleaning Services</h1>
+          <h1 className="text-4xl sm:text-6xl font-black mb-4 tracking-tight">
+            Our Cleaning Services
+          </h1>
           <p className="text-sky-100 text-base sm:text-lg leading-relaxed max-w-xl mx-auto">
-            From routine residential upkeep to specialized deep cleaning and commercial facilities across Abu Dhabi.
+            From routine residential upkeep to specialized deep cleaning and commercial facilities
+            across Abu Dhabi.
           </p>
         </div>
       </div>
@@ -120,9 +132,7 @@ export default function ServicesPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {filtered.map((service, i) => (
               <Reveal key={service.id} delay={i * 50}>
-                <div
-                  className="bg-white rounded-3xl overflow-hidden border border-slate-200/80 group transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl h-full flex flex-col justify-between"
-                >
+                <div className="bg-white rounded-3xl overflow-hidden border border-slate-200/80 group transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl h-full flex flex-col justify-between">
                   <div>
                     <div className="h-52 bg-slate-100 overflow-hidden relative">
                       <img
@@ -132,7 +142,8 @@ export default function ServicesPage() {
                         loading="lazy"
                         onError={(e) => {
                           e.currentTarget.onerror = null;
-                          e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&auto=format&fit=crop&q=80';
+                          e.currentTarget.src =
+                            'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&auto=format&fit=crop&q=80';
                         }}
                       />
                       <div
@@ -144,14 +155,18 @@ export default function ServicesPage() {
                       </div>
                     </div>
                     <div className="p-7">
-                      <h3 className="font-extrabold text-slate-900 text-xl mb-2.5">{service.title}</h3>
+                      <h3 className="font-extrabold text-slate-900 text-xl mb-2.5">
+                        {service.title}
+                      </h3>
                       <p className="text-slate-600 text-sm mb-6 leading-relaxed line-clamp-2">
                         {service.description}
                       </p>
                       <ul className="space-y-2 mb-6 text-xs sm:text-sm text-slate-700">
                         {(service.included || []).slice(0, 4).map((inc) => (
                           <li key={inc} className="flex items-start gap-2.5">
-                            <span className="text-emerald-600 font-bold text-base leading-none">✓</span>
+                            <span className="text-emerald-600 font-bold text-base leading-none">
+                              ✓
+                            </span>
                             <span>{inc}</span>
                           </li>
                         ))}
@@ -161,8 +176,12 @@ export default function ServicesPage() {
 
                   <div className="p-7 pt-0 flex items-center justify-between border-t border-slate-100 pt-5">
                     <div>
-                      <span className="text-xs text-slate-400 block font-bold uppercase tracking-wider">Rate</span>
-                      <span className="text-blue-950 font-black text-base">{service.startingPrice}</span>
+                      <span className="text-xs text-slate-400 block font-bold uppercase tracking-wider">
+                        Rate
+                      </span>
+                      <span className="text-blue-950 font-black text-base">
+                        {service.startingPrice}
+                      </span>
                     </div>
                     <Link
                       to={`/services/${service.id}`}
@@ -187,7 +206,8 @@ export default function ServicesPage() {
             Looking for a Custom Contract?
           </h2>
           <p className="text-slate-600 text-sm mb-8 leading-relaxed">
-            Our Abu Dhabi operations team can prepare a custom quote for luxury villas, commercial towers, or scheduled weekly contracts.
+            Our Abu Dhabi operations team can prepare a custom quote for luxury villas, commercial
+            towers, or scheduled weekly contracts.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link

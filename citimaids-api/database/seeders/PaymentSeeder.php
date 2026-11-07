@@ -20,10 +20,11 @@ class PaymentSeeder extends Seeder
 
         if ($bookings->isEmpty()) {
             $this->command->warn('No bookings found — skipping PaymentSeeder.');
+
             return;
         }
 
-        $methods  = ['adcb_pace_pay', 'bank_transfer', 'cash', 'card'];
+        $methods = ['adcb_pace_pay', 'bank_transfer', 'cash', 'card'];
         $statuses = ['pending', 'paid', 'paid', 'paid', 'failed']; // bias toward 'paid'
 
         foreach ($bookings->take(8) as $i => $booking) {
@@ -34,38 +35,38 @@ class PaymentSeeder extends Seeder
 
             // Update booking totals
             $booking->update([
-                'total_amount'   => $amount,
+                'total_amount' => $amount,
                 'payment_status' => $status === 'paid' ? 'paid' : ($status === 'failed' ? 'unpaid' : 'unpaid'),
                 'payment_method' => $method,
             ]);
 
             $payment = Payment::create([
-                'booking_id'       => $booking->id,
-                'client_id'        => $booking->client_id,
-                'amount'           => $amount,
-                'currency'         => 'AED',
-                'payment_method'   => $method,
-                'payment_link'     => $method === 'adcb_pace_pay'
-                    ? 'https://pay.adcb.com/pace-pay/link/' . fake()->regexify('[A-Za-z0-9]{32}')
+                'booking_id' => $booking->id,
+                'client_id' => $booking->client_id,
+                'amount' => $amount,
+                'currency' => 'AED',
+                'payment_method' => $method,
+                'payment_link' => $method === 'adcb_pace_pay'
+                    ? 'https://pay.adcb.com/pace-pay/link/'.fake()->regexify('[A-Za-z0-9]{32}')
                     : null,
                 'payment_link_expires_at' => $method === 'adcb_pace_pay'
                     ? Carbon::now()->addHours(24)
                     : null,
-                'status'           => $status,
+                'status' => $status,
                 'reference_number' => Payment::generateReference(),
                 'external_reference' => $method === 'adcb_pace_pay'
-                    ? 'ADCB-' . strtoupper(fake()->regexify('[A-Z0-9]{8}'))
+                    ? 'ADCB-'.strtoupper(fake()->regexify('[A-Z0-9]{8}'))
                     : null,
-                'paid_at'          => $paidAt,
-                'notes'            => fake()->optional(0.3)->sentence(),
+                'paid_at' => $paidAt,
+                'notes' => fake()->optional(0.3)->sentence(),
             ]);
 
             // Charge transaction
             Transaction::create([
-                'payment_id'  => $payment->id,
-                'type'        => 'charge',
-                'amount'      => $amount,
-                'status'      => $status === 'paid' ? 'success' : ($status === 'failed' ? 'failed' : 'pending'),
+                'payment_id' => $payment->id,
+                'type' => 'charge',
+                'amount' => $amount,
+                'status' => $status === 'paid' ? 'success' : ($status === 'failed' ? 'failed' : 'pending'),
                 'description' => "Payment for Booking #{$booking->id}",
             ]);
 
@@ -73,15 +74,15 @@ class PaymentSeeder extends Seeder
             if ($i === 3 && $status === 'paid') {
                 $refundAmount = round($amount * 0.5, 2);
                 Transaction::create([
-                    'payment_id'  => $payment->id,
-                    'type'        => 'refund',
-                    'amount'      => $refundAmount,
-                    'status'      => 'success',
+                    'payment_id' => $payment->id,
+                    'type' => 'refund',
+                    'amount' => $refundAmount,
+                    'status' => 'success',
                     'description' => 'Partial refund — customer request',
                 ]);
             }
         }
 
-        $this->command->info('PaymentSeeder: Created ' . Payment::count() . ' payments with transactions.');
+        $this->command->info('PaymentSeeder: Created '.Payment::count().' payments with transactions.');
     }
 }

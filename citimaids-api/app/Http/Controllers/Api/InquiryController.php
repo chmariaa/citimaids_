@@ -14,9 +14,9 @@ class InquiryController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'    => 'required|string|max:120',
-            'email'   => 'required|email|max:120',
-            'phone'   => 'nullable|string|max:50',
+            'name' => 'required|string|max:120',
+            'email' => 'required|email|max:120',
+            'phone' => 'nullable|string|max:50',
             'message' => 'required|string|min:5|max:3000',
         ]);
 
@@ -50,6 +50,7 @@ class InquiryController extends Controller
     public function show($id)
     {
         $inquiry = Inquiry::findOrFail($id);
+
         return response()->json($inquiry);
     }
 
@@ -65,7 +66,7 @@ class InquiryController extends Controller
         ]);
 
         $inquiry->status = $validated['status'];
-        if ($validated['status'] === 'replied' && !$inquiry->replied_at) {
+        if ($validated['status'] === 'replied' && ! $inquiry->replied_at) {
             $inquiry->replied_at = now();
         } elseif ($validated['status'] === 'pending') {
             $inquiry->replied_at = null;
@@ -84,13 +85,13 @@ class InquiryController extends Controller
         $inquiry = Inquiry::findOrFail($id);
 
         $validated = $request->validate([
-            'status'      => 'sometimes|in:pending,replied,closed',
+            'status' => 'sometimes|in:pending,replied,closed',
             'admin_notes' => 'nullable|string|max:2000',
         ]);
 
         if (isset($validated['status'])) {
             $inquiry->status = $validated['status'];
-            if ($validated['status'] === 'replied' && !$inquiry->replied_at) {
+            if ($validated['status'] === 'replied' && ! $inquiry->replied_at) {
                 $inquiry->replied_at = now();
             } elseif ($validated['status'] === 'pending') {
                 $inquiry->replied_at = null;
@@ -117,4 +118,3 @@ class InquiryController extends Controller
         return response()->json(['message' => 'Inquiry deleted successfully.']);
     }
 }
-

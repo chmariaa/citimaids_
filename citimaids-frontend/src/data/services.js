@@ -2,10 +2,12 @@ export const services = [
   {
     id: 'home-cleaning',
     title: 'Home Cleaning Abu Dhabi',
-    description: 'Complete residential cleaning tailored to your residence. Our trained professionals handle every room with care and meticulous attention to detail.',
+    description:
+      'Complete residential cleaning tailored to your residence. Our trained professionals handle every room with care and meticulous attention to detail.',
     category: 'residential',
     iconName: 'home',
-    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80',
+    image:
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80',
     basePrice: 35,
     startingPrice: 'AED 35 / hr',
     rateUnit: 'hour',
@@ -21,10 +23,12 @@ export const services = [
   {
     id: 'office-cleaning',
     title: 'Office Cleaning',
-    description: 'Keep your commercial workspace spotless, hygienic, and productive. We offer flexible scheduling including after-hours to minimize business disruption.',
+    description:
+      'Keep your commercial workspace spotless, hygienic, and productive. We offer flexible scheduling including after-hours to minimize business disruption.',
     category: 'commercial',
     iconName: 'building',
-    image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80',
+    image:
+      'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80',
     basePrice: 45,
     startingPrice: 'AED 45 / hr',
     rateUnit: 'hour',
@@ -40,10 +44,12 @@ export const services = [
   {
     id: 'apartment-cleaning',
     title: 'Apartment Cleaning Services',
-    description: 'Specialized apartment and flat cleaning for modern urban living in Abu Dhabi. Thorough dusting, floor sanitation, kitchen wipe-down, and balcony care.',
+    description:
+      'Specialized apartment and flat cleaning for modern urban living in Abu Dhabi. Thorough dusting, floor sanitation, kitchen wipe-down, and balcony care.',
     category: 'residential',
     iconName: 'home',
-    image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&auto=format&fit=crop&q=80',
+    image:
+      'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&auto=format&fit=crop&q=80',
     basePrice: 35,
     startingPrice: 'AED 35 / hr',
     rateUnit: 'hour',
@@ -59,10 +65,12 @@ export const services = [
   {
     id: 'villa-cleaning',
     title: 'Villa Cleaning Abu Dhabi',
-    description: 'Specialized estate cleaning designed for spacious luxury villas across Abu Dhabi. Our experienced multi-cleaner crew covers every floor comprehensively.',
+    description:
+      'Specialized estate cleaning designed for spacious luxury villas across Abu Dhabi. Our experienced multi-cleaner crew covers every floor comprehensively.',
     category: 'residential',
     iconName: 'villa',
-    image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&auto=format&fit=crop&q=80',
+    image:
+      'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&auto=format&fit=crop&q=80',
     basePrice: 80,
     startingPrice: 'AED 80 / hr',
     rateUnit: 'hour',
@@ -78,10 +86,12 @@ export const services = [
   {
     id: 'move-in-out-cleaning',
     title: 'Move In and Move Out Cleaning',
-    description: 'Guaranteed handover cleaning to secure your full tenancy deposit or welcome you into an immaculate new home with zero previous occupant traces.',
+    description:
+      'Guaranteed handover cleaning to secure your full tenancy deposit or welcome you into an immaculate new home with zero previous occupant traces.',
     category: 'specialized',
     iconName: 'truck',
-    image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&auto=format&fit=crop&q=80',
+    image:
+      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&auto=format&fit=crop&q=80',
     basePrice: 350,
     startingPrice: 'AED 350 flat rate',
     rateUnit: 'flat',
@@ -97,10 +107,12 @@ export const services = [
   {
     id: 'general-cleaning',
     title: 'General Cleaning',
-    description: 'Routine, flexible housekeeping and maintenance cleaning to keep your property tidy, dust-free, and well-maintained on a recurring or on-demand basis.',
+    description:
+      'Routine, flexible housekeeping and maintenance cleaning to keep your property tidy, dust-free, and well-maintained on a recurring or on-demand basis.',
     category: 'residential',
     iconName: 'sparkles',
-    image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&auto=format&fit=crop&q=80',
+    image:
+      'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&auto=format&fit=crop&q=80',
     basePrice: 35,
     startingPrice: 'AED 35 / hr',
     rateUnit: 'hour',
@@ -116,10 +128,12 @@ export const services = [
   {
     id: 'deep-cleaning',
     title: 'Deep Cleaning Services',
-    description: 'An intensive, restorative top-to-bottom scrub for homes requiring detailed sanitation. Ideal for seasonal refreshes or post-renovation recovery.',
+    description:
+      'An intensive, restorative top-to-bottom scrub for homes requiring detailed sanitation. Ideal for seasonal refreshes or post-renovation recovery.',
     category: 'specialized',
     iconName: 'sparkles',
-    image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=800&auto=format&fit=crop&q=80',
+    image:
+      'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=800&auto=format&fit=crop&q=80',
     basePrice: 60,
     startingPrice: 'AED 60 / hr',
     rateUnit: 'hour',
@@ -135,10 +149,12 @@ export const services = [
   {
     id: 'carpet-cleaning',
     title: 'Carpet Cleaning',
-    description: 'Industrial steam extraction and deep shampooing for rugs and wall-to-wall carpeting. Removes tough stains, allergens, dust mites, and odors.',
+    description:
+      'Industrial steam extraction and deep shampooing for rugs and wall-to-wall carpeting. Removes tough stains, allergens, dust mites, and odors.',
     category: 'specialized',
     iconName: 'sofa',
-    image: 'https://images.unsplash.com/photo-1600121848594-d8644e57abab?w=800&auto=format&fit=crop&q=80',
+    image:
+      'https://images.unsplash.com/photo-1600121848594-d8644e57abab?w=800&auto=format&fit=crop&q=80',
     basePrice: 40,
     startingPrice: 'AED 40 / item',
     rateUnit: 'item',
@@ -154,10 +170,12 @@ export const services = [
   {
     id: 'sofa-cleaning',
     title: 'Sofa Cleaning',
-    description: 'Deep upholstery steam cleaning and sanitization for fabric and leather sofas, couches, dining chairs, and cushions across Abu Dhabi.',
+    description:
+      'Deep upholstery steam cleaning and sanitization for fabric and leather sofas, couches, dining chairs, and cushions across Abu Dhabi.',
     category: 'specialized',
     iconName: 'sofa',
-    image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&auto=format&fit=crop&q=80',
+    image:
+      'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&auto=format&fit=crop&q=80',
     basePrice: 50,
     startingPrice: 'AED 50 / item',
     rateUnit: 'item',
@@ -173,7 +191,8 @@ export const services = [
   {
     id: 'window-cleaning',
     title: 'Window Cleaning Abu Dhabi',
-    description: 'Streak-free exterior and interior window washing for apartments, luxury villas, and shop fronts. Removes sand dust, rain spots, and smudges.',
+    description:
+      'Streak-free exterior and interior window washing for apartments, luxury villas, and shop fronts. Removes sand dust, rain spots, and smudges.',
     category: 'specialized',
     iconName: 'window',
     image: '/images/services/window-cleaning.jpg',
@@ -192,7 +211,8 @@ export const services = [
   {
     id: 'glass-cleaning',
     title: 'Glass Cleaning',
-    description: 'Specialized polishing for architectural glass partitions, balcony balustrades, shower cubicles, storefront showcases, and decorative mirrors.',
+    description:
+      'Specialized polishing for architectural glass partitions, balcony balustrades, shower cubicles, storefront showcases, and decorative mirrors.',
     category: 'specialized',
     iconName: 'window',
     image: '/images/services/glass-cleaning.jpg',
@@ -211,10 +231,12 @@ export const services = [
   {
     id: 'ironing-baby-sitting',
     title: 'Ironing & Baby Sitting',
-    description: 'Professional garment pressing, laundry organization, and trustworthy domestic child supervision by vetted, experienced female helpers.',
+    description:
+      'Professional garment pressing, laundry organization, and trustworthy domestic child supervision by vetted, experienced female helpers.',
     category: 'residential',
     iconName: 'sparkles',
-    image: 'https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?w=800&auto=format&fit=crop&q=80',
+    image:
+      'https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?w=800&auto=format&fit=crop&q=80',
     basePrice: 40,
     startingPrice: 'AED 40 / hr',
     rateUnit: 'hour',
@@ -230,10 +252,12 @@ export const services = [
   {
     id: 'baby-pet-sitting',
     title: 'Baby & Pet Sitting',
-    description: 'Compassionate, vetted in-home care for your little ones and beloved pets. Feeding, walking, playtime, and vigilant supervision while you work or travel.',
+    description:
+      'Compassionate, vetted in-home care for your little ones and beloved pets. Feeding, walking, playtime, and vigilant supervision while you work or travel.',
     category: 'residential',
     iconName: 'sparkles',
-    image: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=800&auto=format&fit=crop&q=80',
+    image:
+      'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=800&auto=format&fit=crop&q=80',
     basePrice: 45,
     startingPrice: 'AED 45 / hr',
     rateUnit: 'hour',
@@ -249,10 +273,12 @@ export const services = [
   {
     id: 'building-cleaning',
     title: 'Building Cleaning Services',
-    description: 'Turnkey facility and building cleaning for residential towers, commercial offices, shared lobbies, corridors, stairwells, and compound grounds.',
+    description:
+      'Turnkey facility and building cleaning for residential towers, commercial offices, shared lobbies, corridors, stairwells, and compound grounds.',
     category: 'commercial',
     iconName: 'building',
-    image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&auto=format&fit=crop&q=80',
+    image:
+      'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&auto=format&fit=crop&q=80',
     basePrice: 150,
     startingPrice: 'Custom / Site Survey',
     rateUnit: 'session',
@@ -268,10 +294,12 @@ export const services = [
   {
     id: 'landscape-contractor',
     title: 'Landscape Contractor',
-    description: 'Turnkey landscaping solutions for residential villas and commercial facilities. We design, install, and care for lush outdoor environments that endure the UAE climate.',
+    description:
+      'Turnkey landscaping solutions for residential villas and commercial facilities. We design, install, and care for lush outdoor environments that endure the UAE climate.',
     category: 'maintenance',
     iconName: 'building',
-    image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&auto=format&fit=crop&q=80',
+    image:
+      'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&auto=format&fit=crop&q=80',
     basePrice: 200,
     startingPrice: 'AED 200 Site Survey',
     rateUnit: 'session',
@@ -287,10 +315,12 @@ export const services = [
   {
     id: 'garden-maintenance',
     title: 'Garden Maintenance',
-    description: 'Keep your villa garden thriving and pristine throughout the year. Our skilled horticulturists handle precision trimming, edging, organic fertilization, and weed suppression.',
+    description:
+      'Keep your villa garden thriving and pristine throughout the year. Our skilled horticulturists handle precision trimming, edging, organic fertilization, and weed suppression.',
     category: 'maintenance',
     iconName: 'sparkles',
-    image: 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&auto=format&fit=crop&q=80',
+    image:
+      'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&auto=format&fit=crop&q=80',
     basePrice: 120,
     startingPrice: 'AED 120 / session',
     rateUnit: 'session',
@@ -306,10 +336,12 @@ export const services = [
   {
     id: 'swimming-pool-maintenance',
     title: 'Swimming Pool Maintenance',
-    description: 'Ensure your private pool is crystal-clear, sanitized, and perfectly balanced for your family. We conduct thorough chemical water testing, backwashing, and pump inspections.',
+    description:
+      'Ensure your private pool is crystal-clear, sanitized, and perfectly balanced for your family. We conduct thorough chemical water testing, backwashing, and pump inspections.',
     category: 'maintenance',
     iconName: 'sparkles',
-    image: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=800&auto=format&fit=crop&q=80',
+    image:
+      'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=800&auto=format&fit=crop&q=80',
     basePrice: 150,
     startingPrice: 'AED 150 / session',
     rateUnit: 'session',

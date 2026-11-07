@@ -27,11 +27,11 @@ class ClientController extends Controller
         }
 
         if ($request->filled('search')) {
-            $s = '%' . $request->search . '%';
+            $s = '%'.$request->search.'%';
             $query->where(function ($q) use ($s) {
                 $q->where('clients.name', 'like', $s)
-                  ->orWhere('clients.contact_number', 'like', $s)
-                  ->orWhere('clients.email', 'like', $s);
+                    ->orWhere('clients.contact_number', 'like', $s)
+                    ->orWhere('clients.email', 'like', $s);
             });
         }
 
@@ -40,25 +40,28 @@ class ClientController extends Controller
         }
 
         $perPage = min((int) $request->get('per_page', 15), 100);
+
         return response()->json($query->paginate($perPage));
     }
 
     public function show($id)
     {
         $client = Client::with(['bookings.service'])->findOrFail($id);
+
         return response()->json($client);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'           => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'contact_number' => 'nullable|string|max:50',
-            'email'          => 'nullable|email|max:255',
-            'address'        => 'nullable|string|max:500',
+            'email' => 'nullable|email|max:255',
+            'address' => 'nullable|string|max:500',
         ]);
 
         $client = Client::create($validated);
+
         return response()->json(['message' => 'Client created.', 'client' => $client], 201);
     }
 
@@ -66,6 +69,7 @@ class ClientController extends Controller
     {
         $client = Client::findOrFail($id);
         $client->delete();
+
         return response()->json(['message' => 'Client deleted.']);
     }
 
@@ -74,13 +78,14 @@ class ClientController extends Controller
         $client = Client::findOrFail($id);
 
         $validated = $request->validate([
-            'name'           => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'contact_number' => 'nullable|string|max:50',
-            'email'          => 'nullable|email|max:255',
-            'address'        => 'nullable|string|max:500',
+            'email' => 'nullable|email|max:255',
+            'address' => 'nullable|string|max:500',
         ]);
 
         $client->update($validated);
+
         return response()->json(['message' => 'Client updated.', 'client' => $client]);
     }
 }

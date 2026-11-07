@@ -14,17 +14,17 @@ class DashboardController extends Controller
     public function stats()
     {
         // ── Booking Pipeline Metrics ──
-        $total           = Booking::count();
-        $pending         = Booking::where('status', 'pending')->count();
-        $confirmed       = Booking::where('status', 'confirmed')->count();
-        $completed       = Booking::where('status', 'completed')->count();
-        $cancelled       = Booking::where('status', 'cancelled')->count();
+        $total = Booking::count();
+        $pending = Booking::where('status', 'pending')->count();
+        $confirmed = Booking::where('status', 'confirmed')->count();
+        $completed = Booking::where('status', 'completed')->count();
+        $cancelled = Booking::where('status', 'cancelled')->count();
 
         // ── Client CRM Metrics ──
-        $total_clients       = Client::count();
-        $new_clients_month   = Client::where('created_at', '>=', Carbon::now()->startOfMonth())->count();
-        $repeat_clients      = Client::has('bookings', '>', 1)->count();
-        $repeat_client_rate  = $total_clients > 0 ? round(($repeat_clients / $total_clients) * 100, 1) : 0;
+        $total_clients = Client::count();
+        $new_clients_month = Client::where('created_at', '>=', Carbon::now()->startOfMonth())->count();
+        $repeat_clients = Client::has('bookings', '>', 1)->count();
+        $repeat_client_rate = $total_clients > 0 ? round(($repeat_clients / $total_clients) * 100, 1) : 0;
 
         // ── Service Catalog Metrics ──
         $active_services = Service::where('status', 'active')->count();
@@ -34,7 +34,7 @@ class DashboardController extends Controller
         $dispatched = Booking::where('status', 'confirmed')
             ->where(function ($q) use ($today) {
                 $q->whereDate('preferred_date', '<=', $today)
-                  ->orWhereNull('preferred_date');
+                    ->orWhereNull('preferred_date');
             })->count();
 
         if ($dispatched === 0 && $confirmed > 0) {
@@ -70,12 +70,13 @@ class DashboardController extends Controller
         $colors = ['#059669', '#7c3aed', '#dc2626', '#2563eb', '#d97706'];
         $demand_distribution = $activeServicesList->map(function ($svc, $idx) use ($total, $colors) {
             $pct = $total > 0 ? round(($svc->bookings_count / $total) * 100) : 0;
-            $rate = 'AED ' . ($svc->base_price ? number_format((float) $svc->base_price) : '35');
+            $rate = 'AED '.($svc->base_price ? number_format((float) $svc->base_price) : '35');
+
             return [
-                'name'  => $svc->name,
+                'name' => $svc->name,
                 'count' => $svc->bookings_count,
-                'pct'   => $pct,
-                'rate'  => $rate,
+                'pct' => $pct,
+                'rate' => $rate,
                 'color' => $colors[$idx % count($colors)],
             ];
         })->values();
@@ -87,14 +88,19 @@ class DashboardController extends Controller
             'Yas Island' => 0,
             'Al Khalidiyah' => 0,
         ];
-        
+
         $allAddresses = Booking::pluck('address')->concat(Client::pluck('address'));
         foreach ($allAddresses as $addr) {
             $lower = strtolower((string) $addr);
-            if (str_contains($lower, 'reem')) $territoryCounts['Al Reem Island']++;
-            elseif (str_contains($lower, 'saadiyat')) $territoryCounts['Saadiyat Island']++;
-            elseif (str_contains($lower, 'yas')) $territoryCounts['Yas Island']++;
-            elseif (str_contains($lower, 'khalidiya') || str_contains($lower, 'khalidiyah')) $territoryCounts['Al Khalidiyah']++;
+            if (str_contains($lower, 'reem')) {
+                $territoryCounts['Al Reem Island']++;
+            } elseif (str_contains($lower, 'saadiyat')) {
+                $territoryCounts['Saadiyat Island']++;
+            } elseif (str_contains($lower, 'yas')) {
+                $territoryCounts['Yas Island']++;
+            } elseif (str_contains($lower, 'khalidiya') || str_contains($lower, 'khalidiyah')) {
+                $territoryCounts['Al Khalidiyah']++;
+            }
         }
 
         $totalTerritoryHits = array_sum($territoryCounts);
@@ -124,24 +130,24 @@ class DashboardController extends Controller
 
         return response()->json([
             'stats' => [
-                'total'               => $total,
-                'total_bookings'      => $total,
-                'pending'             => $pending,
-                'confirmed'           => $confirmed,
-                'completed'           => $completed,
-                'cancelled'           => $cancelled,
-                'active_services'     => $active_services,
-                'total_clients'       => $total_clients,
-                'new_clients_month'   => $new_clients_month,
-                'repeat_clients'      => $repeat_clients,
-                'repeat_client_rate'  => $repeat_client_rate,
-                'dispatched'          => $dispatched,
-                'total_revenue'       => $total_revenue,
-                'pipeline_revenue'    => $pipeline_revenue,
+                'total' => $total,
+                'total_bookings' => $total,
+                'pending' => $pending,
+                'confirmed' => $confirmed,
+                'completed' => $completed,
+                'cancelled' => $cancelled,
+                'active_services' => $active_services,
+                'total_clients' => $total_clients,
+                'new_clients_month' => $new_clients_month,
+                'repeat_clients' => $repeat_clients,
+                'repeat_client_rate' => $repeat_client_rate,
+                'dispatched' => $dispatched,
+                'total_revenue' => $total_revenue,
+                'pipeline_revenue' => $pipeline_revenue,
             ],
             'demand_distribution' => $demand_distribution,
-            'top_districts'       => $top_districts,
-            'recent_bookings'     => $recent,
+            'top_districts' => $top_districts,
+            'recent_bookings' => $recent,
         ]);
     }
 }

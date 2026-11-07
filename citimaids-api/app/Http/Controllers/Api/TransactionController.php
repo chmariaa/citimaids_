@@ -19,7 +19,7 @@ class TransactionController extends Controller
             ->orderBy('created_at', $sortDir);
 
         if ($request->filled('service_id') && $request->service_id !== 'all') {
-            $query->whereHas('payment.booking', fn($bq) => $bq->where('service_id', $request->service_id));
+            $query->whereHas('payment.booking', fn ($bq) => $bq->where('service_id', $request->service_id));
         }
 
         if ($request->filled('type')) {
@@ -41,17 +41,17 @@ class TransactionController extends Controller
             $s = trim($request->search);
             $query->where(function ($q) use ($s) {
                 $q->where('id', 'like', "%{$s}%")
-                  ->orWhere('description', 'like', "%{$s}%")
-                  ->orWhere('amount', 'like', "%{$s}%")
-                  ->orWhere('type', 'like', "%{$s}%")
-                  ->orWhere('status', 'like', "%{$s}%")
-                  ->orWhereHas('payment', function ($pq) use ($s) {
-                      $pq->where('reference_number', 'like', "%{$s}%")
-                         ->orWhere('external_reference', 'like', "%{$s}%")
-                         ->orWhereHas('client', fn($cq) => $cq->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%")->orWhere('contact_number', 'like', "%{$s}%"))
-                         ->orWhereHas('booking', fn($bq) => $bq->where('id', 'like', "%{$s}%"))
-                         ->orWhereHas('booking.service', fn($sq) => $sq->where('name', 'like', "%{$s}%"));
-                  });
+                    ->orWhere('description', 'like', "%{$s}%")
+                    ->orWhere('amount', 'like', "%{$s}%")
+                    ->orWhere('type', 'like', "%{$s}%")
+                    ->orWhere('status', 'like', "%{$s}%")
+                    ->orWhereHas('payment', function ($pq) use ($s) {
+                        $pq->where('reference_number', 'like', "%{$s}%")
+                            ->orWhere('external_reference', 'like', "%{$s}%")
+                            ->orWhereHas('client', fn ($cq) => $cq->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%")->orWhere('contact_number', 'like', "%{$s}%"))
+                            ->orWhereHas('booking', fn ($bq) => $bq->where('id', 'like', "%{$s}%"))
+                            ->orWhereHas('booking.service', fn ($sq) => $sq->where('name', 'like', "%{$s}%"));
+                    });
             });
         }
 
@@ -81,7 +81,7 @@ class TransactionController extends Controller
 
         $transaction->update([
             'status' => 'pending',
-            'description' => $transaction->description ? ($transaction->description . ' (Retry initiated)') : 'Payment retry initiated',
+            'description' => $transaction->description ? ($transaction->description.' (Retry initiated)') : 'Payment retry initiated',
             'processed_by_user_id' => $request->user()?->id ?? $transaction->processed_by_user_id,
         ]);
 
@@ -129,7 +129,7 @@ class TransactionController extends Controller
             ->findOrFail($id);
 
         return response()->json([
-            'receipt_number' => 'RCP-' . str_pad((string)$transaction->id, 6, '0', STR_PAD_LEFT),
+            'receipt_number' => 'RCP-'.str_pad((string) $transaction->id, 6, '0', STR_PAD_LEFT),
             'issued_at' => now()->toIso8601String(),
             'transaction' => $transaction,
         ]);
@@ -156,8 +156,8 @@ class TransactionController extends Controller
         $transaction = Transaction::findOrFail($id);
 
         $request->validate([
-            'description'      => 'nullable|string|max:1000',
-            'notes'            => 'nullable|string|max:2000',
+            'description' => 'nullable|string|max:1000',
+            'notes' => 'nullable|string|max:2000',
             'reference_number' => 'nullable|string|max:100',
         ]);
 
@@ -167,9 +167,13 @@ class TransactionController extends Controller
 
         if ($transaction->payment) {
             $paymentUpdates = [];
-            if ($request->has('notes')) $paymentUpdates['notes'] = $request->notes;
-            if ($request->has('reference_number')) $paymentUpdates['reference_number'] = $request->reference_number;
-            if (!empty($paymentUpdates)) {
+            if ($request->has('notes')) {
+                $paymentUpdates['notes'] = $request->notes;
+            }
+            if ($request->has('reference_number')) {
+                $paymentUpdates['reference_number'] = $request->reference_number;
+            }
+            if (! empty($paymentUpdates)) {
                 $transaction->payment->update($paymentUpdates);
             }
         }
@@ -193,7 +197,7 @@ class TransactionController extends Controller
         if ($transaction->payment) {
             $paymentStatus = $request->status === 'success' ? 'paid' : ($request->status === 'failed' ? 'failed' : 'pending');
             $transaction->payment->update([
-                'status'  => $paymentStatus,
+                'status' => $paymentStatus,
                 'paid_at' => $paymentStatus === 'paid' ? now() : $transaction->payment->paid_at,
             ]);
             if ($transaction->payment->booking && $paymentStatus === 'paid') {

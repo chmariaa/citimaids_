@@ -37,10 +37,17 @@ export function formatWhatsAppPhone(phone) {
  * @returns {string} WhatsApp URL (https://wa.me/...)
  */
 export function getCustomerBookingWALink(booking) {
-  const ref = booking?.reference || (booking?.id ? `CM-${String(booking.id).padStart(5, '0')}` : 'Inquiry');
+  const ref =
+    booking?.reference || (booking?.id ? `CM-${String(booking.id).padStart(5, '0')}` : 'Inquiry');
   const service = booking?.service?.name || booking?.service?.title || 'Cleaning Service';
-  const date = booking?.preferred_date ? new Date(booking.preferred_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
-  
+  const date = booking?.preferred_date
+    ? new Date(booking.preferred_date).toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
+    : '';
+
   const text = `Hello CitiMaids! 🧹
 I am inquiring about my booking *${ref}* (${service}${date ? ` on ${date}` : ''}).
 Could you please provide an update on dispatch status?`;
@@ -55,7 +62,8 @@ Could you please provide an update on dispatch status?`;
  * @returns {string} WhatsApp URL (https://wa.me/...)
  */
 export function getCustomerRescheduleWALink(booking) {
-  const ref = booking?.reference || (booking?.id ? `CM-${String(booking.id).padStart(5, '0')}` : 'Booking');
+  const ref =
+    booking?.reference || (booking?.id ? `CM-${String(booking.id).padStart(5, '0')}` : 'Booking');
   const text = `Hello CitiMaids! 📅
 I would like to request a reschedule for my booking *${ref}*.
 Please let me know available slots for an alternative date.`;
@@ -82,7 +90,7 @@ export function getAdminDispatchWALink(booking, template = 'confirmed') {
   const ref = booking?.reference || `CM-${String(booking?.id || '').padStart(5, '0')}`;
   const service = booking?.service?.name || booking?.service?.title || 'Cleaning Service';
   const trackingUrl = `${window.location.origin}/track-booking?ref=${encodeURIComponent(ref)}`;
-  
+
   let text;
   switch (template) {
     case 'confirmed':

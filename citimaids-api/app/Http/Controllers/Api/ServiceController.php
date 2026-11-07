@@ -43,12 +43,12 @@ class ServiceController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'          => 'required|string|max:255',
-            'category'      => 'nullable|string|max:50',
-            'description'   => 'nullable|string',
-            'base_price'    => 'nullable|numeric|min:0',
-            'icon'          => 'nullable|string|max:100',
-            'status'        => 'in:active,inactive',
+            'name' => 'required|string|max:255',
+            'category' => 'nullable|string|max:50',
+            'description' => 'nullable|string',
+            'base_price' => 'nullable|numeric|min:0',
+            'icon' => 'nullable|string|max:100',
+            'status' => 'in:active,inactive',
             'display_order' => 'nullable|integer|min:1',
         ]);
 
@@ -71,12 +71,12 @@ class ServiceController extends Controller
         $service = Service::findOrFail($id);
 
         $validated = $request->validate([
-            'name'          => 'sometimes|string|max:255',
-            'category'      => 'nullable|string|max:50',
-            'description'   => 'nullable|string',
-            'base_price'    => 'nullable|numeric|min:0',
-            'icon'          => 'nullable|string|max:100',
-            'status'        => 'in:active,inactive',
+            'name' => 'sometimes|string|max:255',
+            'category' => 'nullable|string|max:50',
+            'description' => 'nullable|string',
+            'base_price' => 'nullable|numeric|min:0',
+            'icon' => 'nullable|string|max:100',
+            'status' => 'in:active,inactive',
             'display_order' => 'nullable|integer|min:1',
         ]);
 
@@ -88,6 +88,7 @@ class ServiceController extends Controller
     public function destroy($id)
     {
         Service::findOrFail($id)->delete();
+
         return response()->json(['message' => 'Service deleted.']);
     }
 
@@ -99,7 +100,7 @@ class ServiceController extends Controller
     public function reorder(Request $request)
     {
         $request->validate([
-            'order'      => 'required|array|min:1',
+            'order' => 'required|array|min:1',
             'order.*.id' => 'required|integer|exists:services,id',
         ]);
 

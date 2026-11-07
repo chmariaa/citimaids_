@@ -7,8 +7,8 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\InquiryController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ReportsController;
-use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\TransactionController;
 use Illuminate\Support\Facades\Route;
@@ -50,9 +50,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Reports (live DB calculations)
     Route::get('/reports/overview', [ReportsController::class, 'overview']);
     Route::get('/reports/bookings', [ReportsController::class, 'bookings']);
-    Route::get('/reports/clients',  [ReportsController::class, 'clients']);
+    Route::get('/reports/clients', [ReportsController::class, 'clients']);
     Route::get('/reports/services', [ReportsController::class, 'services']);
-    Route::get('/reports/revenue',  [ReportsController::class, 'revenue']);
+    Route::get('/reports/revenue', [ReportsController::class, 'revenue']);
 
     // Bookings (admin)
     Route::get('/bookings', [BookingController::class, 'index']);

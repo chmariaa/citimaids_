@@ -13,6 +13,7 @@ class ClientBookingSeeder extends Seeder
     {
         if (Client::count() > 0) {
             $this->command->info('Clients already exist — skipping.');
+
             return;
         }
 
@@ -27,16 +28,17 @@ class ClientBookingSeeder extends Seeder
 
         foreach ($data as $row) {
             $clients[] = Client::create([
-                'name'           => $row[0],
+                'name' => $row[0],
                 'contact_number' => $row[1],
-                'email'          => $row[2],
-                'address'        => $row[3],
+                'email' => $row[2],
+                'address' => $row[3],
             ]);
         }
 
         $services = Service::all();
         if ($services->isEmpty()) {
             $this->command->warn('No services found — cannot create bookings.');
+
             return;
         }
 
@@ -44,15 +46,15 @@ class ClientBookingSeeder extends Seeder
 
         foreach (range(0, 7) as $i) {
             Booking::create([
-                'client_id'      => $clients[$i % count($clients)]->id,
-                'service_id'     => $services[$i % $services->count()]->id,
+                'client_id' => $clients[$i % count($clients)]->id,
+                'service_id' => $services[$i % $services->count()]->id,
                 'preferred_date' => now()->subDays(rand(0, 30))->toDateString(),
-                'address'        => $clients[$i % count($clients)]->address,
-                'notes'          => 'Sample booking ' . ($i + 1),
-                'status'         => $statuses[$i],
+                'address' => $clients[$i % count($clients)]->address,
+                'notes' => 'Sample booking '.($i + 1),
+                'status' => $statuses[$i],
             ]);
         }
 
-        $this->command->info('ClientBookingSeeder: Created ' . Client::count() . ' clients, ' . Booking::count() . ' bookings.');
+        $this->command->info('ClientBookingSeeder: Created '.Client::count().' clients, '.Booking::count().' bookings.');
     }
 }

@@ -10,8 +10,11 @@ export default function Footer() {
   const additionalPhone = settings?.additional_number || '+971 58 175 3958';
   const email = settings?.business_email || 'info@citi-maids.com';
   const additionalEmail = settings?.additional_email || 'citimaidsuae@gmail.com';
-  const address = settings?.business_address || 'Al jazeera Tower, Room 45, Hamdan St, Abu Dhabi, UAE';
-  const facebookUrl = settings?.facebook_url || 'https://web.facebook.com/people/CitiMaids-Cleaning-Services/61550129471847/';
+  const address =
+    settings?.business_address || 'Al jazeera Tower, Room 45, Hamdan St, Abu Dhabi, UAE';
+  const facebookUrl =
+    settings?.facebook_url ||
+    'https://web.facebook.com/people/CitiMaids-Cleaning-Services/61550129471847/';
   const tiktokUrl = settings?.tiktok_url || 'https://www.tiktok.com/@citimaids?_t=8pO7VCQjaUy&_r=1';
 
   return (
@@ -43,7 +46,8 @@ export default function Footer() {
             </Link>
 
             <p className="text-sm leading-relaxed text-slate-400 mb-6">
-              Abu Dhabi's trusted residential, commercial cleaning, and outdoor maintenance company. Delivering hotel-standard hygiene, transparent pricing, and dependable teams.
+              Abu Dhabi's trusted residential, commercial cleaning, and outdoor maintenance company.
+              Delivering hotel-standard hygiene, transparent pricing, and dependable teams.
             </p>
 
             <div className="inline-flex items-center gap-2 text-xs text-emerald-400 font-bold bg-emerald-950/40 border border-emerald-800/40 px-3.5 py-2 rounded-xl mb-6">
@@ -65,7 +69,7 @@ export default function Footer() {
                   className="w-10 h-10 rounded-xl bg-white/10 hover:bg-[#1877F2] text-white flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-md"
                 >
                   <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                   </svg>
                 </a>
                 <a
@@ -76,7 +80,7 @@ export default function Footer() {
                   className="w-10 h-10 rounded-xl bg-white/10 hover:bg-black text-white flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-md border border-white/5"
                 >
                   <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 00-1-.08A6.34 6.34 0 003 15.66a6.34 6.34 0 0010.86 4.43 6.3 6.3 0 001.88-4.43v-7a8.16 8.16 0 004.85 1.59v-3.56z"/>
+                    <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 00-1-.08A6.34 6.34 0 003 15.66a6.34 6.34 0 0010.86 4.43 6.3 6.3 0 001.88-4.43v-7a8.16 8.16 0 004.85 1.59v-3.56z" />
                   </svg>
                 </a>
               </div>
@@ -124,7 +128,10 @@ export default function Footer() {
                 'Swimming Pool Maintenance',
               ].map((s) => (
                 <li key={s}>
-                  <Link to="/services" className="text-slate-400 hover:text-white transition-colors">
+                  <Link
+                    to="/services"
+                    className="text-slate-400 hover:text-white transition-colors"
+                  >
                     {s}
                   </Link>
                 </li>
@@ -141,8 +148,19 @@ export default function Footer() {
               {address && (
                 <li className="flex items-start gap-3">
                   <span className="text-sky-400 mt-0.5 flex-shrink-0">
-                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <svg
+                      width="16"
+                      height="16"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                      />
                       <circle cx="12" cy="11" r="3" />
                     </svg>
                   </span>
@@ -152,11 +170,25 @@ export default function Footer() {
               {phone && (
                 <li className="flex items-center gap-3">
                   <span className="text-sky-400 flex-shrink-0">
-                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    <svg
+                      width="16"
+                      height="16"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                      />
                     </svg>
                   </span>
-                  <a href={`tel:${phone.replace(/\s+/g, '')}`} className="hover:text-white transition-colors font-semibold text-slate-200">
+                  <a
+                    href={`tel:${phone.replace(/\s+/g, '')}`}
+                    className="hover:text-white transition-colors font-semibold text-slate-200"
+                  >
                     {phone}
                   </a>
                 </li>
@@ -164,11 +196,25 @@ export default function Footer() {
               {additionalPhone && (
                 <li className="flex items-center gap-3">
                   <span className="text-sky-400 flex-shrink-0">
-                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    <svg
+                      width="16"
+                      height="16"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                      />
                     </svg>
                   </span>
-                  <a href={`tel:${additionalPhone.replace(/\s+/g, '')}`} className="hover:text-white transition-colors font-semibold text-slate-200">
+                  <a
+                    href={`tel:${additionalPhone.replace(/\s+/g, '')}`}
+                    className="hover:text-white transition-colors font-semibold text-slate-200"
+                  >
                     {additionalPhone}
                   </a>
                 </li>
@@ -176,11 +222,25 @@ export default function Footer() {
               {email && (
                 <li className="flex items-center gap-3">
                   <span className="text-sky-400 flex-shrink-0">
-                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    <svg
+                      width="16"
+                      height="16"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      />
                     </svg>
                   </span>
-                  <a href={`mailto:${email}`} className="hover:text-white transition-colors font-medium">
+                  <a
+                    href={`mailto:${email}`}
+                    className="hover:text-white transition-colors font-medium"
+                  >
                     {email}
                   </a>
                 </li>
@@ -188,11 +248,25 @@ export default function Footer() {
               {additionalEmail && (
                 <li className="flex items-center gap-3">
                   <span className="text-sky-400 flex-shrink-0">
-                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    <svg
+                      width="16"
+                      height="16"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      />
                     </svg>
                   </span>
-                  <a href={`mailto:${additionalEmail}`} className="hover:text-white transition-colors font-medium">
+                  <a
+                    href={`mailto:${additionalEmail}`}
+                    className="hover:text-white transition-colors font-medium"
+                  >
                     {additionalEmail}
                   </a>
                 </li>

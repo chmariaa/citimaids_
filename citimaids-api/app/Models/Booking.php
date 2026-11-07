@@ -22,7 +22,7 @@ class Booking extends Model
 
     protected $casts = [
         'preferred_date' => 'date',
-        'total_amount'   => 'decimal:2',
+        'total_amount' => 'decimal:2',
     ];
 
     public function client()

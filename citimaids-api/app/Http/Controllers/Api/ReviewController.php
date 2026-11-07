@@ -22,18 +22,18 @@ class ReviewController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'     => 'required|string|max:120',
+            'name' => 'required|string|max:120',
             'whatsapp' => 'nullable|string|max:30',
             'location' => 'nullable|string|max:120',
-            'stars'    => 'required|integer|min:1|max:5',
-            'body'     => 'required|string|min:10|max:1500',
+            'stars' => 'required|integer|min:1|max:5',
+            'body' => 'required|string|min:10|max:1500',
         ]);
 
         $review = Review::create($validated);
 
         return response()->json([
             'message' => 'Thank you! Your review will appear once approved.',
-            'review'  => $review,
+            'review' => $review,
         ], 201);
     }
 
@@ -67,6 +67,7 @@ class ReviewController extends Controller
     public function destroy($id)
     {
         Review::findOrFail($id)->delete();
+
         return response()->json(['message' => 'Review deleted.']);
     }
 

@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class AdminSeeder extends Seeder
 {
@@ -13,9 +12,9 @@ class AdminSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'admin@citimaids.com'],
             [
-                'name'     => 'Admin',
+                'name' => 'Admin',
                 'password' => 'Citimaids@admin!$123',
-                'role'     => 'admin',
+                'role' => 'admin',
             ]
         );
     }

@@ -17,7 +17,7 @@ class Transaction extends Model
     ];
 
     protected $casts = [
-        'amount'           => 'decimal:2',
+        'amount' => 'decimal:2',
         'gateway_response' => 'array',
     ];
 

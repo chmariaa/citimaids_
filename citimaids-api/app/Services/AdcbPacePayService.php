@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\Payment;
-use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 /**
  * ADCB Pace Pay Service — STUB
@@ -27,8 +27,7 @@ class AdcbPacePayService
      *
      * STUB: Returns a simulated link. Replace with real ADCB API call.
      *
-     * @param  Payment  $payment
-     * @return array  ['link' => string, 'expires_at' => Carbon]
+     * @return array ['link' => string, 'expires_at' => Carbon]
      */
     public function generatePaymentLink(Payment $payment): array
     {
@@ -45,13 +44,13 @@ class AdcbPacePayService
         // ]);
 
         $stubToken = Str::random(32);
-        $link      = "https://pay.adcb.com/pace-pay/link/{$stubToken}";
+        $link = "https://pay.adcb.com/pace-pay/link/{$stubToken}";
         $expiresAt = Carbon::now()->addHours(24);
 
         return [
-            'link'       => $link,
+            'link' => $link,
             'expires_at' => $expiresAt,
-            'external_reference' => 'ADCB-STUB-' . strtoupper(Str::random(8)),
+            'external_reference' => 'ADCB-STUB-'.strtoupper(Str::random(8)),
         ];
     }
 
@@ -60,20 +59,19 @@ class AdcbPacePayService
      *
      * STUB: Always returns 'paid'. Replace with real API call.
      *
-     * @param  string  $externalReference
-     * @return array  ['status' => string, 'paid_at' => ?Carbon, 'raw' => array]
+     * @return array ['status' => string, 'paid_at' => ?Carbon, 'raw' => array]
      */
     public function verifyPayment(string $externalReference): array
     {
         // ── Real implementation would call ADCB API here ──
 
         return [
-            'status'  => 'paid',
+            'status' => 'paid',
             'paid_at' => Carbon::now(),
-            'raw'     => [
-                'stub'      => true,
+            'raw' => [
+                'stub' => true,
                 'reference' => $externalReference,
-                'message'   => 'STUB: Payment verified successfully',
+                'message' => 'STUB: Payment verified successfully',
             ],
         ];
     }
@@ -83,20 +81,18 @@ class AdcbPacePayService
      *
      * STUB: Always returns success. Replace with real API call.
      *
-     * @param  Payment  $payment
-     * @param  float    $amount
-     * @return array  ['success' => bool, 'reference' => string, 'raw' => array]
+     * @return array ['success' => bool, 'reference' => string, 'raw' => array]
      */
     public function processRefund(Payment $payment, float $amount): array
     {
         // ── Real implementation would call ADCB API here ──
 
         return [
-            'success'   => true,
-            'reference' => 'ADCB-REFUND-' . strtoupper(Str::random(8)),
-            'raw'       => [
-                'stub'    => true,
-                'amount'  => $amount,
+            'success' => true,
+            'reference' => 'ADCB-REFUND-'.strtoupper(Str::random(8)),
+            'raw' => [
+                'stub' => true,
+                'amount' => $amount,
                 'message' => 'STUB: Refund processed successfully',
             ],
         ];

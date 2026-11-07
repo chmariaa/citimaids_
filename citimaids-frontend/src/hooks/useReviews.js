@@ -6,13 +6,14 @@ import api from '../api/axios';
  * Falls back to an empty array so the page always renders gracefully.
  */
 export function useReviews() {
-  const [reviews, setReviews]   = useState([]);
-  const [loading, setLoading]   = useState(true);
-  const [error,   setError]     = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchReviews = useCallback(() => {
     setLoading(true);
-    api.get('/reviews')
+    api
+      .get('/reviews')
       .then(({ data }) => {
         setReviews(data);
         setError(null);
@@ -24,7 +25,9 @@ export function useReviews() {
       .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => { fetchReviews(); }, [fetchReviews]);
+  useEffect(() => {
+    fetchReviews();
+  }, [fetchReviews]);
 
   /**
    * submitReview — posts a new review (status = pending) and returns the response.
