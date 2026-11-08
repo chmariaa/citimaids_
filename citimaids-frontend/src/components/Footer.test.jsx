@@ -1,7 +1,20 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import Footer from './Footer';
+
+// Mock useSettings so unit tests test the UI without triggering real network calls
+vi.mock('../hooks/useSettings', () => ({
+  useSettings: () => ({
+    settings: {
+      business_name: 'CitiMaids Cleaning Services',
+      contact_number: '+971 52 634 9461',
+      business_email: 'info@citi-maids.com',
+    },
+    loading: false,
+    error: null,
+  }),
+}));
 
 describe('Footer Component', () => {
   it('renders company branding and navigation links', () => {
