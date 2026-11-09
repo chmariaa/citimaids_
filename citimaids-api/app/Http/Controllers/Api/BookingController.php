@@ -19,19 +19,54 @@ class BookingController extends Controller
     {
         $query = Booking::with(['client', 'service', 'processedBy', 'payment']);
 
-        if ($request->filled('status')) {
+        if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
         }
 
+        if ($request->filled('payment_status') && $request->payment_status !== 'all') {
+            $query->where('payment_status', $request->payment_status);
+        }
+
+        if ($request->filled('service_id') && $request->service_id !== 'all') {
+            $query->where('service_id', $request->service_id);
+        }
+
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->whereHas('client', function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
+            $search = trim($request->search);
+
+            $query->where(function ($q) use ($search) {
+                // Booking ID: supports '#0014', '0014', '#14', '14', 'CM-0014'
+                $digits = preg_replace('/[^0-9]/', '', $search);
+                if ($digits !== '') {
+                    $numericId = (int) $digits;
+                    if ($numericId > 0 && (str_starts_with($search, '#') || stripos($search, 'cm-') !== false || ctype_digit($search))) {
+                        $q->orWhere('id', $numericId);
+                    }
+                }
+
+                // Client name, email, contact number
+                $q->orWhereHas('client', function ($cq) use ($search) {
+                    $cq->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('contact_number', 'like', "%{$search}%");
+                });
+
+                // Service name
+                $q->orWhereHas('service', function ($sq) use ($search) {
+                    $sq->where('name', 'like', "%{$search}%");
+                });
+
+                // Address or status text
+                $q->orWhere('address', 'like', "%{$search}%")
+                    ->orWhere('status', 'like', "%{$search}%");
             });
         }
 
-        return response()->json($query->latest()->paginate(15));
+        $allowedSorts = ['id', 'created_at', 'preferred_date', 'total_amount', 'status'];
+        $sortBy = in_array($request->input('sort_by'), $allowedSorts, true) ? $request->input('sort_by') : 'created_at';
+        $sortDir = strtolower((string) $request->input('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+
+        return response()->json($query->orderBy($sortBy, $sortDir)->paginate(15));
     }
 
     // Public: customer submits a booking inquiry
