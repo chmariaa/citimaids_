@@ -53,7 +53,6 @@
         "lint": "vendor/bin/pint --test",
         "lint:fix": "vendor/bin/pint",
         "phpstan": "vendor/bin/phpstan analyse --memory-limit=1G",
-        "audit": "composer audit",
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
