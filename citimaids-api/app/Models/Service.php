@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Service extends Model
 {
@@ -26,12 +27,12 @@ class Service extends Model
         });
     }
 
-    public function bookings()
+    public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
     }
 
-    public function bookingDetails()
+    public function bookingDetails(): HasMany
     {
         return $this->hasMany(BookingDetail::class);
     }
