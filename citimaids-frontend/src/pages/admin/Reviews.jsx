@@ -1205,6 +1205,8 @@ export default function Reviews() {
                                     lineHeight: 1.7,
                                     color: '#1e293b',
                                     whiteSpace: 'pre-wrap',
+                                    wordBreak: 'break-word',
+                                    overflowWrap: 'anywhere',
                                     fontFamily: fonts.body,
                                     boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
                                   }}

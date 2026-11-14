@@ -707,19 +707,19 @@ export default function HomePage() {
                   .map((w) => w[0]?.toUpperCase() ?? '')
                   .join('');
                 return (
-                  <Reveal key={r.id} delay={i * 80}>
-                    <div className="bg-slate-50 rounded-3xl p-8 border border-slate-200/80 flex flex-col justify-between h-full shadow-sm hover:shadow-lg transition-all">
-                      <div>
+                  <Reveal key={r.id} delay={i * 80} className="h-full min-w-0">
+                    <div className="bg-slate-50 rounded-3xl p-8 border border-slate-200/80 flex flex-col justify-between h-full shadow-sm hover:shadow-lg transition-all min-w-0 overflow-hidden">
+                      <div className="min-w-0">
                         <div className="flex gap-1 text-amber-400 mb-5">
                           {Array.from({ length: r.stars }).map((_, j) => (
                             <StarIcon key={j} className="w-5 h-5 text-amber-400" />
                           ))}
                         </div>
-                        <p className="text-slate-700 text-sm sm:text-base leading-relaxed italic mb-8">
+                        <p className="text-slate-700 text-sm sm:text-base leading-relaxed italic mb-8 break-words [overflow-wrap:anywhere]">
                           "{r.body}"
                         </p>
                       </div>
-                      <div className="flex items-center gap-4 pt-5 border-t border-slate-200">
+                      <div className="flex items-center gap-4 pt-5 border-t border-slate-200 min-w-0">
                         <div
                           className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-extrabold text-sm flex-shrink-0 shadow-md"
                           style={{
@@ -728,9 +728,9 @@ export default function HomePage() {
                         >
                           {initials}
                         </div>
-                        <div>
-                          <div className="font-extrabold text-slate-900 text-base">{r.name}</div>
-                          <div className="text-slate-500 text-xs">{r.location}</div>
+                        <div className="min-w-0 flex-1">
+                          <div className="font-extrabold text-slate-900 text-base truncate">{r.name}</div>
+                          <div className="text-slate-500 text-xs truncate">{r.location}</div>
                         </div>
                       </div>
                     </div>
