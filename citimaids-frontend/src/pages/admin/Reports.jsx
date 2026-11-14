@@ -693,6 +693,8 @@ function ClientsPanel({ d }) {
                       WebkitLineClamp: 4,
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden',
+                      wordBreak: 'break-word',
+                      overflowWrap: 'anywhere',
                     }}
                   >
                     "{r.body}"
