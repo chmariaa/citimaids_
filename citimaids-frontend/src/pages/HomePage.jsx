@@ -729,7 +729,9 @@ export default function HomePage() {
                           {initials}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="font-extrabold text-slate-900 text-base truncate">{r.name}</div>
+                          <div className="font-extrabold text-slate-900 text-base truncate">
+                            {r.name}
+                          </div>
                           <div className="text-slate-500 text-xs truncate">{r.location}</div>
                         </div>
                       </div>
