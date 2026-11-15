@@ -6,6 +6,7 @@ import { useReviews } from '../hooks/useReviews';
 import Reveal from '../components/Reveal';
 import BeforeAfterSlider from '../components/BeforeAfterSlider';
 import ServicesMarquee from '../components/ServicesMarquee';
+import TrustStandardsMarquee from '../components/TrustStandardsMarquee';
 import AnimatedCounter from '../components/AnimatedCounter';
 import {
   HomeIcon,
@@ -14,10 +15,6 @@ import {
   SparklesIcon,
   SofaIcon,
   WindowIcon,
-  ShieldCheckIcon,
-  BadgeCheckIcon,
-  UserCheckIcon,
-  ClockIcon,
   StarIcon,
 } from '../components/icons/Icons';
 
@@ -26,52 +23,6 @@ const stats = [
   { value: '4.9 / 5', label: 'Average Client Rating' },
   { value: '9+ Yrs', label: 'Abu Dhabi Experience' },
   { value: '100%', label: 'Satisfaction Guarantee' },
-];
-
-const whyUs = [
-  {
-    icon: <UserCheckIcon className="w-7 h-7 text-white" />,
-    title: 'Vetted & Trained Specialists',
-    desc: 'Every team member undergoes police background checks, Emirates ID verification, and 40+ hours of hotel-grade cleaning training.',
-  },
-  {
-    icon: <ShieldCheckIcon className="w-7 h-7 text-white" />,
-    title: 'AED 1M Liability Insurance',
-    desc: 'Comprehensive public liability insurance guarantees absolute peace of mind for your luxury furniture, fixtures, and property.',
-  },
-  {
-    icon: <SparklesIcon className="w-7 h-7 text-white" />,
-    title: 'Hospital-Grade Eco Products',
-    desc: 'UAE-approved non-toxic solutions safe for young children, pets, and delicate marble flooring. Zero harsh chemical residue.',
-  },
-  {
-    icon: <ClockIcon className="w-7 h-7 text-white" />,
-    title: 'Fast Same-Day Scheduling',
-    desc: 'Convenient online booking in under 60 seconds with flexible 7-day appointment slots and instant WhatsApp dispatch confirmation.',
-  },
-];
-
-const trustPillars = [
-  {
-    icon: <UserCheckIcon className="w-6 h-6 text-sky-300" />,
-    title: 'Emirates ID Verified',
-    desc: 'Legal identity validated before every household assignment.',
-  },
-  {
-    icon: <BadgeCheckIcon className="w-6 h-6 text-sky-300" />,
-    title: 'Police Security Cleared',
-    desc: 'Strict criminal background check on file for all personnel.',
-  },
-  {
-    icon: <SparklesIcon className="w-6 h-6 text-sky-300" />,
-    title: 'Hotel-Trained Crews',
-    desc: 'Trained to 5-star hospitality hygiene and finishing standards.',
-  },
-  {
-    icon: <ShieldCheckIcon className="w-6 h-6 text-sky-300" />,
-    title: 'AED 1M Property Insurance',
-    desc: 'Full coverage protecting your home and luxury interiors.',
-  },
 ];
 
 const steps = [
@@ -390,48 +341,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── 3. Why Choose CitiMaids (Setting the Standard) ── */}
-      <section className="py-28 bg-white">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8">
-          <Reveal>
-            <div className="text-center max-w-2xl mx-auto mb-16">
-              <span className="inline-block px-3.5 py-1.5 rounded-full bg-blue-50 text-blue-900 font-extrabold text-xs uppercase tracking-widest mb-3">
-                Why CitiMaids
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
-                Setting the Standard in UAE
-              </h2>
-              <p className="text-slate-500 mt-4 text-sm sm:text-base leading-relaxed">
-                We combine vetted cleaners, 5-star hotel hygiene standards, and modern online
-                booking so you never have to worry about cleaning again.
-              </p>
-            </div>
-          </Reveal>
+      {/* ── 3. Why CitiMaids & The CitiMaids Promise (Vertical Moving Standards Marquee) ── */}
+      <TrustStandardsMarquee />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {whyUs.map((item, i) => (
-              <Reveal key={item.title} delay={i * 80}>
-                <div className="group rounded-3xl p-8 bg-slate-50 border border-slate-200/80 hover:border-blue-400 hover:bg-white hover:-translate-y-2 hover:shadow-2xl transition-all duration-300 h-full flex flex-col justify-between">
-                  <div>
-                    <div
-                      className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-lg transition-transform duration-300 group-hover:scale-105"
-                      style={{ background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)' }}
-                    >
-                      {item.icon}
-                    </div>
-                    <h3 className="font-extrabold text-slate-900 text-lg mb-3 leading-snug">
-                      {item.title}
-                    </h3>
-                    <p className="text-slate-600 text-sm leading-relaxed">{item.desc}</p>
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ── 4. Services Architectural Marquee ("To and Fro" Animation) ── */}
+      <ServicesMarquee services={services} />
 
-      {/* ── 4. Interactive Before & After Comparison Showcase ── */}
+      {/* ── 5. Interactive Before & After Comparison Showcase ── */}
       <section className="py-28 bg-slate-50 border-y border-slate-200/80">
         <div className="max-w-7xl mx-auto px-6 sm:px-8">
           <Reveal>
@@ -468,49 +384,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* ── 5. The CitiMaids Promise (Trust Pillars) ── */}
-      <section
-        className="py-28 relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #061429 0%, #0A2342 100%)' }}
-      >
-        {/* Glow */}
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10">
-          <Reveal>
-            <div className="text-center max-w-2xl mx-auto mb-16">
-              <span className="inline-block px-3.5 py-1.5 rounded-full bg-white/10 text-sky-300 font-bold text-xs uppercase tracking-widest mb-3 backdrop-blur-md">
-                Guaranteed Excellence
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-                The CitiMaids Promise
-              </h2>
-              <p className="text-slate-300 mt-4 text-sm sm:text-base leading-relaxed">
-                Four stringent security and quality standards every cleaner satisfies before
-                entering your residence.
-              </p>
-            </div>
-          </Reveal>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {trustPillars.map((p, i) => (
-              <Reveal key={p.title} delay={i * 80} direction="scale">
-                <div className="group glass-panel rounded-3xl p-7 text-center hover:-translate-y-2 transition-all duration-300 h-full flex flex-col items-center">
-                  <div className="w-13 h-13 rounded-2xl bg-white/10 flex items-center justify-center mb-5 shadow-inner transition-transform duration-300 group-hover:scale-110">
-                    {p.icon}
-                  </div>
-                  <h3 className="font-extrabold text-white text-lg mb-2">{p.title}</h3>
-                  <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">{p.desc}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── 6. Services Architectural Marquee ("To and Fro" Animation) ── */}
-      <ServicesMarquee services={services} />
 
       {/* ── 7. How It Works (3 Steps) ── */}
       <section className="py-28 bg-slate-50 border-t border-slate-200/80">

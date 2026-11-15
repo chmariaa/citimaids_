@@ -565,10 +565,61 @@
   touch-action: pan-y;
 }
 
+/* ── Vertical Moving Columns Animation (ReflexAI Reference) ── */
+@keyframes marqueeUp {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, -50%, 0);
+  }
+}
+
+@keyframes marqueeDown {
+  0% {
+    transform: translate3d(0, -50%, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-marquee-up {
+  display: flex;
+  flex-direction: column;
+  animation: marqueeUp 26s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-down {
+  display: flex;
+  flex-direction: column;
+  animation: marqueeDown 30s linear infinite;
+  will-change: transform;
+}
+
+.vertical-marquee-container:hover .animate-marquee-up,
+.vertical-marquee-container:hover .animate-marquee-down {
+  animation-play-state: paused;
+}
+
+.vertical-marquee-mask {
+  mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 12%,
+    black 88%,
+    transparent 100%
+  );
+}
+
 /* Reduced motion accessibility */
 @media (prefers-reduced-motion: reduce) {
   .animate-marquee-left,
   .animate-marquee-right,
+  .animate-marquee-up,
+  .animate-marquee-down,
   .animate-ambient-1,
   .animate-ambient-2,
   .handle-pulse,
