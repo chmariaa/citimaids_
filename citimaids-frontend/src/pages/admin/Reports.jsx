@@ -56,14 +56,17 @@ export default function Reports() {
   const [to, setTo] = useState(today());
   const [cache, setCache] = useState({});
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const fetch = useCallback(async (tab, f, t) => {
     setLoading(true);
+    setError(null);
     try {
       const res = await api.get(`/reports/${tab}`, { params: { from: f, to: t } });
       setCache((prev) => ({ ...prev, [tab]: res.data }));
     } catch (e) {
       console.error(e);
+      setError('Unable to load report data. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -249,14 +252,39 @@ export default function Reports() {
 
         {/* Panel */}
         <div>
-          {loading || !d ? (
+          {loading ? (
             <div
               style={{ ...card, padding: 60, textAlign: 'center', color: '#94a3b8', fontSize: 14 }}
             >
-              <div style={{ fontSize: 40, marginBottom: 12 }}>{loading ? '⏳' : '📊'}</div>
-              {loading
-                ? 'Fetching live data from database…'
-                : 'Click Generate Report to load data.'}
+              <div style={{ fontSize: 40, marginBottom: 12 }}>⏳</div>
+              Fetching live data from database…
+            </div>
+          ) : error ? (
+            <div
+              style={{ ...card, padding: 60, textAlign: 'center', color: '#dc2626', fontSize: 14 }}
+            >
+              <div style={{ fontSize: 40, marginBottom: 12 }}>⚠️</div>
+              <div style={{ fontWeight: 600, marginBottom: 14, color: '#b91c1c' }}>{error}</div>
+              <button
+                type="button"
+                onClick={generate}
+                style={{
+                  ...outlineBtnToken,
+                  padding: '8px 18px',
+                  fontSize: 13,
+                  cursor: 'pointer',
+                  margin: '0 auto',
+                }}
+              >
+                Retry
+              </button>
+            </div>
+          ) : !d ? (
+            <div
+              style={{ ...card, padding: 60, textAlign: 'center', color: '#94a3b8', fontSize: 14 }}
+            >
+              <div style={{ fontSize: 40, marginBottom: 12 }}>📊</div>
+              Click Generate Report to load data.
             </div>
           ) : (
             <>

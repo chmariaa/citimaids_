@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
+import ActionMenu from './ActionMenu';
 import {
   brand,
   fonts,
@@ -776,68 +777,102 @@ export default function Clients() {
                     {/* Last Booking */}
                     <div style={{ fontSize: 13, color: '#64748b' }}>{lastBooking}</div>
                     {/* Actions */}
-                    <div style={{ display: 'flex', gap: 6 }}>
-                      <ActionBtn
-                        title="View"
-                        onClick={() => navigate(`/admin/clients/${client.id}`)}
-                        icon={
-                          <svg
-                            width="14"
-                            height="14"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                          >
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                            <circle cx="12" cy="12" r="3" />
-                          </svg>
-                        }
-                      />
-                      <ActionBtn
-                        title="Edit"
-                        onClick={() => {
-                          setForm({
-                            name: client.name || '',
-                            contact_number: client.contact_number || '',
-                            email: client.email || '',
-                            address: client.address || '',
-                          });
-                          setEditId(client.id);
-                          setEditModal(true);
-                        }}
-                        icon={
-                          <svg
-                            width="14"
-                            height="14"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                          >
-                            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
-                            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
-                          </svg>
-                        }
-                      />
-                      <ActionBtn
-                        title="Delete"
-                        danger
-                        onClick={() => setDeleteModal(client)}
-                        icon={
-                          <svg
-                            width="14"
-                            height="14"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                          >
-                            <polyline points="3 6 5 6 21 6" />
-                            <path d="M19 6l-1 14H6L5 6" />
-                            <path d="M10 11v6M14 11v6M9 6V4h6v2" />
-                          </svg>
-                        }
+                    <div
+                      style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}
+                    >
+                      <ActionMenu
+                        title="Client Actions"
+                        items={[
+                          {
+                            label: 'View Details',
+                            icon: (
+                              <svg
+                                width="15"
+                                height="15"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                              >
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                <circle cx="12" cy="12" r="3" />
+                              </svg>
+                            ),
+                            color: '#1e40af',
+                            onClick: () => navigate(`/admin/clients/${client.id}`),
+                          },
+                          {
+                            label: 'Edit Client',
+                            icon: (
+                              <svg
+                                width="15"
+                                height="15"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                              >
+                                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                              </svg>
+                            ),
+                            color: '#475569',
+                            onClick: () => {
+                              setForm({
+                                name: client.name || '',
+                                contact_number: client.contact_number || '',
+                                email: client.email || '',
+                                address: client.address || '',
+                              });
+                              setEditId(client.id);
+                              setEditModal(true);
+                            },
+                          },
+                          ...(client.contact_number
+                            ? [
+                                {
+                                  label: 'WhatsApp Client',
+                                  icon: (
+                                    <svg
+                                      width="15"
+                                      height="15"
+                                      fill="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2z" />
+                                    </svg>
+                                  ),
+                                  color: '#16a34a',
+                                  hoverBg: '#f0fdf4',
+                                  hoverColor: '#15803d',
+                                  onClick: () => {
+                                    const phone = client.contact_number.replace(/\D/g, '');
+                                    window.open(`https://wa.me/${phone}`, '_blank');
+                                  },
+                                },
+                              ]
+                            : []),
+                          {
+                            label: 'Delete Client',
+                            icon: (
+                              <svg
+                                width="15"
+                                height="15"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                              >
+                                <polyline points="3 6 5 6 21 6" />
+                                <path d="M19 6l-1 14H6L5 6" />
+                                <path d="M10 11v6M14 11v6M9 6V4h6v2" />
+                              </svg>
+                            ),
+                            danger: true,
+                            dividerBefore: true,
+                            onClick: () => setDeleteModal(client),
+                          },
+                        ]}
                       />
                     </div>
                   </div>
@@ -1084,7 +1119,7 @@ function PageBtn({ label, active, disabled, onClick }) {
 const tableHeaderStyle = {
   display: 'grid',
   gridTemplateColumns:
-    'minmax(200px, 1.8fr) minmax(140px, 1.3fr) minmax(170px, 1.6fr) 120px 120px 110px',
+    'minmax(200px, 1.8fr) minmax(140px, 1.3fr) minmax(170px, 1.6fr) 120px 120px 60px',
   padding: '14px 24px',
   borderBottom: `1px solid ${brand.border}`,
   background: brand.softBg,
@@ -1095,7 +1130,7 @@ const tableHeaderStyle = {
 const tableRowStyle = {
   display: 'grid',
   gridTemplateColumns:
-    'minmax(200px, 1.8fr) minmax(140px, 1.3fr) minmax(170px, 1.6fr) 120px 120px 110px',
+    'minmax(200px, 1.8fr) minmax(140px, 1.3fr) minmax(170px, 1.6fr) 120px 120px 60px',
   padding: '16px 24px',
   borderBottom: '1px solid #f1f5f9',
   alignItems: 'center',

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../../api/axios';
+import ActionMenu from './ActionMenu';
 import { formatWhatsAppPhone } from '../../utils/whatsapp';
 import {
   brand,
@@ -2227,7 +2228,7 @@ export default function Payments({ defaultTab = 'payments' }) {
               <table
                 style={{
                   width: '100%',
-                  minWidth: 980,
+                  minWidth: 680,
                   borderCollapse: 'collapse',
                   textAlign: 'left',
                 }}
@@ -2247,7 +2248,7 @@ export default function Payments({ defaultTab = 'payments' }) {
                         color: '#64748b',
                         textTransform: 'uppercase',
                         letterSpacing: 0.6,
-                        width: '24%',
+                        width: '26%',
                       }}
                     >
                       Invoice / Reference
@@ -2260,7 +2261,7 @@ export default function Payments({ defaultTab = 'payments' }) {
                         color: '#64748b',
                         textTransform: 'uppercase',
                         letterSpacing: 0.6,
-                        width: '32%',
+                        width: '38%',
                       }}
                     >
                       Client & Booking
@@ -2273,7 +2274,7 @@ export default function Payments({ defaultTab = 'payments' }) {
                         color: '#64748b',
                         textTransform: 'uppercase',
                         letterSpacing: 0.6,
-                        width: '16%',
+                        width: '18%',
                       }}
                     >
                       Amount
@@ -2293,14 +2294,15 @@ export default function Payments({ defaultTab = 'payments' }) {
                     </th>
                     <th
                       style={{
-                        padding: '12px 18px',
+                        padding: '12px 8px',
                         fontSize: 11,
                         fontWeight: 700,
                         color: '#64748b',
                         textTransform: 'uppercase',
                         letterSpacing: 0.6,
-                        width: '14%',
-                        textAlign: 'right',
+                        width: 60,
+                        minWidth: 60,
+                        textAlign: 'center',
                       }}
                     >
                       Actions
@@ -2608,132 +2610,134 @@ export default function Payments({ defaultTab = 'payments' }) {
                             <PaymentStatusBadge status={p.status} />
                           </td>
 
-                          {/* Actions: WhatsApp | View | Edit | Delete */}
+                          {/* Actions: ActionMenu (WhatsApp | View | Edit | Delete) */}
                           <td
-                            style={{ padding: '14px 18px', textAlign: 'right' }}
+                            style={{ padding: '14px 8px', textAlign: 'center', width: 60 }}
                             onClick={(e) => e.stopPropagation()}
                           >
                             <div
                               style={{
-                                display: 'inline-flex',
-                                gap: 6,
+                                display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'flex-end',
+                                justifyContent: 'center',
                               }}
                             >
-                              {/* 1. WhatsApp Button */}
-                              <ActionBtn
-                                title="WhatsApp Client"
-                                variant="whatsapp"
-                                onClick={() => {
-                                  const ph = formatWhatsAppPhone(
-                                    p.client?.contact_number || p.client?.phone
-                                  );
-                                  const clientName = p.client?.name || 'Valued Client';
-                                  const invoiceId = p.reference_number || `INV-${p.id}`;
-                                  const serviceName =
-                                    p.booking?.service?.name || 'Cleaning Service';
-                                  const bookingDate = p.booking?.preferred_date
-                                    ? new Date(p.booking.preferred_date).toLocaleDateString(
-                                        'en-AE',
-                                        { day: 'numeric', month: 'short', year: 'numeric' }
-                                      )
-                                    : 'your scheduled date';
-                                  const msg = `Hello ${clientName}, this is regarding your invoice ${invoiceId} for ${serviceName} scheduled on ${bookingDate}. Please let us know if you have any questions or require assistance!`;
-                                  window.open(
-                                    `https://wa.me/${ph}?text=${encodeURIComponent(msg)}`,
-                                    '_blank'
-                                  );
-                                }}
-                                icon={
-                                  <svg
-                                    width="15"
-                                    height="15"
-                                    fill="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2z" />
-                                  </svg>
-                                }
-                              />
-                              {/* 2. View Button */}
-                              <ActionBtn
-                                title="View Details"
-                                variant="view"
-                                onClick={() => setSelectedPayment(p)}
-                                icon={
-                                  <svg
-                                    width="15"
-                                    height="15"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                  >
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                    <circle cx="12" cy="12" r="3" />
-                                  </svg>
-                                }
-                              />
-                              {/* 3. Edit Button */}
-                              <ActionBtn
-                                title="Edit Invoice"
-                                variant="edit"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setInvoiceEditModal(p);
-                                  setInvoiceEditStatus(
-                                    p.status === 'failed' ? 'unpaid' : p.status || 'pending'
-                                  );
-                                  setInvoiceEditNotes(p.notes || '');
-                                  setInvoiceEditPaymentMethod(
-                                    normalizePaymentMethodFormValue(p.payment_method)
-                                  );
-                                }}
-                                icon={
-                                  <svg
-                                    width="15"
-                                    height="15"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                    />
-                                  </svg>
-                                }
-                              />
-                              {/* 4. Delete Button */}
-                              <ActionBtn
-                                title="Delete Invoice"
-                                variant="delete"
-                                onClick={() => setDeleteTarget({ type: 'payment', item: p })}
-                                icon={
-                                  <svg
-                                    width="15"
-                                    height="15"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                  >
-                                    <polyline points="3 6 5 6 21 6" />
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      d="M19 6l-1 14H6L5 6"
-                                    />
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      d="M10 11v6M14 11v6M9 6V4h6v2"
-                                    />
-                                  </svg>
-                                }
+                              <ActionMenu
+                                title="Invoice Options"
+                                items={[
+                                  {
+                                    label: 'View Details',
+                                    icon: (
+                                      <svg
+                                        width="15"
+                                        height="15"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                      >
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                        <circle cx="12" cy="12" r="3" />
+                                      </svg>
+                                    ),
+                                    color: '#1d4ed8',
+                                    onClick: () => setSelectedPayment(p),
+                                  },
+                                  {
+                                    label: 'Edit Invoice',
+                                    icon: (
+                                      <svg
+                                        width="15"
+                                        height="15"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                        />
+                                      </svg>
+                                    ),
+                                    color: '#b45309',
+                                    onClick: () => {
+                                      setInvoiceEditModal(p);
+                                      setInvoiceEditStatus(
+                                        p.status === 'failed' ? 'unpaid' : p.status || 'pending'
+                                      );
+                                      setInvoiceEditNotes(p.notes || '');
+                                      setInvoiceEditPaymentMethod(
+                                        normalizePaymentMethodFormValue(p.payment_method)
+                                      );
+                                    },
+                                  },
+                                  {
+                                    label: 'WhatsApp Client',
+                                    icon: (
+                                      <svg
+                                        width="15"
+                                        height="15"
+                                        fill="currentColor"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2z" />
+                                      </svg>
+                                    ),
+                                    color: '#16a34a',
+                                    hoverBg: '#f0fdf4',
+                                    hoverColor: '#15803d',
+                                    onClick: () => {
+                                      const ph = formatWhatsAppPhone(
+                                        p.client?.contact_number || p.client?.phone
+                                      );
+                                      const clientName = p.client?.name || 'Valued Client';
+                                      const invoiceId = p.reference_number || `INV-${p.id}`;
+                                      const serviceName =
+                                        p.booking?.service?.name || 'Cleaning Service';
+                                      const bookingDate = p.booking?.preferred_date
+                                        ? new Date(p.booking.preferred_date).toLocaleDateString(
+                                            'en-AE',
+                                            { day: 'numeric', month: 'short', year: 'numeric' }
+                                          )
+                                        : 'your scheduled date';
+                                      const msg = `Hello ${clientName}, this is regarding your invoice ${invoiceId} for ${serviceName} scheduled on ${bookingDate}. Please let us know if you have any questions or require assistance!`;
+                                      window.open(
+                                        `https://wa.me/${ph}?text=${encodeURIComponent(msg)}`,
+                                        '_blank'
+                                      );
+                                    },
+                                  },
+                                  {
+                                    label: 'Delete Invoice',
+                                    icon: (
+                                      <svg
+                                        width="15"
+                                        height="15"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                      >
+                                        <polyline points="3 6 5 6 21 6" />
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          d="M19 6l-1 14H6L5 6"
+                                        />
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          d="M10 11v6M14 11v6M9 6V4h6v2"
+                                        />
+                                      </svg>
+                                    ),
+                                    danger: true,
+                                    dividerBefore: true,
+                                    onClick: () => setDeleteTarget({ type: 'payment', item: p }),
+                                  },
+                                ]}
                               />
                             </div>
                           </td>
@@ -2807,7 +2811,7 @@ export default function Payments({ defaultTab = 'payments' }) {
               <table
                 style={{
                   width: '100%',
-                  minWidth: 1080,
+                  minWidth: 840,
                   borderCollapse: 'collapse',
                   textAlign: 'left',
                 }}
@@ -2827,7 +2831,7 @@ export default function Payments({ defaultTab = 'payments' }) {
                         color: '#64748b',
                         textTransform: 'uppercase',
                         letterSpacing: 0.6,
-                        width: '12%',
+                        width: '13%',
                       }}
                     >
                       TX ID & Date
@@ -2880,7 +2884,7 @@ export default function Payments({ defaultTab = 'payments' }) {
                         color: '#64748b',
                         textTransform: 'uppercase',
                         letterSpacing: 0.6,
-                        width: '12%',
+                        width: '13%',
                       }}
                     >
                       Amount
@@ -2893,21 +2897,22 @@ export default function Payments({ defaultTab = 'payments' }) {
                         color: '#64748b',
                         textTransform: 'uppercase',
                         letterSpacing: 0.6,
-                        width: '8%',
+                        width: '10%',
                       }}
                     >
                       Status
                     </th>
                     <th
                       style={{
-                        padding: '13px 18px',
+                        padding: '13px 8px',
                         fontSize: 11,
                         fontWeight: 700,
                         color: '#64748b',
                         textTransform: 'uppercase',
                         letterSpacing: 0.6,
-                        width: '8%',
-                        textAlign: 'right',
+                        width: 60,
+                        minWidth: 60,
+                        textAlign: 'center',
                       }}
                     >
                       Actions
@@ -3267,90 +3272,93 @@ export default function Payments({ defaultTab = 'payments' }) {
                             />
                           </td>
 
-                          {/* 8. Strict 3 Actions: WhatsApp | View | Delete */}
+                          {/* 8. ActionMenu: WhatsApp | View | Delete */}
                           <td
-                            style={{ padding: '14px 18px', textAlign: 'right' }}
+                            style={{ padding: '14px 8px', textAlign: 'center', width: 60 }}
                             onClick={(e) => e.stopPropagation()}
                           >
                             <div
                               style={{
-                                display: 'inline-flex',
-                                gap: 6,
+                                display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'flex-end',
+                                justifyContent: 'center',
                               }}
                             >
-                              {/* 1. WhatsApp Button */}
-                              <ActionBtn
-                                title="WhatsApp Client"
-                                variant="whatsapp"
-                                onClick={() => {
-                                  const ph = formatWhatsAppPhone(clientPhone);
-                                  const msg = `Hi ${clientName}, reaching out regarding your transaction for Invoice #${parentInvoiceRef} (${serviceName}) scheduled on ${bookingDate}.`;
-                                  window.open(
-                                    `https://wa.me/${ph}?text=${encodeURIComponent(msg)}`,
-                                    '_blank'
-                                  );
-                                }}
-                                icon={
-                                  <svg
-                                    width="15"
-                                    height="15"
-                                    fill="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2z" />
-                                  </svg>
-                                }
-                              />
-
-                              {/* 2. View Details Button */}
-                              <ActionBtn
-                                title="View Transaction Details"
-                                variant="view"
-                                onClick={() => setSelectedTransaction(tx)}
-                                icon={
-                                  <svg
-                                    width="15"
-                                    height="15"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                  >
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                    <circle cx="12" cy="12" r="3" />
-                                  </svg>
-                                }
-                              />
-
-                              {/* 3. Delete Button */}
-                              <ActionBtn
-                                title="Delete Transaction Record"
-                                variant="delete"
-                                onClick={() => setDeleteTarget({ type: 'transaction', item: tx })}
-                                icon={
-                                  <svg
-                                    width="15"
-                                    height="15"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                  >
-                                    <polyline points="3 6 5 6 21 6" />
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      d="M19 6l-1 14H6L5 6"
-                                    />
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      d="M10 11v6M14 11v6M9 6V4h6v2"
-                                    />
-                                  </svg>
-                                }
+                              <ActionMenu
+                                title="Transaction Options"
+                                items={[
+                                  {
+                                    label: 'View Details',
+                                    icon: (
+                                      <svg
+                                        width="15"
+                                        height="15"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                      >
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                        <circle cx="12" cy="12" r="3" />
+                                      </svg>
+                                    ),
+                                    color: '#1d4ed8',
+                                    onClick: () => setSelectedTransaction(tx),
+                                  },
+                                  {
+                                    label: 'WhatsApp Client',
+                                    icon: (
+                                      <svg
+                                        width="15"
+                                        height="15"
+                                        fill="currentColor"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2z" />
+                                      </svg>
+                                    ),
+                                    color: '#16a34a',
+                                    hoverBg: '#f0fdf4',
+                                    hoverColor: '#15803d',
+                                    onClick: () => {
+                                      const ph = formatWhatsAppPhone(clientPhone);
+                                      const msg = `Hi ${clientName}, reaching out regarding your transaction for Invoice #${parentInvoiceRef} (${serviceName}) scheduled on ${bookingDate}.`;
+                                      window.open(
+                                        `https://wa.me/${ph}?text=${encodeURIComponent(msg)}`,
+                                        '_blank'
+                                      );
+                                    },
+                                  },
+                                  {
+                                    label: 'Delete Record',
+                                    icon: (
+                                      <svg
+                                        width="15"
+                                        height="15"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                      >
+                                        <polyline points="3 6 5 6 21 6" />
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          d="M19 6l-1 14H6L5 6"
+                                        />
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          d="M10 11v6M14 11v6M9 6V4h6v2"
+                                        />
+                                      </svg>
+                                    ),
+                                    danger: true,
+                                    dividerBefore: true,
+                                    onClick: () =>
+                                      setDeleteTarget({ type: 'transaction', item: tx }),
+                                  },
+                                ]}
                               />
                             </div>
                           </td>

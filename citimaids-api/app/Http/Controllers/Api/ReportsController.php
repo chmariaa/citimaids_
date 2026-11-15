@@ -136,13 +136,12 @@ class ReportsController extends Controller
         $repeatRate = $totalClients > 0 ? round(($repeatClients / $totalClients) * 100, 1) : 0;
         $active = Client::whereHas('bookings', fn ($q) => $q->whereIn('status', ['pending', 'confirmed']))->count();
 
-        $topClients = Client::select('clients.*')
-            ->selectRaw('COUNT(bookings.id) as bookings_count')
-            ->selectRaw('SUM(bookings.total_amount) as lifetime_value')
-            ->leftJoin('bookings', 'bookings.client_id', '=', 'clients.id')
-            ->groupBy('clients.id')
+        $topClients = Client::query()
+            ->withCount('bookings')
+            ->withSum('bookings as lifetime_value', 'total_amount')
             ->orderByDesc('bookings_count')
-            ->take(10)->get();
+            ->take(10)
+            ->get();
 
         $monthlyGrowth = Client::selectRaw("DATE_FORMAT(created_at,'%Y-%m') as month, COUNT(*) as new_clients")
             ->where('created_at', '>=', now()->subMonths(6)->startOfMonth())
@@ -166,13 +165,13 @@ class ReportsController extends Controller
     {
         [$from, $to] = $this->range($request);
 
-        $services = Service::select('services.*')
+        $services = Service::select('services.id', 'services.name', 'services.status', 'services.base_price')
             ->selectRaw('COUNT(b.id) as total_bookings')
             ->selectRaw('SUM(CASE WHEN b.status="completed" THEN 1 ELSE 0 END) as completed_bookings')
             ->selectRaw('SUM(CASE WHEN (b.created_at BETWEEN ? AND ?) THEN 1 ELSE 0 END) as period_bookings', [$from, $to])
             ->selectRaw('SUM(CASE WHEN b.status="completed" THEN COALESCE(b.total_amount,0) ELSE 0 END) as revenue')
             ->leftJoin('bookings as b', 'b.service_id', '=', 'services.id')
-            ->groupBy('services.id')
+            ->groupBy('services.id', 'services.name', 'services.status', 'services.base_price')
             ->get()
             ->sortByDesc('total_bookings')->values();
 
@@ -240,7 +239,7 @@ class ReportsController extends Controller
             ->selectRaw('COUNT(CASE WHEN b.status="completed" THEN 1 END) as completed_count')
             ->selectRaw('SUM(CASE WHEN b.status="completed" THEN COALESCE(b.total_amount,services.base_price) ELSE 0 END) as revenue')
             ->leftJoin('bookings as b', 'b.service_id', '=', 'services.id')
-            ->groupBy('services.id')
+            ->groupBy('services.id', 'services.name', 'services.base_price')
             ->get()
             ->map(fn ($s) => ['name' => $s->name, 'revenue' => round((float) $s->revenue, 2), 'count' => (int) $s->completed_count])
             ->sortByDesc('revenue')->values();
