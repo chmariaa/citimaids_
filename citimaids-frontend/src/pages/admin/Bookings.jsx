@@ -19,6 +19,7 @@ import {
 } from './adminStyles';
 import { getAdminDispatchWALink } from '../../utils/whatsapp';
 import PrintManifestModal from './PrintManifestModal';
+import ActionMenu from './ActionMenu';
 
 /**
  * ── Status Tab Filter Box Configurations ──
@@ -987,7 +988,7 @@ export default function Bookings() {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: '95px 1.25fr 1.15fr 1.1fr 125px 155px',
+                gridTemplateColumns: '95px 1.35fr 1.25fr 1.2fr 125px 60px',
                 padding: '14px 24px',
                 borderBottom: `1px solid ${brand.border}`,
                 background: brand.softBg,
@@ -1112,7 +1113,7 @@ export default function Bookings() {
                     key={booking.id}
                     style={{
                       display: 'grid',
-                      gridTemplateColumns: '95px 1.25fr 1.15fr 1.1fr 125px 155px',
+                      gridTemplateColumns: '95px 1.35fr 1.25fr 1.2fr 125px 60px',
                       padding: '16px 24px',
                       borderBottom: '1px solid #f1f5f9',
                       alignItems: 'center',
@@ -1217,151 +1218,91 @@ export default function Bookings() {
 
                     {/* Actions */}
                     <div
-                      style={{ display: 'flex', gap: 6, alignItems: 'center' }}
+                      style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      {/* WhatsApp Client */}
-                      <a
-                        href={getAdminDispatchWALink(
-                          booking,
-                          booking.status === 'completed' ? 'completed' : 'confirmed'
-                        )}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title="WhatsApp Client (Status & Tracking Link)"
-                        style={{
-                          ...actionBtn,
-                          color: '#16a34a',
-                          borderColor: '#bbf7d0',
-                          background: '#f0fdf4',
-                          textDecoration: 'none',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'translateY(-2px)';
-                          e.currentTarget.style.background = '#dcfce7';
-                          e.currentTarget.style.boxShadow = '0 4px 10px rgba(22, 163, 74, 0.2)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.background = '#f0fdf4';
-                          e.currentTarget.style.boxShadow = 'none';
-                        }}
-                      >
-                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2z" />
-                        </svg>
-                      </a>
-
-                      {/* View Details */}
-                      <button
-                        type="button"
-                        title="View Details"
-                        onClick={() => navigate(`/admin/bookings/${booking.id}`)}
-                        style={{
-                          ...actionBtn,
-                          color: '#1d4ed8',
-                          borderColor: '#bfdbfe',
-                          background: '#eff6ff',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'translateY(-2px)';
-                          e.currentTarget.style.background = '#dbeafe';
-                          e.currentTarget.style.boxShadow = '0 4px 10px rgba(29, 78, 216, 0.2)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.background = '#eff6ff';
-                          e.currentTarget.style.boxShadow = 'none';
-                        }}
-                      >
-                        <svg
-                          width="14"
-                          height="14"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                          <circle cx="12" cy="12" r="3" />
-                        </svg>
-                      </button>
-
-                      {/* Edit Booking */}
-                      <button
-                        type="button"
-                        title="Edit Booking"
-                        onClick={() => openEditModal(booking)}
-                        style={{
-                          ...actionBtn,
-                          color: '#b45309',
-                          borderColor: '#fde68a',
-                          background: '#fffbeb',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'translateY(-2px)';
-                          e.currentTarget.style.background = '#fef3c7';
-                          e.currentTarget.style.boxShadow = '0 4px 10px rgba(180, 83, 9, 0.2)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.background = '#fffbeb';
-                          e.currentTarget.style.boxShadow = 'none';
-                        }}
-                      >
-                        <svg
-                          width="14"
-                          height="14"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                          />
-                        </svg>
-                      </button>
-
-                      {/* Delete Booking */}
-                      <button
-                        type="button"
-                        title="Delete Booking"
-                        onClick={() => setDeleteBooking(booking)}
-                        style={{
-                          ...actionBtn,
-                          color: '#dc2626',
-                          borderColor: '#fecaca',
-                          background: '#fef2f2',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'translateY(-2px)';
-                          e.currentTarget.style.background = '#fee2e2';
-                          e.currentTarget.style.boxShadow = '0 4px 10px rgba(220, 38, 38, 0.2)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.background = '#fef2f2';
-                          e.currentTarget.style.boxShadow = 'none';
-                        }}
-                      >
-                        <svg
-                          width="14"
-                          height="14"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                          />
-                        </svg>
-                      </button>
+                      <ActionMenu
+                        title="Booking Options"
+                        items={[
+                          {
+                            label: 'View Details',
+                            icon: (
+                              <svg
+                                width="15"
+                                height="15"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                              >
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                <circle cx="12" cy="12" r="3" />
+                              </svg>
+                            ),
+                            color: '#1d4ed8',
+                            onClick: () => navigate(`/admin/bookings/${booking.id}`),
+                          },
+                          {
+                            label: 'Edit Booking',
+                            icon: (
+                              <svg
+                                width="15"
+                                height="15"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                />
+                              </svg>
+                            ),
+                            color: '#b45309',
+                            onClick: () => openEditModal(booking),
+                          },
+                          {
+                            label: 'WhatsApp Client',
+                            icon: (
+                              <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2z" />
+                              </svg>
+                            ),
+                            color: '#16a34a',
+                            hoverBg: '#f0fdf4',
+                            hoverColor: '#15803d',
+                            onClick: () => {
+                              const url = getAdminDispatchWALink(
+                                booking,
+                                booking.status === 'completed' ? 'completed' : 'confirmed'
+                              );
+                              window.open(url, '_blank');
+                            },
+                          },
+                          {
+                            label: 'Delete Booking',
+                            icon: (
+                              <svg
+                                width="15"
+                                height="15"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                              >
+                                <polyline points="3 6 5 6 21 6" />
+                                <path d="M19 6l-1 14H6L5 6" />
+                                <path d="M10 11v6M14 11v6M9 6V4h6v2" />
+                              </svg>
+                            ),
+                            danger: true,
+                            dividerBefore: true,
+                            onClick: () => setDeleteBooking(booking),
+                          },
+                        ]}
+                      />
                     </div>
                   </div>
                 );

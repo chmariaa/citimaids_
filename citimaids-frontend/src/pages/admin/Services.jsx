@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import api from '../../api/axios';
+import ActionMenu from './ActionMenu';
 import {
   brand,
   fonts,
@@ -1110,8 +1111,8 @@ export default function Services() {
               style={{
                 ...thRow,
                 gridTemplateColumns: reorderMode
-                  ? '28px 1.8fr 130px 110px 105px 92px'
-                  : '1.8fr 130px 110px 105px 92px',
+                  ? '28px 1.8fr 130px 110px 105px 54px'
+                  : '1.8fr 130px 110px 105px 54px',
               }}
             >
               {reorderMode && <span />}
@@ -1263,8 +1264,8 @@ function ServiceRow({
       style={{
         ...tdRow,
         gridTemplateColumns: reorderMode
-          ? '28px 1.8fr 130px 110px 105px 92px'
-          : '1.8fr 130px 110px 105px 92px',
+          ? '28px 1.8fr 130px 110px 105px 54px'
+          : '1.8fr 130px 110px 105px 54px',
         cursor: reorderMode ? (isDragging ? 'grabbing' : 'grab') : 'pointer',
         userSelect: reorderMode ? 'none' : 'auto',
         touchAction: reorderMode ? 'none' : 'auto',
@@ -1376,44 +1377,80 @@ function ServiceRow({
       {/* Actions */}
       <div
         onClick={(e) => e.stopPropagation()}
-        style={{ display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'flex-end' }}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}
       >
-        <ActionBtn
-          title="View"
-          onClick={() => {
-            if (reorderMode) {
-              onActionBlocked();
-              return;
-            }
-            onView();
-          }}
-          icon={eyeIcon}
+        <ActionMenu
+          title="Service Options"
           disabled={reorderMode}
-        />
-        <ActionBtn
-          title="Edit"
-          onClick={() => {
-            if (reorderMode) {
-              onActionBlocked();
-              return;
-            }
-            onEdit();
-          }}
-          icon={editIcon}
-          disabled={reorderMode}
-        />
-        <ActionBtn
-          title="Delete"
-          danger
-          onClick={() => {
-            if (reorderMode) {
-              onActionBlocked();
-              return;
-            }
-            onDelete();
-          }}
-          icon={trashIcon}
-          disabled={reorderMode}
+          items={[
+            {
+              label: 'View Details',
+              icon: eyeIcon,
+              color: '#1e40af',
+              onClick: () => {
+                if (reorderMode) {
+                  onActionBlocked();
+                  return;
+                }
+                onView();
+              },
+            },
+            {
+              label: 'Edit Service',
+              icon: editIcon,
+              color: '#475569',
+              onClick: () => {
+                if (reorderMode) {
+                  onActionBlocked();
+                  return;
+                }
+                onEdit();
+              },
+            },
+            {
+              label: isActive ? 'Set to Inactive' : 'Set to Active',
+              icon: (
+                <svg
+                  width="15"
+                  height="15"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728M12 3v9"
+                  />
+                </svg>
+              ),
+              color: isActive ? '#64748b' : '#059669',
+              badge: isActive ? 'Active' : 'Inactive',
+              badgeBg: isActive ? '#ecfdf5' : '#f1f5f9',
+              badgeColor: isActive ? '#059669' : '#64748b',
+              onClick: () => {
+                if (reorderMode) {
+                  onActionBlocked();
+                  return;
+                }
+                onToggle();
+              },
+            },
+            {
+              label: 'Delete Service',
+              icon: trashIcon,
+              danger: true,
+              dividerBefore: true,
+              onClick: () => {
+                if (reorderMode) {
+                  onActionBlocked();
+                  return;
+                }
+                onDelete();
+              },
+            },
+          ]}
         />
       </div>
     </div>

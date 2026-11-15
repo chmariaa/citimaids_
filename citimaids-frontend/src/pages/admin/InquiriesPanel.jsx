@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import api from '../../api/axios';
+import ActionMenu from './ActionMenu';
 import {
   brand,
   fonts,
@@ -732,7 +733,7 @@ export default function InquiriesPanel({ onPendingCountChange }) {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 1.4fr) 90px 95px 165px',
+                gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 1.4fr) 90px 95px 60px',
                 gap: 12,
                 padding: '12px 18px',
                 background: '#f8fafc',
@@ -831,7 +832,7 @@ export default function InquiriesPanel({ onPendingCountChange }) {
                       onClick={() => toggleExpand(inq.id)}
                       style={{
                         display: 'grid',
-                        gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 1.4fr) 90px 95px 165px',
+                        gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 1.4fr) 90px 95px 60px',
                         gap: 12,
                         padding: '15px 18px',
                         alignItems: 'center',
@@ -991,48 +992,166 @@ export default function InquiriesPanel({ onPendingCountChange }) {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'flex-end',
-                          gap: 6,
                           minWidth: 0,
                           flexShrink: 0,
                         }}
+                        onClick={(e) => e.stopPropagation()}
                       >
-                        {hasPhone && (
-                          <a
-                            href={waUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            title={`Message ${inq.name} on WhatsApp`}
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: 4,
-                              padding: '5px 10px',
-                              borderRadius: 8,
-                              background: '#dcfce7',
-                              color: '#15803d',
-                              fontSize: 11.5,
-                              fontWeight: 700,
-                              textDecoration: 'none',
-                              border: '1px solid #bbf7d0',
-                              cursor: 'pointer',
-                              whiteSpace: 'nowrap',
-                              flexShrink: 0,
-                            }}
-                          >
-                            💬 WhatsApp
-                          </a>
-                        )}
-                        <InquiriesDropdown
-                          inquiry={inq}
-                          onOpenModal={() => setModalTarget(inq)}
-                          onMarkReplied={() => quickStatus(inq.id, 'replied')}
-                          onMarkPending={() => quickStatus(inq.id, 'pending')}
-                          onMarkClosed={() => quickStatus(inq.id, 'closed')}
-                          onDelete={() => handleDelete(inq.id, inq.name)}
-                          onToggleExpand={() => toggleExpand(inq.id)}
-                          isExpanded={isExpanded}
-                          loading={!!actionLoading[inq.id]}
+                        <ActionMenu
+                          title="Inquiry Options"
+                          disabled={!!actionLoading[inq.id]}
+                          items={[
+                            {
+                              label: isExpanded ? 'Hide Message' : 'Read Full Message',
+                              icon: (
+                                <svg
+                                  width="15"
+                                  height="15"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                >
+                                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                  <circle cx="12" cy="12" r="3" />
+                                </svg>
+                              ),
+                              color: '#2563eb',
+                              onClick: () => toggleExpand(inq.id),
+                            },
+                            ...(inq.status !== 'replied'
+                              ? [
+                                  {
+                                    label: 'Mark as Replied',
+                                    icon: (
+                                      <svg
+                                        width="15"
+                                        height="15"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth="2.5"
+                                      >
+                                        <polyline points="20 6 9 17 4 12" />
+                                      </svg>
+                                    ),
+                                    color: '#059669',
+                                    hoverBg: '#ecfdf5',
+                                    hoverColor: '#047857',
+                                    dividerBefore: true,
+                                    onClick: () => quickStatus(inq.id, 'replied'),
+                                  },
+                                ]
+                              : []),
+                            ...(inq.status !== 'pending'
+                              ? [
+                                  {
+                                    label: 'Mark as Pending',
+                                    icon: (
+                                      <svg
+                                        width="15"
+                                        height="15"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                      >
+                                        <circle cx="12" cy="12" r="10" />
+                                        <polyline points="12 6 12 12 16 14" />
+                                      </svg>
+                                    ),
+                                    color: '#b45309',
+                                    hoverBg: '#fffbeb',
+                                    hoverColor: '#92400e',
+                                    onClick: () => quickStatus(inq.id, 'pending'),
+                                  },
+                                ]
+                              : []),
+                            ...(inq.status !== 'closed'
+                              ? [
+                                  {
+                                    label: 'Mark as Closed',
+                                    icon: (
+                                      <svg
+                                        width="15"
+                                        height="15"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                      >
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                        <line x1="9" y1="9" x2="15" y2="15" />
+                                        <line x1="15" y1="9" x2="9" y2="15" />
+                                      </svg>
+                                    ),
+                                    color: '#64748b',
+                                    onClick: () => quickStatus(inq.id, 'closed'),
+                                  },
+                                ]
+                              : []),
+                            {
+                              label: 'Manage & Respond...',
+                              icon: (
+                                <svg
+                                  width="15"
+                                  height="15"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                >
+                                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                                  <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                </svg>
+                              ),
+                              color: '#1e40af',
+                              dividerBefore: inq.status === 'replied',
+                              onClick: () => setModalTarget(inq),
+                            },
+                            ...(hasPhone
+                              ? [
+                                  {
+                                    label: 'WhatsApp Inquirer',
+                                    icon: (
+                                      <svg
+                                        width="15"
+                                        height="15"
+                                        fill="currentColor"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2z" />
+                                      </svg>
+                                    ),
+                                    color: '#16a34a',
+                                    hoverBg: '#f0fdf4',
+                                    hoverColor: '#15803d',
+                                    dividerBefore: true,
+                                    onClick: () => window.open(waUrl, '_blank'),
+                                  },
+                                ]
+                              : []),
+                            {
+                              label: 'Delete Inquiry',
+                              icon: (
+                                <svg
+                                  width="15"
+                                  height="15"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                >
+                                  <polyline points="3 6 5 6 21 6" />
+                                  <path d="M19 6l-1 14H6L5 6" />
+                                  <path d="M10 11v6M14 11v6M9 6V4h6v2" />
+                                </svg>
+                              ),
+                              danger: true,
+                              dividerBefore: true,
+                              onClick: () => handleDelete(inq.id, inq.name),
+                            },
+                          ]}
                         />
                       </div>
                     </div>

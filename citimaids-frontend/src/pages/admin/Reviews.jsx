@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router-dom';
 import api from '../../api/axios';
 import InquiriesPanel from './InquiriesPanel';
+import ActionMenu from './ActionMenu';
 import {
   brand,
   fonts,
@@ -844,7 +845,7 @@ export default function Reviews() {
                     <div
                       style={{
                         display: 'grid',
-                        gridTemplateColumns: 'minmax(0, 2.5fr) minmax(0, 1.2fr) 90px 95px 165px',
+                        gridTemplateColumns: 'minmax(0, 2.8fr) minmax(0, 1.4fr) 90px 95px 60px',
                         gap: 12,
                         padding: '12px 20px',
                         background: brand.softBg,
@@ -931,7 +932,7 @@ export default function Reviews() {
                               style={{
                                 display: 'grid',
                                 gridTemplateColumns:
-                                  'minmax(0, 2.5fr) minmax(0, 1.2fr) 90px 95px 165px',
+                                  'minmax(0, 2.8fr) minmax(0, 1.4fr) 90px 95px 60px',
                                 gap: 12,
                                 padding: '15px 20px',
                                 alignItems: 'center',
@@ -1076,49 +1077,174 @@ export default function Reviews() {
                                   display: 'flex',
                                   alignItems: 'center',
                                   justifyContent: 'flex-end',
-                                  gap: 6,
                                   minWidth: 0,
                                   flexShrink: 0,
                                 }}
+                                onClick={(e) => e.stopPropagation()}
                               >
-                                {r.whatsapp && (
-                                  <a
-                                    href={`https://wa.me/${r.whatsapp.replace(/\D/g, '')}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    onClick={(e) => e.stopPropagation()}
-                                    title={`Send WhatsApp message to ${r.name}`}
-                                    style={{
-                                      display: 'inline-flex',
-                                      alignItems: 'center',
-                                      gap: 4,
-                                      padding: '5px 10px',
-                                      borderRadius: 8,
-                                      background: '#dcfce7',
-                                      color: '#15803d',
-                                      fontSize: 11.5,
-                                      fontWeight: 700,
-                                      textDecoration: 'none',
-                                      border: '1px solid #bbf7d0',
-                                      cursor: 'pointer',
-                                      transition: 'all 0.15s',
-                                      whiteSpace: 'nowrap',
-                                      flexShrink: 0,
-                                    }}
-                                  >
-                                    💬 Message
-                                  </a>
-                                )}
-                                <ActionsDropdown
-                                  review={r}
-                                  onApprove={() => quickStatus(r.id, 'approved')}
-                                  onReject={() => quickStatus(r.id, 'rejected')}
-                                  onMarkPending={() => quickStatus(r.id, 'pending')}
-                                  onChangeStatus={() => setStatusTarget(r)}
-                                  onDelete={() => handleDelete(r.id, r.name)}
-                                  onToggleExpand={() => toggleExpand(r.id)}
-                                  isExpanded={isExpanded}
-                                  loading={!!actionLoading[r.id]}
+                                <ActionMenu
+                                  title="Review Options"
+                                  disabled={!!actionLoading[r.id]}
+                                  items={[
+                                    {
+                                      label: isExpanded ? 'Hide Full Review' : 'Read Full Review',
+                                      icon: (
+                                        <svg
+                                          width="15"
+                                          height="15"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                          stroke="currentColor"
+                                          strokeWidth="2"
+                                        >
+                                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                          <circle cx="12" cy="12" r="3" />
+                                        </svg>
+                                      ),
+                                      color: '#2563eb',
+                                      onClick: () => toggleExpand(r.id),
+                                    },
+                                    ...(r.status !== 'approved'
+                                      ? [
+                                          {
+                                            label: 'Approve Testimonial',
+                                            icon: (
+                                              <svg
+                                                width="15"
+                                                height="15"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                                strokeWidth="2.5"
+                                              >
+                                                <polyline points="20 6 9 17 4 12" />
+                                              </svg>
+                                            ),
+                                            color: '#059669',
+                                            hoverBg: '#ecfdf5',
+                                            hoverColor: '#047857',
+                                            dividerBefore: true,
+                                            onClick: () => quickStatus(r.id, 'approved'),
+                                          },
+                                        ]
+                                      : []),
+                                    ...(r.status !== 'rejected'
+                                      ? [
+                                          {
+                                            label: 'Reject Testimonial',
+                                            icon: (
+                                              <svg
+                                                width="15"
+                                                height="15"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                                strokeWidth="2.5"
+                                              >
+                                                <line x1="18" y1="6" x2="6" y2="18" />
+                                                <line x1="6" y1="6" x2="18" y2="18" />
+                                              </svg>
+                                            ),
+                                            color: '#b91c1c',
+                                            hoverBg: '#fef2f2',
+                                            hoverColor: '#991b1b',
+                                            onClick: () => quickStatus(r.id, 'rejected'),
+                                          },
+                                        ]
+                                      : []),
+                                    ...(r.status !== 'pending'
+                                      ? [
+                                          {
+                                            label: 'Mark Pending',
+                                            icon: (
+                                              <svg
+                                                width="15"
+                                                height="15"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                              >
+                                                <circle cx="12" cy="12" r="10" />
+                                                <polyline points="12 6 12 12 16 14" />
+                                              </svg>
+                                            ),
+                                            color: '#b45309',
+                                            hoverBg: '#fffbeb',
+                                            hoverColor: '#92400e',
+                                            onClick: () => quickStatus(r.id, 'pending'),
+                                          },
+                                        ]
+                                      : []),
+                                    {
+                                      label: 'Set Custom Status',
+                                      icon: (
+                                        <svg
+                                          width="15"
+                                          height="15"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                          stroke="currentColor"
+                                          strokeWidth="2"
+                                        >
+                                          <polyline points="16 3 21 3 21 8" />
+                                          <line x1="4" y1="20" x2="21" y2="3" />
+                                          <polyline points="21 16 21 21 16 21" />
+                                          <line x1="15" y1="15" x2="21" y2="21" />
+                                          <line x1="4" y1="4" x2="9" y2="9" />
+                                        </svg>
+                                      ),
+                                      color: '#1e40af',
+                                      dividerBefore: r.status === 'approved',
+                                      onClick: () => setStatusTarget(r),
+                                    },
+                                    ...(r.whatsapp
+                                      ? [
+                                          {
+                                            label: 'WhatsApp Client',
+                                            icon: (
+                                              <svg
+                                                width="15"
+                                                height="15"
+                                                fill="currentColor"
+                                                viewBox="0 0 24 24"
+                                              >
+                                                <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2z" />
+                                              </svg>
+                                            ),
+                                            color: '#16a34a',
+                                            hoverBg: '#f0fdf4',
+                                            hoverColor: '#15803d',
+                                            dividerBefore: true,
+                                            onClick: () =>
+                                              window.open(
+                                                `https://wa.me/${r.whatsapp.replace(/\D/g, '')}`,
+                                                '_blank'
+                                              ),
+                                          },
+                                        ]
+                                      : []),
+                                    {
+                                      label: 'Delete Testimonial',
+                                      icon: (
+                                        <svg
+                                          width="15"
+                                          height="15"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                          stroke="currentColor"
+                                          strokeWidth="2"
+                                        >
+                                          <polyline points="3 6 5 6 21 6" />
+                                          <path d="M19 6l-1 14H6L5 6" />
+                                          <path d="M10 11v6M14 11v6M9 6V4h6v2" />
+                                        </svg>
+                                      ),
+                                      danger: true,
+                                      dividerBefore: true,
+                                      onClick: () => handleDelete(r.id, r.name),
+                                    },
+                                  ]}
                                 />
                               </div>
                             </div>
