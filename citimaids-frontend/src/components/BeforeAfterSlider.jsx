@@ -36,7 +36,8 @@ export default function BeforeAfterSlider({
       {/* Visual Frame */}
       <div
         ref={containerRef}
-        className="relative h-80 sm:h-96 w-full overflow-hidden select-none cursor-ew-resize group"
+        className="relative h-72 sm:h-84 md:h-96 w-full overflow-hidden select-none cursor-ew-resize group touch-pan-y"
+        style={{ touchAction: 'pan-y' }}
         onMouseDown={(e) => {
           setIsDragging(true);
           updatePosition(e.clientX);
@@ -45,8 +46,13 @@ export default function BeforeAfterSlider({
         onMouseLeave={() => setIsDragging(false)}
         onMouseMove={handleMouseMove}
         onTouchStart={(e) => {
-          if (e.touches && e.touches[0]) updatePosition(e.touches[0].clientX);
+          if (e.touches && e.touches[0]) {
+            setIsDragging(true);
+            updatePosition(e.touches[0].clientX);
+          }
         }}
+        onTouchEnd={() => setIsDragging(false)}
+        onTouchCancel={() => setIsDragging(false)}
         onTouchMove={handleTouchMove}
       >
         {/* AFTER Image (Full Layer) */}
@@ -95,7 +101,11 @@ export default function BeforeAfterSlider({
           className="absolute top-0 bottom-0 w-1 bg-white shadow-2xl pointer-events-none z-20"
           style={{ left: `${sliderPosition}%` }}
         >
-          <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-white shadow-2xl flex items-center justify-center border-2 border-slate-900 text-slate-900 transition-transform duration-150 group-hover:scale-110">
+          <div
+            className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white shadow-2xl flex items-center justify-center border-2 border-slate-900 text-slate-900 transition-transform duration-150 group-hover:scale-110 ${
+              isDragging ? 'scale-110 ring-4 ring-blue-500/30' : 'handle-pulse'
+            }`}
+          >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"

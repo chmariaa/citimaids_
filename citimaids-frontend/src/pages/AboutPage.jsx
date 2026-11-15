@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useSettings } from '../hooks/useSettings';
 import Reveal from '../components/Reveal';
+import AnimatedCounter from '../components/AnimatedCounter';
 import { AwardIcon, ShieldCheckIcon, LeafIcon, UserCheckIcon } from '../components/icons/Icons';
 
 const values = [
@@ -51,7 +52,7 @@ export default function AboutPage() {
     <div>
       {/* Header */}
       <div
-        className="py-20 text-white text-center relative overflow-hidden"
+        className="pt-36 pb-20 text-white text-center relative overflow-hidden"
         style={{ background: 'linear-gradient(135deg,#0A2342 0%,#1E3A8A 100%)' }}
       >
         <div className="relative z-10 max-w-2xl mx-auto px-6">
@@ -143,7 +144,9 @@ export default function AboutPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
             {stats.map((s) => (
               <div key={s.label}>
-                <div className="text-3xl sm:text-4xl font-extrabold mb-1">{s.value}</div>
+                <div className="text-3xl sm:text-4xl font-extrabold mb-1">
+                  <AnimatedCounter value={s.value} />
+                </div>
                 <div className="text-blue-200 text-xs sm:text-sm font-medium">{s.label}</div>
               </div>
             ))}

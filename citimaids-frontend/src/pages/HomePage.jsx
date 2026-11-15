@@ -5,6 +5,8 @@ import { useSettings } from '../hooks/useSettings';
 import { useReviews } from '../hooks/useReviews';
 import Reveal from '../components/Reveal';
 import BeforeAfterSlider from '../components/BeforeAfterSlider';
+import ServicesMarquee from '../components/ServicesMarquee';
+import AnimatedCounter from '../components/AnimatedCounter';
 import {
   HomeIcon,
   BuildingIcon,
@@ -221,9 +223,9 @@ export default function HomePage() {
         {/* Rich Figma Navy Gradient Overlay */}
         <div className="hero-gradient-overlay absolute inset-0" />
 
-        {/* Ambient Glow */}
-        <div className="absolute top-1/4 left-10 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-sky-400/10 rounded-full blur-3xl pointer-events-none" />
+        {/* Ambient Glow with Subtle Organic Drift */}
+        <div className="absolute top-1/4 left-10 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl pointer-events-none animate-ambient-1" />
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-sky-400/10 rounded-full blur-3xl pointer-events-none animate-ambient-2" />
 
         {/* Hero Content */}
         <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 w-full">
@@ -364,14 +366,14 @@ export default function HomePage() {
       {/* ── 2. Elevated Floating Stats Bar ── */}
       <section className="relative z-20 -mt-10 max-w-7xl mx-auto px-6 sm:px-8">
         <div
-          className="rounded-3xl p-8 sm:p-10 shadow-2xl border border-white/10 grid grid-cols-2 md:grid-cols-4 gap-8"
+          className="rounded-3xl p-6 sm:p-10 shadow-2xl border border-white/10 grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8"
           style={{ background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)' }}
         >
           {stats.map((s, i) => (
             <Reveal key={s.label} delay={i * 70} direction="up">
               <div className="text-center sm:text-left border-l-0 sm:border-l sm:border-white/10 sm:pl-6 first:border-0 first:pl-0">
                 <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-white mb-1.5 tracking-tight">
-                  {s.value}
+                  <AnimatedCounter value={s.value} />
                 </div>
                 <div className="text-sky-200 text-xs sm:text-sm font-medium leading-snug">
                   {s.label}
@@ -403,10 +405,10 @@ export default function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {whyUs.map((item, i) => (
               <Reveal key={item.title} delay={i * 80}>
-                <div className="rounded-3xl p-8 bg-slate-50 border border-slate-200/80 hover:border-blue-400 hover:bg-white hover:-translate-y-2 hover:shadow-2xl transition-all duration-300 h-full flex flex-col justify-between">
+                <div className="group rounded-3xl p-8 bg-slate-50 border border-slate-200/80 hover:border-blue-400 hover:bg-white hover:-translate-y-2 hover:shadow-2xl transition-all duration-300 h-full flex flex-col justify-between">
                   <div>
                     <div
-                      className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-lg"
+                      className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-lg transition-transform duration-300 group-hover:scale-105"
                       style={{ background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)' }}
                     >
                       {item.icon}
@@ -488,8 +490,8 @@ export default function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {trustPillars.map((p, i) => (
               <Reveal key={p.title} delay={i * 80} direction="scale">
-                <div className="glass-panel rounded-3xl p-7 text-center hover:-translate-y-2 transition-all duration-300 h-full flex flex-col items-center">
-                  <div className="w-13 h-13 rounded-2xl bg-white/10 flex items-center justify-center mb-5 shadow-inner">
+                <div className="group glass-panel rounded-3xl p-7 text-center hover:-translate-y-2 transition-all duration-300 h-full flex flex-col items-center">
+                  <div className="w-13 h-13 rounded-2xl bg-white/10 flex items-center justify-center mb-5 shadow-inner transition-transform duration-300 group-hover:scale-110">
                     {p.icon}
                   </div>
                   <h3 className="font-extrabold text-white text-lg mb-2">{p.title}</h3>
@@ -501,116 +503,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── 6. Services Catalog Showcase ── */}
-      <section className="py-28 bg-white">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8">
-          <Reveal>
-            <div className="flex items-end justify-between mb-16 flex-wrap gap-4 border-b border-slate-100 pb-8">
-              <div>
-                <span className="inline-block px-3.5 py-1.5 rounded-full bg-blue-50 text-blue-900 font-extrabold text-xs uppercase tracking-widest mb-3">
-                  Tailored Cleaning
-                </span>
-                <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
-                  Popular Services
-                </h2>
-              </div>
-              <Link
-                to="/services"
-                className="inline-flex items-center gap-2 text-sm font-extrabold text-blue-900 hover:text-blue-700 transition-colors"
-              >
-                <span>View all {services.length} services</span>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2.5}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </Link>
-            </div>
-          </Reveal>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services.slice(0, 6).map((service, i) => (
-              <Reveal key={service.id} delay={i * 60}>
-                <div className="bg-white rounded-3xl overflow-hidden border border-slate-200/80 group transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl h-full flex flex-col justify-between">
-                  <div>
-                    <div className="h-52 bg-slate-100 overflow-hidden relative">
-                      <img
-                        src={service.image}
-                        alt={service.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        loading="lazy"
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src =
-                            'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&auto=format&fit=crop&q=80';
-                        }}
-                      />
-                      <div
-                        className="absolute top-4 left-4 text-white text-xs font-extrabold px-3.5 py-1.5 rounded-xl shadow-lg flex items-center gap-2 backdrop-blur-md"
-                        style={{ background: 'rgba(10, 35, 66, 0.85)' }}
-                      >
-                        {getCategoryIcon(service.iconName)}
-                        <span>{service.title}</span>
-                      </div>
-                    </div>
-                    <div className="p-7">
-                      <h3 className="font-extrabold text-slate-900 text-xl mb-2.5">
-                        {service.title}
-                      </h3>
-                      <p className="text-slate-600 text-sm mb-6 leading-relaxed line-clamp-2">
-                        {service.description}
-                      </p>
-                      <ul className="space-y-2 mb-6 text-xs sm:text-sm text-slate-700">
-                        {(service.included || []).slice(0, 3).map((inc) => (
-                          <li key={inc} className="flex items-start gap-2.5">
-                            <span className="text-emerald-600 font-bold text-base leading-none">
-                              ✓
-                            </span>
-                            <span>{inc}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-
-                  <div className="p-7 pt-0 flex items-center justify-between border-t border-slate-100 pt-5">
-                    <div>
-                      <span className="text-xs text-slate-400 block font-bold uppercase tracking-wider">
-                        Rate
-                      </span>
-                      <span className="text-blue-950 font-black text-base">
-                        {service.startingPrice}
-                      </span>
-                    </div>
-                    <Link
-                      to={`/services/${service.id}`}
-                      className="inline-flex items-center gap-1.5 text-xs font-extrabold px-5 py-2.5 rounded-xl text-white transition-all duration-150 hover:scale-105 shadow-md"
-                      style={{ background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)' }}
-                    >
-                      <span>View Details</span>
-                      <span>→</span>
-                    </Link>
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-
-          <div className="text-center mt-16">
-            <Link
-              to="/services"
-              className="inline-flex items-center gap-2.5 px-9 py-4 rounded-2xl font-extrabold text-sm text-white transition-all hover:scale-105 shadow-xl"
-              style={{ background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)' }}
-            >
-              <span>Browse Full Service Catalog</span>
-              <span>→</span>
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* ── 6. Services Architectural Marquee ("To and Fro" Animation) ── */}
+      <ServicesMarquee services={services} />
 
       {/* ── 7. How It Works (3 Steps) ── */}
       <section className="py-28 bg-slate-50 border-t border-slate-200/80">
@@ -632,9 +526,9 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl mx-auto">
             {steps.map((s, i) => (
               <Reveal key={s.num} delay={i * 90} direction="scale">
-                <div className="bg-white rounded-3xl p-8 text-center border border-slate-200/80 shadow-sm relative h-full flex flex-col items-center">
+                <div className="group bg-white rounded-3xl p-8 text-center border border-slate-200/80 shadow-sm relative h-full flex flex-col items-center hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300">
                   <div
-                    className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-white font-black text-2xl shadow-xl"
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-white font-black text-2xl shadow-xl transition-transform duration-300 group-hover:scale-105"
                     style={{ background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)' }}
                   >
                     {s.num}

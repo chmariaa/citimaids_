@@ -106,7 +106,7 @@ export default function ServicesPage() {
       <section className="py-24 bg-slate-50">
         <div className="max-w-7xl mx-auto px-6 sm:px-8">
           {/* Category Filter Tabs */}
-          <div className="flex justify-center gap-3 mb-16 flex-wrap">
+          <div className="flex justify-center gap-2 sm:gap-3 mb-14 sm:mb-16 flex-wrap px-2">
             {[
               { key: 'all', label: 'All Services' },
               { key: 'residential', label: 'Residential' },
@@ -117,7 +117,7 @@ export default function ServicesPage() {
               <button
                 key={tab.key}
                 onClick={() => setFilter(tab.key)}
-                className={`px-6 py-3 rounded-2xl text-xs sm:text-sm font-extrabold transition-all duration-200 cursor-pointer ${
+                className={`px-4 sm:px-6 py-2.5 sm:py-3 min-h-[40px] rounded-2xl text-xs sm:text-sm font-extrabold transition-all duration-200 cursor-pointer ${
                   filter === tab.key
                     ? 'bg-[#0A2342] text-white shadow-xl scale-105'
                     : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
@@ -129,7 +129,7 @@ export default function ServicesPage() {
           </div>
 
           {/* Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {filtered.map((service, i) => (
               <Reveal key={service.id} delay={i * 50}>
                 <div className="bg-white rounded-3xl overflow-hidden border border-slate-200/80 group transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl h-full flex flex-col justify-between">
