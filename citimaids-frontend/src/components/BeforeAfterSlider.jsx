@@ -15,7 +15,7 @@ export default function BeforeAfterSlider({
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     const x = clientX - rect.left;
-    const percentage = Math.min(Math.max((x / rect.width) * 100, 0), 100);
+    const percentage = Math.min(Math.max((x / rect.width) * 100, 2), 98);
     setSliderPosition(percentage);
   }, []);
 
@@ -31,12 +31,36 @@ export default function BeforeAfterSlider({
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      setSliderPosition((prev) => Math.max(prev - 5, 2));
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      setSliderPosition((prev) => Math.min(prev + 5, 98));
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      setSliderPosition(2);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      setSliderPosition(98);
+    }
+  };
+
   return (
     <div className="rounded-3xl overflow-hidden bg-white shadow-xl border border-slate-200/80 transition-all duration-300 hover:shadow-2xl">
       {/* Visual Frame */}
       <div
         ref={containerRef}
-        className="relative h-80 sm:h-96 w-full overflow-hidden select-none cursor-ew-resize group"
+        role="slider"
+        tabIndex={0}
+        aria-label={`${label} before and after comparison`}
+        aria-valuenow={Math.round(sliderPosition)}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        onKeyDown={handleKeyDown}
+        className="relative h-72 sm:h-84 md:h-96 w-full overflow-hidden select-none cursor-ew-resize group touch-pan-y focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+        style={{ touchAction: 'pan-y' }}
         onMouseDown={(e) => {
           setIsDragging(true);
           updatePosition(e.clientX);
@@ -45,8 +69,13 @@ export default function BeforeAfterSlider({
         onMouseLeave={() => setIsDragging(false)}
         onMouseMove={handleMouseMove}
         onTouchStart={(e) => {
-          if (e.touches && e.touches[0]) updatePosition(e.touches[0].clientX);
+          if (e.touches && e.touches[0]) {
+            setIsDragging(true);
+            updatePosition(e.touches[0].clientX);
+          }
         }}
+        onTouchEnd={() => setIsDragging(false)}
+        onTouchCancel={() => setIsDragging(false)}
         onTouchMove={handleTouchMove}
       >
         {/* AFTER Image (Full Layer) */}
@@ -95,7 +124,11 @@ export default function BeforeAfterSlider({
           className="absolute top-0 bottom-0 w-1 bg-white shadow-2xl pointer-events-none z-20"
           style={{ left: `${sliderPosition}%` }}
         >
-          <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-white shadow-2xl flex items-center justify-center border-2 border-slate-900 text-slate-900 transition-transform duration-150 group-hover:scale-110">
+          <div
+            className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white shadow-2xl flex items-center justify-center border-2 border-slate-900 text-slate-900 transition-transform duration-150 group-hover:scale-110 ${
+              isDragging ? 'scale-110 ring-4 ring-blue-500/30' : 'handle-pulse'
+            }`}
+          >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"

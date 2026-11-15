@@ -19,6 +19,18 @@ export default function Navbar() {
     setOpen(false);
   }, [location.pathname]);
 
+  // Prevent background scroll when mobile drawer is open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [open]);
+
   const links = [
     { to: '/', label: 'Home' },
     { to: '/services', label: 'Services' },
@@ -126,6 +138,7 @@ export default function Navbar() {
           className="lg:hidden p-2.5 rounded-xl text-white hover:bg-white/10 transition-colors"
           onClick={() => setOpen(!open)}
           aria-label="Toggle navigation menu"
+          aria-expanded={open}
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             {open ? (
@@ -149,51 +162,58 @@ export default function Navbar() {
 
       {/* Mobile Drawer */}
       {open && (
-        <div className="lg:hidden bg-[#0A2342] border-t border-white/10 px-6 py-6 flex flex-col gap-3 shadow-2xl animate-in fade-in slide-in-from-top-4 duration-200">
-          {links.map((l) => (
-            <Link
-              key={l.to}
-              to={l.to}
-              className={`px-4 py-3 rounded-xl text-sm font-bold transition-colors ${
-                isActive(l.to)
-                  ? 'bg-blue-600/30 text-sky-300 border border-blue-500/30'
-                  : 'text-white/80 hover:bg-white/10'
-              }`}
-            >
-              {l.label}
-            </Link>
-          ))}
-          <div className="pt-4 border-t border-white/10 flex flex-col gap-3">
-            <Link to="/book" className="btn-3d-primary w-full text-center py-3">
-              <span>Book Now</span>
-            </Link>
-            <Link
-              to="/admin/login"
-              className="w-full py-2 text-center text-xs font-medium text-white/60 hover:text-white flex items-center justify-center gap-1.5 transition-colors hover:bg-white/5 rounded-xl group"
-            >
-              <svg
-                className="w-3.5 h-3.5 text-white/60 group-hover:text-white transition-colors"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
+        <>
+          <div
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[-1] lg:hidden animate-in fade-in duration-200"
+            onClick={() => setOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="lg:hidden bg-[#0A2342] border-t border-white/10 px-6 py-6 flex flex-col gap-3 shadow-2xl animate-in fade-in slide-in-from-top-4 duration-200">
+            {links.map((l) => (
+              <Link
+                key={l.to}
+                to={l.to}
+                className={`px-4 py-3 rounded-xl text-sm font-bold transition-colors ${
+                  isActive(l.to)
+                    ? 'bg-blue-600/30 text-sky-300 border border-blue-500/30'
+                    : 'text-white/80 hover:bg-white/10'
+                }`}
               >
-                <rect
-                  x="5"
-                  y="11"
-                  width="14"
-                  height="10"
-                  rx="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path d="M8 11V7a4 4 0 018 0v4" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M12 15v2" strokeLinecap="round" />
-              </svg>
-              <span>Staff Portal</span>
-            </Link>
+                {l.label}
+              </Link>
+            ))}
+            <div className="pt-4 border-t border-white/10 flex flex-col gap-3">
+              <Link to="/book" className="btn-3d-primary w-full text-center py-3">
+                <span>Book Now</span>
+              </Link>
+              <Link
+                to="/admin/login"
+                className="w-full py-2 text-center text-xs font-medium text-white/60 hover:text-white flex items-center justify-center gap-1.5 transition-colors hover:bg-white/5 rounded-xl group"
+              >
+                <svg
+                  className="w-3.5 h-3.5 text-white/60 group-hover:text-white transition-colors"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <rect
+                    x="5"
+                    y="11"
+                    width="14"
+                    height="10"
+                    rx="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path d="M8 11V7a4 4 0 018 0v4" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M12 15v2" strokeLinecap="round" />
+                </svg>
+                <span>Staff Portal</span>
+              </Link>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </header>
   );

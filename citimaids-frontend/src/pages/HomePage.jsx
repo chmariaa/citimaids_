@@ -5,6 +5,10 @@ import { useSettings } from '../hooks/useSettings';
 import { useReviews } from '../hooks/useReviews';
 import Reveal from '../components/Reveal';
 import BeforeAfterSlider from '../components/BeforeAfterSlider';
+import ServicesMarquee from '../components/ServicesMarquee';
+import TrustStandardsMarquee from '../components/TrustStandardsMarquee';
+import ReviewsCarousel from '../components/ReviewsCarousel';
+import AnimatedCounter from '../components/AnimatedCounter';
 import {
   HomeIcon,
   BuildingIcon,
@@ -12,11 +16,6 @@ import {
   SparklesIcon,
   SofaIcon,
   WindowIcon,
-  ShieldCheckIcon,
-  BadgeCheckIcon,
-  UserCheckIcon,
-  ClockIcon,
-  StarIcon,
 } from '../components/icons/Icons';
 
 const stats = [
@@ -24,52 +23,6 @@ const stats = [
   { value: '4.9 / 5', label: 'Average Client Rating' },
   { value: '9+ Yrs', label: 'Abu Dhabi Experience' },
   { value: '100%', label: 'Satisfaction Guarantee' },
-];
-
-const whyUs = [
-  {
-    icon: <UserCheckIcon className="w-7 h-7 text-white" />,
-    title: 'Vetted & Trained Specialists',
-    desc: 'Every team member undergoes police background checks, Emirates ID verification, and 40+ hours of hotel-grade cleaning training.',
-  },
-  {
-    icon: <ShieldCheckIcon className="w-7 h-7 text-white" />,
-    title: 'AED 1M Liability Insurance',
-    desc: 'Comprehensive public liability insurance guarantees absolute peace of mind for your luxury furniture, fixtures, and property.',
-  },
-  {
-    icon: <SparklesIcon className="w-7 h-7 text-white" />,
-    title: 'Hospital-Grade Eco Products',
-    desc: 'UAE-approved non-toxic solutions safe for young children, pets, and delicate marble flooring. Zero harsh chemical residue.',
-  },
-  {
-    icon: <ClockIcon className="w-7 h-7 text-white" />,
-    title: 'Fast Same-Day Scheduling',
-    desc: 'Convenient online booking in under 60 seconds with flexible 7-day appointment slots and instant WhatsApp dispatch confirmation.',
-  },
-];
-
-const trustPillars = [
-  {
-    icon: <UserCheckIcon className="w-6 h-6 text-sky-300" />,
-    title: 'Emirates ID Verified',
-    desc: 'Legal identity validated before every household assignment.',
-  },
-  {
-    icon: <BadgeCheckIcon className="w-6 h-6 text-sky-300" />,
-    title: 'Police Security Cleared',
-    desc: 'Strict criminal background check on file for all personnel.',
-  },
-  {
-    icon: <SparklesIcon className="w-6 h-6 text-sky-300" />,
-    title: 'Hotel-Trained Crews',
-    desc: 'Trained to 5-star hospitality hygiene and finishing standards.',
-  },
-  {
-    icon: <ShieldCheckIcon className="w-6 h-6 text-sky-300" />,
-    title: 'AED 1M Property Insurance',
-    desc: 'Full coverage protecting your home and luxury interiors.',
-  },
 ];
 
 const steps = [
@@ -221,9 +174,9 @@ export default function HomePage() {
         {/* Rich Figma Navy Gradient Overlay */}
         <div className="hero-gradient-overlay absolute inset-0" />
 
-        {/* Ambient Glow */}
-        <div className="absolute top-1/4 left-10 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-sky-400/10 rounded-full blur-3xl pointer-events-none" />
+        {/* Ambient Glow with Subtle Organic Drift */}
+        <div className="absolute top-1/4 left-10 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl pointer-events-none animate-ambient-1" />
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-sky-400/10 rounded-full blur-3xl pointer-events-none animate-ambient-2" />
 
         {/* Hero Content */}
         <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 w-full">
@@ -256,8 +209,11 @@ export default function HomePage() {
             </p>
 
             {/* Primary Action Buttons */}
-            <div className="flex flex-wrap items-center gap-4 mb-12">
-              <Link to="/book" className="btn-3d-primary group text-sm sm:text-base">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3.5 sm:gap-4 mb-10 sm:mb-12">
+              <Link
+                to="/book"
+                className="btn-3d-primary group text-sm sm:text-base w-full sm:w-auto"
+              >
                 <span>Book a Cleaning</span>
                 <svg
                   className="w-4 h-4 text-blue-900 group-hover:text-white transition-all duration-200"
@@ -274,13 +230,16 @@ export default function HomePage() {
                 </svg>
               </Link>
 
-              <Link to="/services" className="btn-3d-secondary group text-sm sm:text-base">
+              <Link
+                to="/services"
+                className="btn-3d-secondary group text-sm sm:text-base w-full sm:w-auto"
+              >
                 <span>Explore Services</span>
               </Link>
             </div>
 
             {/* Trust Proof Badges */}
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2.5 sm:gap-3">
               {[
                 {
                   label: 'AED 1M Insurance',
@@ -350,7 +309,7 @@ export default function HomePage() {
               ].map((b) => (
                 <div
                   key={b.label}
-                  className="glass-pill text-white/95 text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm"
+                  className="glass-pill text-white/95 text-xs font-semibold px-3.5 sm:px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm transition-all duration-200 hover:bg-white/20 hover:-translate-y-0.5 cursor-default"
                 >
                   <span className="text-sky-300">{b.icon}</span>
                   <span>{b.label}</span>
@@ -364,14 +323,14 @@ export default function HomePage() {
       {/* ── 2. Elevated Floating Stats Bar ── */}
       <section className="relative z-20 -mt-10 max-w-7xl mx-auto px-6 sm:px-8">
         <div
-          className="rounded-3xl p-8 sm:p-10 shadow-2xl border border-white/10 grid grid-cols-2 md:grid-cols-4 gap-8"
+          className="rounded-3xl p-6 sm:p-10 shadow-2xl border border-white/10 grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8"
           style={{ background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)' }}
         >
           {stats.map((s, i) => (
             <Reveal key={s.label} delay={i * 70} direction="up">
               <div className="text-center sm:text-left border-l-0 sm:border-l sm:border-white/10 sm:pl-6 first:border-0 first:pl-0">
                 <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-white mb-1.5 tracking-tight">
-                  {s.value}
+                  <AnimatedCounter value={s.value} />
                 </div>
                 <div className="text-sky-200 text-xs sm:text-sm font-medium leading-snug">
                   {s.label}
@@ -382,48 +341,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── 3. Why Choose CitiMaids (Setting the Standard) ── */}
-      <section className="py-28 bg-white">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8">
-          <Reveal>
-            <div className="text-center max-w-2xl mx-auto mb-16">
-              <span className="inline-block px-3.5 py-1.5 rounded-full bg-blue-50 text-blue-900 font-extrabold text-xs uppercase tracking-widest mb-3">
-                Why CitiMaids
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
-                Setting the Standard in UAE
-              </h2>
-              <p className="text-slate-500 mt-4 text-sm sm:text-base leading-relaxed">
-                We combine vetted cleaners, 5-star hotel hygiene standards, and modern online
-                booking so you never have to worry about cleaning again.
-              </p>
-            </div>
-          </Reveal>
+      {/* ── 3. Why CitiMaids & The CitiMaids Promise (Vertical Moving Standards Marquee) ── */}
+      <TrustStandardsMarquee />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {whyUs.map((item, i) => (
-              <Reveal key={item.title} delay={i * 80}>
-                <div className="rounded-3xl p-8 bg-slate-50 border border-slate-200/80 hover:border-blue-400 hover:bg-white hover:-translate-y-2 hover:shadow-2xl transition-all duration-300 h-full flex flex-col justify-between">
-                  <div>
-                    <div
-                      className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-lg"
-                      style={{ background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)' }}
-                    >
-                      {item.icon}
-                    </div>
-                    <h3 className="font-extrabold text-slate-900 text-lg mb-3 leading-snug">
-                      {item.title}
-                    </h3>
-                    <p className="text-slate-600 text-sm leading-relaxed">{item.desc}</p>
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── 4. Interactive Before & After Comparison Showcase ── */}
+      {/* ── 4. Interactive Before & After Comparison Showcase (Visual Breathing Buffer) ── */}
       <section className="py-28 bg-slate-50 border-y border-slate-200/80">
         <div className="max-w-7xl mx-auto px-6 sm:px-8">
           <Reveal>
@@ -461,158 +382,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── 5. The CitiMaids Promise (Trust Pillars) ── */}
-      <section
-        className="py-28 relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #061429 0%, #0A2342 100%)' }}
-      >
-        {/* Glow */}
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+      {/* ── 5. Services Architectural Marquee ("To and Fro" Animation) ── */}
+      <ServicesMarquee services={services} />
 
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10">
-          <Reveal>
-            <div className="text-center max-w-2xl mx-auto mb-16">
-              <span className="inline-block px-3.5 py-1.5 rounded-full bg-white/10 text-sky-300 font-bold text-xs uppercase tracking-widest mb-3 backdrop-blur-md">
-                Guaranteed Excellence
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-                The CitiMaids Promise
-              </h2>
-              <p className="text-slate-300 mt-4 text-sm sm:text-base leading-relaxed">
-                Four stringent security and quality standards every cleaner satisfies before
-                entering your residence.
-              </p>
-            </div>
-          </Reveal>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {trustPillars.map((p, i) => (
-              <Reveal key={p.title} delay={i * 80} direction="scale">
-                <div className="glass-panel rounded-3xl p-7 text-center hover:-translate-y-2 transition-all duration-300 h-full flex flex-col items-center">
-                  <div className="w-13 h-13 rounded-2xl bg-white/10 flex items-center justify-center mb-5 shadow-inner">
-                    {p.icon}
-                  </div>
-                  <h3 className="font-extrabold text-white text-lg mb-2">{p.title}</h3>
-                  <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">{p.desc}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── 6. Services Catalog Showcase ── */}
-      <section className="py-28 bg-white">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8">
-          <Reveal>
-            <div className="flex items-end justify-between mb-16 flex-wrap gap-4 border-b border-slate-100 pb-8">
-              <div>
-                <span className="inline-block px-3.5 py-1.5 rounded-full bg-blue-50 text-blue-900 font-extrabold text-xs uppercase tracking-widest mb-3">
-                  Tailored Cleaning
-                </span>
-                <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
-                  Popular Services
-                </h2>
-              </div>
-              <Link
-                to="/services"
-                className="inline-flex items-center gap-2 text-sm font-extrabold text-blue-900 hover:text-blue-700 transition-colors"
-              >
-                <span>View all {services.length} services</span>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2.5}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </Link>
-            </div>
-          </Reveal>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services.slice(0, 6).map((service, i) => (
-              <Reveal key={service.id} delay={i * 60}>
-                <div className="bg-white rounded-3xl overflow-hidden border border-slate-200/80 group transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl h-full flex flex-col justify-between">
-                  <div>
-                    <div className="h-52 bg-slate-100 overflow-hidden relative">
-                      <img
-                        src={service.image}
-                        alt={service.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        loading="lazy"
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src =
-                            'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&auto=format&fit=crop&q=80';
-                        }}
-                      />
-                      <div
-                        className="absolute top-4 left-4 text-white text-xs font-extrabold px-3.5 py-1.5 rounded-xl shadow-lg flex items-center gap-2 backdrop-blur-md"
-                        style={{ background: 'rgba(10, 35, 66, 0.85)' }}
-                      >
-                        {getCategoryIcon(service.iconName)}
-                        <span>{service.title}</span>
-                      </div>
-                    </div>
-                    <div className="p-7">
-                      <h3 className="font-extrabold text-slate-900 text-xl mb-2.5">
-                        {service.title}
-                      </h3>
-                      <p className="text-slate-600 text-sm mb-6 leading-relaxed line-clamp-2">
-                        {service.description}
-                      </p>
-                      <ul className="space-y-2 mb-6 text-xs sm:text-sm text-slate-700">
-                        {(service.included || []).slice(0, 3).map((inc) => (
-                          <li key={inc} className="flex items-start gap-2.5">
-                            <span className="text-emerald-600 font-bold text-base leading-none">
-                              ✓
-                            </span>
-                            <span>{inc}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-
-                  <div className="p-7 pt-0 flex items-center justify-between border-t border-slate-100 pt-5">
-                    <div>
-                      <span className="text-xs text-slate-400 block font-bold uppercase tracking-wider">
-                        Rate
-                      </span>
-                      <span className="text-blue-950 font-black text-base">
-                        {service.startingPrice}
-                      </span>
-                    </div>
-                    <Link
-                      to={`/services/${service.id}`}
-                      className="inline-flex items-center gap-1.5 text-xs font-extrabold px-5 py-2.5 rounded-xl text-white transition-all duration-150 hover:scale-105 shadow-md"
-                      style={{ background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)' }}
-                    >
-                      <span>View Details</span>
-                      <span>→</span>
-                    </Link>
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-
-          <div className="text-center mt-16">
-            <Link
-              to="/services"
-              className="inline-flex items-center gap-2.5 px-9 py-4 rounded-2xl font-extrabold text-sm text-white transition-all hover:scale-105 shadow-xl"
-              style={{ background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)' }}
-            >
-              <span>Browse Full Service Catalog</span>
-              <span>→</span>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── 7. How It Works (3 Steps) ── */}
+      {/* ── 6. How It Works (3 Steps) ── */}
       <section className="py-28 bg-slate-50 border-t border-slate-200/80">
         <div className="max-w-7xl mx-auto px-6 sm:px-8">
           <Reveal>
@@ -632,9 +405,9 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl mx-auto">
             {steps.map((s, i) => (
               <Reveal key={s.num} delay={i * 90} direction="scale">
-                <div className="bg-white rounded-3xl p-8 text-center border border-slate-200/80 shadow-sm relative h-full flex flex-col items-center">
+                <div className="group bg-white rounded-3xl p-8 text-center border border-slate-200/80 shadow-sm relative h-full flex flex-col items-center hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300">
                   <div
-                    className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-white font-black text-2xl shadow-xl"
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-white font-black text-2xl shadow-xl transition-transform duration-300 group-hover:scale-105"
                     style={{ background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)' }}
                   >
                     {s.num}
@@ -659,255 +432,175 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── 8. Verified Reviews ── */}
-      <section className="py-28 bg-white relative">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8">
-          <Reveal>
-            <div className="text-center max-w-2xl mx-auto mb-16">
-              <span className="inline-block px-3.5 py-1.5 rounded-full bg-blue-50 text-blue-900 font-extrabold text-xs uppercase tracking-widest mb-3">
-                Client Testimonials
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
-                Trusted Across Abu Dhabi
-              </h2>
-              <p className="text-slate-500 mt-4 text-sm sm:text-base">
-                Read real experiences from our clients across Abu Dhabi or share your own feedback.
-              </p>
-              <div className="mt-6">
-                <button
-                  onClick={() => setShowReviewModal(true)}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-extrabold text-sm transition-all transform hover:scale-105 shadow-lg"
-                >
-                  <span>⭐ Write a Review</span>
-                </button>
+      {/* ── 7. Verified Reviews Carousel ── */}
+      <ReviewsCarousel
+        reviews={reviews}
+        loading={reviewsLoading}
+        onWriteReview={() => setShowReviewModal(true)}
+      />
+
+      {/* ── Review Submission Modal Template ── */}
+      {showReviewModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl relative border border-slate-100 animate-in fade-in zoom-in duration-200">
+            <button
+              onClick={() => setShowReviewModal(false)}
+              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold transition-all"
+            >
+              ✕
+            </button>
+
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center font-black text-lg">
+                ⭐
+              </div>
+              <div>
+                <h3 className="font-extrabold text-slate-900 text-xl">Leave a Client Review</h3>
+                <p className="text-slate-500 text-xs">Share your experience with {businessName}</p>
               </div>
             </div>
-          </Reveal>
 
-          {reviewsLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[0, 1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="bg-slate-100 rounded-3xl p-8 border border-slate-200/60 animate-pulse h-56"
-                />
-              ))}
-            </div>
-          ) : reviews.length === 0 ? (
-            <div className="text-center py-16 text-slate-400">
-              <p className="text-lg font-semibold">No reviews yet — be the first!</p>
-              <p className="text-sm mt-1">Click "Write a Review" above to share your experience.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {reviews.map((r, i) => {
-                const initials = r.name
-                  .split(' ')
-                  .slice(0, 2)
-                  .map((w) => w[0]?.toUpperCase() ?? '')
-                  .join('');
-                return (
-                  <Reveal key={r.id} delay={i * 80} className="h-full min-w-0">
-                    <div className="bg-slate-50 rounded-3xl p-8 border border-slate-200/80 flex flex-col justify-between h-full shadow-sm hover:shadow-lg transition-all min-w-0 overflow-hidden">
-                      <div className="min-w-0">
-                        <div className="flex gap-1 text-amber-400 mb-5">
-                          {Array.from({ length: r.stars }).map((_, j) => (
-                            <StarIcon key={j} className="w-5 h-5 text-amber-400" />
-                          ))}
-                        </div>
-                        <p className="text-slate-700 text-sm sm:text-base leading-relaxed italic mb-8 break-words [overflow-wrap:anywhere]">
-                          "{r.body}"
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-4 pt-5 border-t border-slate-200 min-w-0">
-                        <div
-                          className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-extrabold text-sm flex-shrink-0 shadow-md"
-                          style={{
-                            background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)',
-                          }}
-                        >
-                          {initials}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="font-extrabold text-slate-900 text-base truncate">
-                            {r.name}
-                          </div>
-                          <div className="text-slate-500 text-xs truncate">{r.location}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </Reveal>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* ── Review Submission Modal Template ── */}
-        {showReviewModal && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl relative border border-slate-100 animate-in fade-in zoom-in duration-200">
-              <button
-                onClick={() => setShowReviewModal(false)}
-                className="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold transition-all"
-              >
-                ✕
-              </button>
-
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center font-black text-lg">
-                  ⭐
-                </div>
-                <div>
-                  <h3 className="font-extrabold text-slate-900 text-xl">Leave a Client Review</h3>
-                  <p className="text-slate-500 text-xs">
-                    Share your experience with {businessName}
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setReviewSubmitting(true);
+                setReviewError(null);
+                try {
+                  await submitReview({
+                    name: reviewForm.name,
+                    whatsapp: reviewForm.whatsapp,
+                    location: reviewForm.location,
+                    stars: reviewForm.stars,
+                    body: reviewForm.text,
+                  });
+                  setReviewSubmitted(true);
+                  setReviewForm({ name: '', whatsapp: '', location: '', stars: 5, text: '' });
+                  setTimeout(() => {
+                    setReviewSubmitted(false);
+                    setShowReviewModal(false);
+                  }, 3000);
+                } catch (err) {
+                  setReviewError('Something went wrong. Please try again.');
+                } finally {
+                  setReviewSubmitting(false);
+                }
+              }}
+              className="space-y-4"
+            >
+              {reviewSubmitted ? (
+                <div className="p-6 bg-emerald-50 border border-emerald-200 rounded-2xl text-center">
+                  <div className="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto mb-3 font-bold text-xl">
+                    ✓
+                  </div>
+                  <h4 className="font-bold text-emerald-900 text-base">
+                    Thank You for Your Feedback!
+                  </h4>
+                  <p className="text-emerald-700 text-xs mt-1">
+                    Your review has been submitted and will appear once approved by our team.
                   </p>
                 </div>
-              </div>
-
-              <form
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  setReviewSubmitting(true);
-                  setReviewError(null);
-                  try {
-                    await submitReview({
-                      name: reviewForm.name,
-                      whatsapp: reviewForm.whatsapp,
-                      location: reviewForm.location,
-                      stars: reviewForm.stars,
-                      body: reviewForm.text,
-                    });
-                    setReviewSubmitted(true);
-                    setReviewForm({ name: '', whatsapp: '', location: '', stars: 5, text: '' });
-                    setTimeout(() => {
-                      setReviewSubmitted(false);
-                      setShowReviewModal(false);
-                    }, 3000);
-                  } catch (err) {
-                    setReviewError('Something went wrong. Please try again.');
-                  } finally {
-                    setReviewSubmitting(false);
-                  }
-                }}
-                className="space-y-4"
-              >
-                {reviewSubmitted ? (
-                  <div className="p-6 bg-emerald-50 border border-emerald-200 rounded-2xl text-center">
-                    <div className="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto mb-3 font-bold text-xl">
-                      ✓
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                      Rating
+                    </label>
+                    <div className="flex gap-2 text-2xl">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setReviewForm({ ...reviewForm, stars: star })}
+                          className={`transition-all transform hover:scale-110 ${
+                            star <= reviewForm.stars ? 'text-amber-400' : 'text-slate-200'
+                          }`}
+                        >
+                          ★
+                        </button>
+                      ))}
                     </div>
-                    <h4 className="font-bold text-emerald-900 text-base">
-                      Thank You for Your Feedback!
-                    </h4>
-                    <p className="text-emerald-700 text-xs mt-1">
-                      Your review has been submitted and will appear once approved by our team.
-                    </p>
                   </div>
-                ) : (
-                  <>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                        Rating
-                      </label>
-                      <div className="flex gap-2 text-2xl">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <button
-                            key={star}
-                            type="button"
-                            onClick={() => setReviewForm({ ...reviewForm, stars: star })}
-                            className={`transition-all transform hover:scale-110 ${
-                              star <= reviewForm.stars ? 'text-amber-400' : 'text-slate-200'
-                            }`}
-                          >
-                            ★
-                          </button>
-                        ))}
-                      </div>
-                    </div>
 
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                        Your Full Name
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="e.g. Mariam Al Zaabi"
-                        value={reviewForm.name}
-                        onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Your Full Name
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Mariam Al Zaabi"
+                      value={reviewForm.name}
+                      onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900"
+                    />
+                  </div>
 
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                        WhatsApp Number{' '}
-                        <span className="normal-case font-normal text-slate-400">(optional)</span>
-                      </label>
-                      <input
-                        type="tel"
-                        placeholder="e.g. +971501234567"
-                        value={reviewForm.whatsapp}
-                        onChange={(e) => setReviewForm({ ...reviewForm, whatsapp: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      WhatsApp Number{' '}
+                      <span className="normal-case font-normal text-slate-400">(optional)</span>
+                    </label>
+                    <input
+                      type="tel"
+                      placeholder="e.g. +971501234567"
+                      value={reviewForm.whatsapp}
+                      onChange={(e) => setReviewForm({ ...reviewForm, whatsapp: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900"
+                    />
+                  </div>
 
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                        Location / District
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Al Reem Island, Abu Dhabi"
-                        value={reviewForm.location}
-                        onChange={(e) => setReviewForm({ ...reviewForm, location: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Location / District
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Al Reem Island, Abu Dhabi"
+                      value={reviewForm.location}
+                      onChange={(e) => setReviewForm({ ...reviewForm, location: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900"
+                    />
+                  </div>
 
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                        Your Review
-                      </label>
-                      <textarea
-                        required
-                        rows={4}
-                        placeholder="Tell us about your experience with CitiMaids cleaners..."
-                        value={reviewForm.text}
-                        onChange={(e) => setReviewForm({ ...reviewForm, text: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Your Review
+                    </label>
+                    <textarea
+                      required
+                      rows={4}
+                      placeholder="Tell us about your experience with CitiMaids cleaners..."
+                      value={reviewForm.text}
+                      onChange={(e) => setReviewForm({ ...reviewForm, text: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900"
+                    />
+                  </div>
 
-                    <div className="flex gap-3 pt-2">
-                      <button
-                        type="button"
-                        onClick={() => setShowReviewModal(false)}
-                        className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-extrabold text-sm hover:bg-slate-50 transition-all"
-                      >
-                        Cancel
-                      </button>
-                      {reviewError && (
-                        <p className="text-red-600 text-xs text-center col-span-2">{reviewError}</p>
-                      )}
-                      <button
-                        type="submit"
-                        disabled={reviewSubmitting}
-                        className="flex-1 py-3 rounded-xl bg-blue-950 text-white font-extrabold text-sm hover:bg-blue-900 transition-all shadow-lg disabled:opacity-60"
-                      >
-                        {reviewSubmitting ? 'Submitting…' : 'Submit Review'}
-                      </button>
-                    </div>
-                  </>
-                )}
-              </form>
-            </div>
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowReviewModal(false)}
+                      className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-extrabold text-sm hover:bg-slate-50 transition-all"
+                    >
+                      Cancel
+                    </button>
+                    {reviewError && (
+                      <p className="text-red-600 text-xs text-center col-span-2">{reviewError}</p>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={reviewSubmitting}
+                      className="flex-1 py-3 rounded-xl bg-blue-950 text-white font-extrabold text-sm hover:bg-blue-900 transition-all shadow-lg disabled:opacity-60"
+                    >
+                      {reviewSubmitting ? 'Submitting…' : 'Submit Review'}
+                    </button>
+                  </div>
+                </>
+              )}
+            </form>
           </div>
-        )}
-      </section>
+        </div>
+      )}
 
       {/* ── 9. FAQ Accordion ── */}
       <section className="py-28 bg-slate-50 border-t border-slate-200/80">

@@ -43,7 +43,7 @@ export default function ContactPage() {
     <div>
       {/* Header */}
       <div
-        className="py-20 text-white text-center relative overflow-hidden"
+        className="pt-36 pb-20 text-white text-center relative overflow-hidden"
         style={{ background: 'linear-gradient(135deg,#0A2342 0%,#1E3A8A 100%)' }}
       >
         <div className="relative z-10 max-w-2xl mx-auto px-6">

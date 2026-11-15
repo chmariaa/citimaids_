@@ -437,3 +437,194 @@
     0 1px 4px rgba(10, 35, 66, 0.4),
     inset 0 1px 3px rgba(0, 0, 0, 0.25);
 }
+
+/* ── Architectural Marquee ("To and Fro" Service Ticker) ── */
+@keyframes marqueeLeft {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes marqueeRight {
+  0% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-marquee-left {
+  display: flex;
+  width: max-content;
+  animation: marqueeLeft 42s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-right {
+  display: flex;
+  width: max-content;
+  animation: marqueeRight 46s linear infinite;
+  will-change: transform;
+}
+
+.marquee-container:hover .animate-marquee-left,
+.marquee-container:hover .animate-marquee-right {
+  animation-play-state: paused;
+}
+
+.marquee-mask {
+  mask-image: linear-gradient(to right, transparent 0%, black 7%, black 93%, transparent 100%);
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 7%,
+    black 93%,
+    transparent 100%
+  );
+}
+
+/* ── Ambient Hero Glow Floating Drift ── */
+@keyframes ambientDrift1 {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translate3d(24px, -18px, 0) scale(1.08);
+    opacity: 0.28;
+  }
+}
+
+@keyframes ambientDrift2 {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.12;
+  }
+  50% {
+    transform: translate3d(-20px, 16px, 0) scale(1.06);
+    opacity: 0.2;
+  }
+}
+
+.animate-ambient-1 {
+  animation: ambientDrift1 18s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.animate-ambient-2 {
+  animation: ambientDrift2 22s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+/* ── Before & After Divider Handle Invitation Pulse ── */
+@keyframes handleInvitePulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(10, 35, 66, 0.45),
+      0 4px 14px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 0 0 10px rgba(10, 35, 66, 0),
+      0 6px 20px rgba(0, 0, 0, 0.25);
+  }
+}
+
+.handle-pulse {
+  animation: handleInvitePulse 2.8s ease-in-out infinite;
+}
+
+/* ── Refined WhatsApp Floating Radar Ripple ── */
+@keyframes waRadarWave {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.65;
+  }
+  60% {
+    opacity: 0.25;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+.wa-radar-ring {
+  animation: waRadarWave 3s cubic-bezier(0.2, 0.8, 0.4, 1) infinite;
+}
+
+/* ── Touch screen smooth vertical scrolling for interactive frames ── */
+.touch-pan-y {
+  touch-action: pan-y;
+}
+
+/* ── Vertical Moving Columns Animation (ReflexAI Reference) ── */
+@keyframes marqueeUp {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, -50%, 0);
+  }
+}
+
+@keyframes marqueeDown {
+  0% {
+    transform: translate3d(0, -50%, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-marquee-up {
+  display: flex;
+  flex-direction: column;
+  animation: marqueeUp 38s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-down {
+  display: flex;
+  flex-direction: column;
+  animation: marqueeDown 44s linear infinite;
+  will-change: transform;
+}
+
+.vertical-marquee-container:hover .animate-marquee-up,
+.vertical-marquee-container:hover .animate-marquee-down {
+  animation-play-state: paused;
+}
+
+.vertical-marquee-mask {
+  mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 12%,
+    black 88%,
+    transparent 100%
+  );
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee-left,
+  .animate-marquee-right,
+  .animate-marquee-up,
+  .animate-marquee-down,
+  .animate-ambient-1,
+  .animate-ambient-2,
+  .handle-pulse,
+  .wa-radar-ring,
+  .wa-pulse {
+    animation: none !important;
+  }
+}
