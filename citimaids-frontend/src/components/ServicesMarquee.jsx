@@ -68,7 +68,9 @@ function GridCrosshairLine({ showCrosshairs = true }) {
           {[...Array(9)].map((_, i) => (
             <span
               key={i}
-              className="text-slate-400/80 font-mono text-[13px] leading-none select-none -translate-y-[0.5px]"
+              className={`text-slate-400/80 font-mono text-[13px] leading-none select-none -translate-y-[0.5px] ${
+                i % 2 !== 0 ? 'hidden md:inline' : 'inline'
+              }`}
             >
               +
             </span>
@@ -91,7 +93,7 @@ function ServiceMarqueeCard({ service, activeCategory }) {
       className={`group relative flex-shrink-0 w-[280px] sm:w-[330px] md:w-[350px] bg-white rounded-2xl p-4.5 sm:p-5 border transition-all duration-300 mx-2 sm:mx-2.5 flex flex-col justify-between ${
         isHighlighted
           ? 'border-slate-200/90 shadow-sm hover:shadow-xl hover:border-blue-400 hover:-translate-y-1.5'
-          : 'border-slate-200/50 opacity-40 grayscale-[30%] hover:opacity-90 hover:grayscale-0'
+          : 'border-slate-200/50 opacity-50 grayscale-[20%] hover:opacity-100 hover:grayscale-0 hover:border-slate-300'
       }`}
     >
       <div>
@@ -104,7 +106,7 @@ function ServiceMarqueeCard({ service, activeCategory }) {
             <span>{cat.label}</span>
           </span>
 
-          <span className="text-xs font-black text-slate-900 bg-slate-100/90 px-2.5 py-1 rounded-lg">
+          <span className="text-xs font-black text-slate-900 bg-slate-100/90 border border-slate-200/60 px-2.5 py-1 rounded-lg shadow-sm">
             {service.startingPrice}
           </span>
         </div>
@@ -334,9 +336,12 @@ export default function ServicesMarquee({ services = [] }) {
 
       {/* Footer Navigation Bar */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 mt-12 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="text-xs text-slate-500 flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500" />
-          <span>Hover over any service card to pause animation and inspect rates</span>
+        <div className="text-xs text-slate-500 flex items-center gap-2 text-center sm:text-left">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
+          <span className="hidden sm:inline">
+            Hover over any service card to pause animation and inspect rates
+          </span>
+          <span className="sm:hidden">Swipe horizontally or tap any card to inspect rates</span>
         </div>
 
         <div className="flex items-center gap-3">

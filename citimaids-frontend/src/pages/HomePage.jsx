@@ -258,8 +258,11 @@ export default function HomePage() {
             </p>
 
             {/* Primary Action Buttons */}
-            <div className="flex flex-wrap items-center gap-4 mb-12">
-              <Link to="/book" className="btn-3d-primary group text-sm sm:text-base">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3.5 sm:gap-4 mb-10 sm:mb-12">
+              <Link
+                to="/book"
+                className="btn-3d-primary group text-sm sm:text-base w-full sm:w-auto"
+              >
                 <span>Book a Cleaning</span>
                 <svg
                   className="w-4 h-4 text-blue-900 group-hover:text-white transition-all duration-200"
@@ -276,13 +279,16 @@ export default function HomePage() {
                 </svg>
               </Link>
 
-              <Link to="/services" className="btn-3d-secondary group text-sm sm:text-base">
+              <Link
+                to="/services"
+                className="btn-3d-secondary group text-sm sm:text-base w-full sm:w-auto"
+              >
                 <span>Explore Services</span>
               </Link>
             </div>
 
             {/* Trust Proof Badges */}
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2.5 sm:gap-3">
               {[
                 {
                   label: 'AED 1M Insurance',
@@ -352,7 +358,7 @@ export default function HomePage() {
               ].map((b) => (
                 <div
                   key={b.label}
-                  className="glass-pill text-white/95 text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm"
+                  className="glass-pill text-white/95 text-xs font-semibold px-3.5 sm:px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm transition-all duration-200 hover:bg-white/20 hover:-translate-y-0.5 cursor-default"
                 >
                   <span className="text-sky-300">{b.icon}</span>
                   <span>{b.label}</span>
@@ -640,7 +646,7 @@ export default function HomePage() {
         {/* ── Review Submission Modal Template ── */}
         {showReviewModal && (
           <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl relative border border-slate-100 animate-in fade-in zoom-in duration-200">
+            <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl relative border border-slate-100 animate-in fade-in zoom-in duration-200">
               <button
                 onClick={() => setShowReviewModal(false)}
                 className="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold transition-all"

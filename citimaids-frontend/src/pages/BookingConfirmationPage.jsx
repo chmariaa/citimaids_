@@ -27,7 +27,7 @@ export default function BookingConfirmationPage() {
   );
 
   return (
-    <div className="min-h-[85vh] bg-slate-50 py-16 flex items-center">
+    <div className="min-h-[85vh] bg-slate-50 pt-32 pb-16 flex items-center">
       <div className="max-w-xl mx-auto px-6 w-full">
         {/* Success Icon */}
         <div className="text-center mb-8">

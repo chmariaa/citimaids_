@@ -15,7 +15,7 @@ export default function BeforeAfterSlider({
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     const x = clientX - rect.left;
-    const percentage = Math.min(Math.max((x / rect.width) * 100, 0), 100);
+    const percentage = Math.min(Math.max((x / rect.width) * 100, 2), 98);
     setSliderPosition(percentage);
   }, []);
 
@@ -31,12 +31,35 @@ export default function BeforeAfterSlider({
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      setSliderPosition((prev) => Math.max(prev - 5, 2));
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      setSliderPosition((prev) => Math.min(prev + 5, 98));
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      setSliderPosition(2);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      setSliderPosition(98);
+    }
+  };
+
   return (
     <div className="rounded-3xl overflow-hidden bg-white shadow-xl border border-slate-200/80 transition-all duration-300 hover:shadow-2xl">
       {/* Visual Frame */}
       <div
         ref={containerRef}
-        className="relative h-72 sm:h-84 md:h-96 w-full overflow-hidden select-none cursor-ew-resize group touch-pan-y"
+        role="slider"
+        tabIndex={0}
+        aria-label={`${label} before and after comparison`}
+        aria-valuenow={Math.round(sliderPosition)}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        onKeyDown={handleKeyDown}
+        className="relative h-72 sm:h-84 md:h-96 w-full overflow-hidden select-none cursor-ew-resize group touch-pan-y focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
         style={{ touchAction: 'pan-y' }}
         onMouseDown={(e) => {
           setIsDragging(true);
