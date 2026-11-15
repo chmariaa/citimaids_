@@ -7,6 +7,7 @@ import Reveal from '../components/Reveal';
 import BeforeAfterSlider from '../components/BeforeAfterSlider';
 import ServicesMarquee from '../components/ServicesMarquee';
 import TrustStandardsMarquee from '../components/TrustStandardsMarquee';
+import ReviewsCarousel from '../components/ReviewsCarousel';
 import AnimatedCounter from '../components/AnimatedCounter';
 import {
   HomeIcon,
@@ -15,7 +16,6 @@ import {
   SparklesIcon,
   SofaIcon,
   WindowIcon,
-  StarIcon,
 } from '../components/icons/Icons';
 
 const stats = [
@@ -344,10 +344,7 @@ export default function HomePage() {
       {/* ── 3. Why CitiMaids & The CitiMaids Promise (Vertical Moving Standards Marquee) ── */}
       <TrustStandardsMarquee />
 
-      {/* ── 4. Services Architectural Marquee ("To and Fro" Animation) ── */}
-      <ServicesMarquee services={services} />
-
-      {/* ── 5. Interactive Before & After Comparison Showcase ── */}
+      {/* ── 4. Interactive Before & After Comparison Showcase (Visual Breathing Buffer) ── */}
       <section className="py-28 bg-slate-50 border-y border-slate-200/80">
         <div className="max-w-7xl mx-auto px-6 sm:px-8">
           <Reveal>
@@ -385,7 +382,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── 7. How It Works (3 Steps) ── */}
+      {/* ── 5. Services Architectural Marquee ("To and Fro" Animation) ── */}
+      <ServicesMarquee services={services} />
+
+      {/* ── 6. How It Works (3 Steps) ── */}
       <section className="py-28 bg-slate-50 border-t border-slate-200/80">
         <div className="max-w-7xl mx-auto px-6 sm:px-8">
           <Reveal>
@@ -432,255 +432,175 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── 8. Verified Reviews ── */}
-      <section className="py-28 bg-white relative">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8">
-          <Reveal>
-            <div className="text-center max-w-2xl mx-auto mb-16">
-              <span className="inline-block px-3.5 py-1.5 rounded-full bg-blue-50 text-blue-900 font-extrabold text-xs uppercase tracking-widest mb-3">
-                Client Testimonials
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
-                Trusted Across Abu Dhabi
-              </h2>
-              <p className="text-slate-500 mt-4 text-sm sm:text-base">
-                Read real experiences from our clients across Abu Dhabi or share your own feedback.
-              </p>
-              <div className="mt-6">
-                <button
-                  onClick={() => setShowReviewModal(true)}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-extrabold text-sm transition-all transform hover:scale-105 shadow-lg"
-                >
-                  <span>⭐ Write a Review</span>
-                </button>
+      {/* ── 7. Verified Reviews Carousel ── */}
+      <ReviewsCarousel
+        reviews={reviews}
+        loading={reviewsLoading}
+        onWriteReview={() => setShowReviewModal(true)}
+      />
+
+      {/* ── Review Submission Modal Template ── */}
+      {showReviewModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl relative border border-slate-100 animate-in fade-in zoom-in duration-200">
+            <button
+              onClick={() => setShowReviewModal(false)}
+              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold transition-all"
+            >
+              ✕
+            </button>
+
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center font-black text-lg">
+                ⭐
+              </div>
+              <div>
+                <h3 className="font-extrabold text-slate-900 text-xl">Leave a Client Review</h3>
+                <p className="text-slate-500 text-xs">Share your experience with {businessName}</p>
               </div>
             </div>
-          </Reveal>
 
-          {reviewsLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[0, 1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="bg-slate-100 rounded-3xl p-8 border border-slate-200/60 animate-pulse h-56"
-                />
-              ))}
-            </div>
-          ) : reviews.length === 0 ? (
-            <div className="text-center py-16 text-slate-400">
-              <p className="text-lg font-semibold">No reviews yet — be the first!</p>
-              <p className="text-sm mt-1">Click "Write a Review" above to share your experience.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {reviews.map((r, i) => {
-                const initials = r.name
-                  .split(' ')
-                  .slice(0, 2)
-                  .map((w) => w[0]?.toUpperCase() ?? '')
-                  .join('');
-                return (
-                  <Reveal key={r.id} delay={i * 80} className="h-full min-w-0">
-                    <div className="bg-slate-50 rounded-3xl p-8 border border-slate-200/80 flex flex-col justify-between h-full shadow-sm hover:shadow-lg transition-all min-w-0 overflow-hidden">
-                      <div className="min-w-0">
-                        <div className="flex gap-1 text-amber-400 mb-5">
-                          {Array.from({ length: r.stars }).map((_, j) => (
-                            <StarIcon key={j} className="w-5 h-5 text-amber-400" />
-                          ))}
-                        </div>
-                        <p className="text-slate-700 text-sm sm:text-base leading-relaxed italic mb-8 break-words [overflow-wrap:anywhere]">
-                          "{r.body}"
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-4 pt-5 border-t border-slate-200 min-w-0">
-                        <div
-                          className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-extrabold text-sm flex-shrink-0 shadow-md"
-                          style={{
-                            background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)',
-                          }}
-                        >
-                          {initials}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="font-extrabold text-slate-900 text-base truncate">
-                            {r.name}
-                          </div>
-                          <div className="text-slate-500 text-xs truncate">{r.location}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </Reveal>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* ── Review Submission Modal Template ── */}
-        {showReviewModal && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl relative border border-slate-100 animate-in fade-in zoom-in duration-200">
-              <button
-                onClick={() => setShowReviewModal(false)}
-                className="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold transition-all"
-              >
-                ✕
-              </button>
-
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center font-black text-lg">
-                  ⭐
-                </div>
-                <div>
-                  <h3 className="font-extrabold text-slate-900 text-xl">Leave a Client Review</h3>
-                  <p className="text-slate-500 text-xs">
-                    Share your experience with {businessName}
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setReviewSubmitting(true);
+                setReviewError(null);
+                try {
+                  await submitReview({
+                    name: reviewForm.name,
+                    whatsapp: reviewForm.whatsapp,
+                    location: reviewForm.location,
+                    stars: reviewForm.stars,
+                    body: reviewForm.text,
+                  });
+                  setReviewSubmitted(true);
+                  setReviewForm({ name: '', whatsapp: '', location: '', stars: 5, text: '' });
+                  setTimeout(() => {
+                    setReviewSubmitted(false);
+                    setShowReviewModal(false);
+                  }, 3000);
+                } catch (err) {
+                  setReviewError('Something went wrong. Please try again.');
+                } finally {
+                  setReviewSubmitting(false);
+                }
+              }}
+              className="space-y-4"
+            >
+              {reviewSubmitted ? (
+                <div className="p-6 bg-emerald-50 border border-emerald-200 rounded-2xl text-center">
+                  <div className="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto mb-3 font-bold text-xl">
+                    ✓
+                  </div>
+                  <h4 className="font-bold text-emerald-900 text-base">
+                    Thank You for Your Feedback!
+                  </h4>
+                  <p className="text-emerald-700 text-xs mt-1">
+                    Your review has been submitted and will appear once approved by our team.
                   </p>
                 </div>
-              </div>
-
-              <form
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  setReviewSubmitting(true);
-                  setReviewError(null);
-                  try {
-                    await submitReview({
-                      name: reviewForm.name,
-                      whatsapp: reviewForm.whatsapp,
-                      location: reviewForm.location,
-                      stars: reviewForm.stars,
-                      body: reviewForm.text,
-                    });
-                    setReviewSubmitted(true);
-                    setReviewForm({ name: '', whatsapp: '', location: '', stars: 5, text: '' });
-                    setTimeout(() => {
-                      setReviewSubmitted(false);
-                      setShowReviewModal(false);
-                    }, 3000);
-                  } catch (err) {
-                    setReviewError('Something went wrong. Please try again.');
-                  } finally {
-                    setReviewSubmitting(false);
-                  }
-                }}
-                className="space-y-4"
-              >
-                {reviewSubmitted ? (
-                  <div className="p-6 bg-emerald-50 border border-emerald-200 rounded-2xl text-center">
-                    <div className="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto mb-3 font-bold text-xl">
-                      ✓
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                      Rating
+                    </label>
+                    <div className="flex gap-2 text-2xl">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setReviewForm({ ...reviewForm, stars: star })}
+                          className={`transition-all transform hover:scale-110 ${
+                            star <= reviewForm.stars ? 'text-amber-400' : 'text-slate-200'
+                          }`}
+                        >
+                          ★
+                        </button>
+                      ))}
                     </div>
-                    <h4 className="font-bold text-emerald-900 text-base">
-                      Thank You for Your Feedback!
-                    </h4>
-                    <p className="text-emerald-700 text-xs mt-1">
-                      Your review has been submitted and will appear once approved by our team.
-                    </p>
                   </div>
-                ) : (
-                  <>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                        Rating
-                      </label>
-                      <div className="flex gap-2 text-2xl">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <button
-                            key={star}
-                            type="button"
-                            onClick={() => setReviewForm({ ...reviewForm, stars: star })}
-                            className={`transition-all transform hover:scale-110 ${
-                              star <= reviewForm.stars ? 'text-amber-400' : 'text-slate-200'
-                            }`}
-                          >
-                            ★
-                          </button>
-                        ))}
-                      </div>
-                    </div>
 
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                        Your Full Name
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="e.g. Mariam Al Zaabi"
-                        value={reviewForm.name}
-                        onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Your Full Name
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Mariam Al Zaabi"
+                      value={reviewForm.name}
+                      onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900"
+                    />
+                  </div>
 
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                        WhatsApp Number{' '}
-                        <span className="normal-case font-normal text-slate-400">(optional)</span>
-                      </label>
-                      <input
-                        type="tel"
-                        placeholder="e.g. +971501234567"
-                        value={reviewForm.whatsapp}
-                        onChange={(e) => setReviewForm({ ...reviewForm, whatsapp: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      WhatsApp Number{' '}
+                      <span className="normal-case font-normal text-slate-400">(optional)</span>
+                    </label>
+                    <input
+                      type="tel"
+                      placeholder="e.g. +971501234567"
+                      value={reviewForm.whatsapp}
+                      onChange={(e) => setReviewForm({ ...reviewForm, whatsapp: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900"
+                    />
+                  </div>
 
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                        Location / District
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Al Reem Island, Abu Dhabi"
-                        value={reviewForm.location}
-                        onChange={(e) => setReviewForm({ ...reviewForm, location: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Location / District
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Al Reem Island, Abu Dhabi"
+                      value={reviewForm.location}
+                      onChange={(e) => setReviewForm({ ...reviewForm, location: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900"
+                    />
+                  </div>
 
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                        Your Review
-                      </label>
-                      <textarea
-                        required
-                        rows={4}
-                        placeholder="Tell us about your experience with CitiMaids cleaners..."
-                        value={reviewForm.text}
-                        onChange={(e) => setReviewForm({ ...reviewForm, text: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Your Review
+                    </label>
+                    <textarea
+                      required
+                      rows={4}
+                      placeholder="Tell us about your experience with CitiMaids cleaners..."
+                      value={reviewForm.text}
+                      onChange={(e) => setReviewForm({ ...reviewForm, text: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900"
+                    />
+                  </div>
 
-                    <div className="flex gap-3 pt-2">
-                      <button
-                        type="button"
-                        onClick={() => setShowReviewModal(false)}
-                        className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-extrabold text-sm hover:bg-slate-50 transition-all"
-                      >
-                        Cancel
-                      </button>
-                      {reviewError && (
-                        <p className="text-red-600 text-xs text-center col-span-2">{reviewError}</p>
-                      )}
-                      <button
-                        type="submit"
-                        disabled={reviewSubmitting}
-                        className="flex-1 py-3 rounded-xl bg-blue-950 text-white font-extrabold text-sm hover:bg-blue-900 transition-all shadow-lg disabled:opacity-60"
-                      >
-                        {reviewSubmitting ? 'Submitting…' : 'Submit Review'}
-                      </button>
-                    </div>
-                  </>
-                )}
-              </form>
-            </div>
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowReviewModal(false)}
+                      className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-extrabold text-sm hover:bg-slate-50 transition-all"
+                    >
+                      Cancel
+                    </button>
+                    {reviewError && (
+                      <p className="text-red-600 text-xs text-center col-span-2">{reviewError}</p>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={reviewSubmitting}
+                      className="flex-1 py-3 rounded-xl bg-blue-950 text-white font-extrabold text-sm hover:bg-blue-900 transition-all shadow-lg disabled:opacity-60"
+                    >
+                      {reviewSubmitting ? 'Submitting…' : 'Submit Review'}
+                    </button>
+                  </div>
+                </>
+              )}
+            </form>
           </div>
-        )}
-      </section>
+        </div>
+      )}
 
       {/* ── 9. FAQ Accordion ── */}
       <section className="py-28 bg-slate-50 border-t border-slate-200/80">
