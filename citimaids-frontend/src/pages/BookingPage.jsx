@@ -360,7 +360,6 @@ export default function BookingPage() {
 
   const handleConfirm = async () => {
     setSubmitLoading(true);
-    let bookingId = 'CM-' + Date.now().toString().slice(-5);
     const formattedAddress =
       `${data.district ? data.district + ', ' : ''}${data.streetAddress}${data.city ? ', ' + data.city : ''}${data.zipCode ? ' ' + data.zipCode : ''}`.trim();
     try {
@@ -385,20 +384,20 @@ export default function BookingPage() {
       };
 
       const res = await api.post('/bookings', payload);
-      if (res.data?.reference) {
-        bookingId = res.data.reference;
-      } else if (res.data?.booking_id) {
-        bookingId = `CM-${String(res.data.booking_id).padStart(5, '0')}`;
-      } else if (res.data?.booking?.id) {
-        bookingId = `CM-${String(res.data.booking.id).padStart(5, '0')}`;
-      }
-    } catch (err) {
-      console.warn('Backend API notification skipped or offline:', err);
-    } finally {
+      const bookingId =
+        res.data?.reference ||
+        (res.data?.booking_id ? `CM-${String(res.data.booking_id).padStart(5, '0')}` : null) ||
+        (res.data?.booking?.id ? `CM-${String(res.data.booking.id).padStart(5, '0')}` : null) ||
+        'CM-00001';
+
       setSubmitLoading(false);
       navigate('/booking-confirmation', {
         state: { data, bookingId, service: selectedService, estimate },
       });
+    } catch (err) {
+      console.error('Booking submission failed:', err);
+      setSubmitLoading(false);
+      alert(err.response?.data?.message || 'Failed to submit booking. Please check your connection and try again.');
     }
   };
 
