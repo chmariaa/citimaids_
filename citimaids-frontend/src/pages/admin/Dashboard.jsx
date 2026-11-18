@@ -1032,7 +1032,9 @@ export default function Dashboard() {
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span>Customer Satisfaction</span>
-                <span style={{ fontWeight: 800, color: '#34d399' }}>4.9 / 5.0</span>
+                <span style={{ fontWeight: 800, color: '#34d399' }}>
+                  {stats?.customer_satisfaction || '4.9 / 5.0'}
+                </span>
               </div>
             </div>
           </div>

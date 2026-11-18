@@ -47,6 +47,13 @@ export default function AnimatedCounter({ value, duration = 1300, className = ''
     const el = containerRef.current;
     if (!el) return;
 
+    // If already animated once and the target value updates dynamically (e.g. from async API fetch),
+    // update immediately to display the live value and prevent getting frozen on initial stale state
+    if (hasAnimated.current) {
+      setDisplayValue(value);
+      return;
+    }
+
     // Start counter with 0 or 0.0
     setDisplayValue(`${prefix}${(0).toFixed(decimalPlaces)}${suffix}`);
 

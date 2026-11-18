@@ -78,22 +78,42 @@ function initials(name = '') {
     .join('');
 }
 
-// ── Status Moderation Modal (Client feedback is read-only) ────────────────────
-function ReviewStatusModal({ review, onClose, onSaved }) {
-  const [status, setStatus] = useState(review.status);
+// ── Add New Review Modal ──────────────────────────────────────────────────────
+function AddReviewModal({ onClose, onSaved }) {
+  const [name, setName] = useState('');
+  const [location, setLocation] = useState('Abu Dhabi, UAE');
+  const [whatsapp, setWhatsapp] = useState('');
+  const [stars, setStars] = useState(5);
+  const [body, setBody] = useState('');
+  const [status, setStatus] = useState('approved');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleSave = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!name.trim()) {
+      setError('Please provide reviewer client name.');
+      return;
+    }
+    if (!body.trim() || body.trim().length < 5) {
+      setError('Review body must be at least 5 characters.');
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
-      await api.patch(`/reviews/${review.id}/status`, { status });
+      await api.post('/admin/reviews', {
+        name: name.trim(),
+        location: location.trim() || null,
+        whatsapp: whatsapp.trim() || null,
+        stars: Number(stars),
+        body: body.trim(),
+        status,
+      });
       onSaved();
       onClose();
-    } catch {
-      setError('Failed to update status. Please try again.');
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to create review. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -114,10 +134,297 @@ function ReviewStatusModal({ review, onClose, onSaved }) {
     background: '#fff',
     borderRadius: 20,
     padding: 32,
-    maxWidth: 520,
+    maxWidth: 540,
     width: '100%',
     boxShadow: '0 24px 60px rgba(0,0,0,0.18)',
     position: 'relative',
+    maxHeight: '90vh',
+    overflowY: 'auto',
+  };
+
+  return (
+    <div style={overlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div style={modal}>
+        <button
+          onClick={onClose}
+          style={{
+            position: 'absolute',
+            top: 16,
+            right: 16,
+            width: 32,
+            height: 32,
+            borderRadius: '50%',
+            border: 'none',
+            background: '#f1f5f9',
+            color: '#64748b',
+            fontSize: 18,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          ✕
+        </button>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
+          <div
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 12,
+              background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)',
+              color: '#fff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 800,
+              fontSize: 20,
+            }}
+          >
+            ★
+          </div>
+          <div>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: brand.navy, margin: 0 }}>
+              Add Client Review
+            </h2>
+            <p style={{ fontSize: 12, color: '#64748b', margin: '2px 0 0 0' }}>
+              Add a verified testimonial directly into the system.
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {/* Client Name & Location */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div>
+              <label
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: '#64748b',
+                  textTransform: 'uppercase',
+                  display: 'block',
+                  marginBottom: 4,
+                }}
+              >
+                Client Name *
+              </label>
+              <input
+                style={inputStyleToken}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Fatima Al Mansoori"
+                required
+              />
+            </div>
+            <div>
+              <label
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: '#64748b',
+                  textTransform: 'uppercase',
+                  display: 'block',
+                  marginBottom: 4,
+                }}
+              >
+                District / Location
+              </label>
+              <input
+                style={inputStyleToken}
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="e.g. Al Khalidiyah, Abu Dhabi"
+              />
+            </div>
+          </div>
+
+          {/* WhatsApp & Rating */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div>
+              <label
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: '#64748b',
+                  textTransform: 'uppercase',
+                  display: 'block',
+                  marginBottom: 4,
+                }}
+              >
+                WhatsApp Number (Optional)
+              </label>
+              <input
+                style={inputStyleToken}
+                value={whatsapp}
+                onChange={(e) => setWhatsapp(e.target.value)}
+                placeholder="+971 50 123 4567"
+              />
+            </div>
+            <div>
+              <label
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: '#64748b',
+                  textTransform: 'uppercase',
+                  display: 'block',
+                  marginBottom: 4,
+                }}
+              >
+                Rating (1–5 Stars)
+              </label>
+              <select
+                style={{ ...inputStyleToken, cursor: 'pointer', fontWeight: 700, color: '#b45309' }}
+                value={stars}
+                onChange={(e) => setStars(Number(e.target.value))}
+              >
+                <option value={5}>★★★★★ (5 Stars - Excellent)</option>
+                <option value={4}>★★★★☆ (4 Stars - Very Good)</option>
+                <option value={3}>★★★☆☆ (3 Stars - Good)</option>
+                <option value={2}>★★☆☆☆ (2 Stars - Fair)</option>
+                <option value={1}>★☆☆☆☆ (1 Star - Poor)</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Review Body */}
+          <div>
+            <label
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                color: '#64748b',
+                textTransform: 'uppercase',
+                display: 'block',
+                marginBottom: 4,
+              }}
+            >
+              Client Testimonial Text *
+            </label>
+            <textarea
+              style={{ ...inputStyleToken, minHeight: 90, resize: 'vertical', lineHeight: 1.5 }}
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              placeholder="Write or paste client feedback..."
+              required
+            />
+          </div>
+
+          {/* Publication Status */}
+          <div>
+            <label
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                color: '#64748b',
+                textTransform: 'uppercase',
+                display: 'block',
+                marginBottom: 4,
+              }}
+            >
+              Initial Publication Status
+            </label>
+            <select
+              style={{ ...inputStyleToken, cursor: 'pointer', fontWeight: 600 }}
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+            >
+              <option value="approved">Approved (Publish live immediately to website)</option>
+              <option value="pending">Pending (Save as draft awaiting moderation)</option>
+              <option value="rejected">Rejected (Keep hidden)</option>
+            </select>
+          </div>
+
+          {error && <p style={{ color: '#dc2626', fontSize: 13, margin: '2px 0' }}>{error}</p>}
+
+          <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{ ...outlineBtnToken, flex: 1, justifyContent: 'center' }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              style={{
+                ...solidBtnToken,
+                flex: 1,
+                justifyContent: 'center',
+                opacity: saving ? 0.7 : 1,
+              }}
+            >
+              {saving ? 'Saving Review…' : 'Save & Publish'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ── Status Moderation & Edit Modal ───────────────────────────────────────────
+function ReviewStatusModal({ review, onClose, onSaved }) {
+  const [status, setStatus] = useState(review.status);
+  const [isEditing, setIsEditing] = useState(false);
+  const [name, setName] = useState(review.name || '');
+  const [location, setLocation] = useState(review.location || '');
+  const [whatsapp, setWhatsapp] = useState(review.whatsapp || '');
+  const [stars, setStars] = useState(review.stars || 5);
+  const [body, setBody] = useState(review.body || '');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setError(null);
+    try {
+      if (isEditing) {
+        await api.put(`/reviews/${review.id}`, {
+          name: name.trim(),
+          location: location.trim() || null,
+          whatsapp: whatsapp.trim() || null,
+          stars: Number(stars),
+          body: body.trim(),
+          status,
+        });
+      } else {
+        await api.patch(`/reviews/${review.id}/status`, { status });
+      }
+      onSaved();
+      onClose();
+    } catch {
+      setError('Failed to update review. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const overlay = {
+    position: 'fixed',
+    inset: 0,
+    background: 'rgba(10,35,66,0.55)',
+    backdropFilter: 'blur(4px)',
+    zIndex: 1000,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+  };
+  const modal = {
+    background: '#fff',
+    borderRadius: 20,
+    padding: 32,
+    maxWidth: 540,
+    width: '100%',
+    boxShadow: '0 24px 60px rgba(0,0,0,0.18)',
+    position: 'relative',
+    maxHeight: '90vh',
+    overflowY: 'auto',
   };
 
   return (
@@ -160,50 +467,67 @@ function ReviewStatusModal({ review, onClose, onSaved }) {
               fontSize: 16,
             }}
           >
-            {initials(review.name)}
+            {initials(name || review.name)}
           </div>
-          <div>
-            <h2 style={{ fontSize: 18, fontWeight: 800, color: brand.navy, margin: 0 }}>
-              Review Moderation
-            </h2>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 style={{ fontSize: 18, fontWeight: 800, color: brand.navy, margin: 0 }}>
+                {isEditing ? 'Edit Review' : 'Review Moderation'}
+              </h2>
+              <button
+                type="button"
+                onClick={() => setIsEditing(!isEditing)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#2563eb',
+                  fontWeight: 700,
+                  fontSize: 12,
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                }}
+              >
+                {isEditing ? 'View Summary' : '✏️ Edit Content'}
+              </button>
+            </div>
             <div style={{ display: 'flex', gap: 8, marginTop: 4, alignItems: 'center' }}>
-              <StarRow stars={review.stars} />
-              <span style={{ fontSize: 12, color: '#64748b' }}>• {review.name}</span>
+              <StarRow stars={isEditing ? stars : review.stars} />
+              <span style={{ fontSize: 12, color: '#64748b' }}>• {name || review.name}</span>
             </div>
           </div>
         </div>
 
-        {/* Read-Only Client Feedback Information Card */}
-        <div
-          style={{
-            background: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            borderRadius: 14,
-            padding: '16px',
-            marginBottom: 20,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 10,
-          }}
-        >
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div>
-              <span
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  color: '#94a3b8',
-                  textTransform: 'uppercase',
-                  letterSpacing: 0.5,
-                }}
-              >
-                Client Name
-              </span>
-              <div style={{ fontSize: 13, fontWeight: 700, color: brand.navy, marginTop: 2 }}>
-                {review.name}
+        {/* Content Section: Read-Only or Form Fields */}
+        {!isEditing ? (
+          <div
+            style={{
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: 14,
+              padding: '16px',
+              marginBottom: 20,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 10,
+            }}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: '#94a3b8',
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  Client Name
+                </span>
+                <div style={{ fontSize: 13, fontWeight: 700, color: brand.navy, marginTop: 2 }}>
+                  {name || review.name}
+                </div>
               </div>
-            </div>
-            {review.location && (
               <div>
                 <span
                   style={{
@@ -217,72 +541,186 @@ function ReviewStatusModal({ review, onClose, onSaved }) {
                   Location / District
                 </span>
                 <div style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginTop: 2 }}>
-                  {review.location}
+                  {location || review.location || '—'}
                 </div>
               </div>
-            )}
-            {review.whatsapp && (
-              <div style={{ gridColumn: 'span 2' }}>
-                <span
+              {whatsapp && (
+                <div style={{ gridColumn: 'span 2' }}>
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                      color: '#94a3b8',
+                      textTransform: 'uppercase',
+                      letterSpacing: 0.5,
+                    }}
+                  >
+                    WhatsApp Number
+                  </span>
+                  <div
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 700,
+                      color: '#16a34a',
+                      marginTop: 2,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                    }}
+                  >
+                    💬 {whatsapp}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  color: '#94a3b8',
+                  textTransform: 'uppercase',
+                  letterSpacing: 0.5,
+                }}
+              >
+                Client Review Text
+              </span>
+              <div
+                style={{
+                  background: '#fff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: 10,
+                  padding: '12px 14px',
+                  marginTop: 4,
+                  fontSize: 13,
+                  lineHeight: 1.6,
+                  color: '#334155',
+                  whiteSpace: 'pre-wrap',
+                  maxHeight: 140,
+                  overflowY: 'auto',
+                  fontStyle: 'italic',
+                }}
+              >
+                "{body || review.body}"
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label
                   style={{
-                    fontSize: 10,
+                    fontSize: 11,
                     fontWeight: 700,
-                    color: '#94a3b8',
+                    color: '#64748b',
                     textTransform: 'uppercase',
-                    letterSpacing: 0.5,
+                    display: 'block',
+                    marginBottom: 4,
+                  }}
+                >
+                  Client Name
+                </label>
+                <input
+                  style={inputStyleToken}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Client name"
+                />
+              </div>
+              <div>
+                <label
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: '#64748b',
+                    textTransform: 'uppercase',
+                    display: 'block',
+                    marginBottom: 4,
+                  }}
+                >
+                  Location / District
+                </label>
+                <input
+                  style={inputStyleToken}
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="District, City"
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: '#64748b',
+                    textTransform: 'uppercase',
+                    display: 'block',
+                    marginBottom: 4,
                   }}
                 >
                   WhatsApp Number
-                </span>
-                <div
+                </label>
+                <input
+                  style={inputStyleToken}
+                  value={whatsapp}
+                  onChange={(e) => setWhatsapp(e.target.value)}
+                  placeholder="+971 50 ..."
+                />
+              </div>
+              <div>
+                <label
                   style={{
-                    fontSize: 13,
+                    fontSize: 11,
                     fontWeight: 700,
-                    color: '#16a34a',
-                    marginTop: 2,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
+                    color: '#64748b',
+                    textTransform: 'uppercase',
+                    display: 'block',
+                    marginBottom: 4,
                   }}
                 >
-                  💬 {review.whatsapp}
-                </div>
+                  Stars Rating
+                </label>
+                <select
+                  style={{ ...inputStyleToken, fontWeight: 700, color: '#b45309' }}
+                  value={stars}
+                  onChange={(e) => setStars(Number(e.target.value))}
+                >
+                  <option value={5}>★★★★★ (5 Stars)</option>
+                  <option value={4}>★★★★☆ (4 Stars)</option>
+                  <option value={3}>★★★☆☆ (3 Stars)</option>
+                  <option value={2}>★★☆☆☆ (2 Stars)</option>
+                  <option value={1}>★☆☆☆☆ (1 Star)</option>
+                </select>
               </div>
-            )}
-          </div>
+            </div>
 
-          <div>
-            <span
-              style={{
-                fontSize: 10,
-                fontWeight: 700,
-                color: '#94a3b8',
-                textTransform: 'uppercase',
-                letterSpacing: 0.5,
-              }}
-            >
-              Client Review Text
-            </span>
-            <div
-              style={{
-                background: '#fff',
-                border: '1px solid #e2e8f0',
-                borderRadius: 10,
-                padding: '12px 14px',
-                marginTop: 4,
-                fontSize: 13,
-                lineHeight: 1.6,
-                color: '#334155',
-                whiteSpace: 'pre-wrap',
-                maxHeight: 140,
-                overflowY: 'auto',
-                fontStyle: 'italic',
-              }}
-            >
-              "{review.body}"
+            <div>
+              <label
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: '#64748b',
+                  textTransform: 'uppercase',
+                  display: 'block',
+                  marginBottom: 4,
+                }}
+              >
+                Review Text
+              </label>
+              <textarea
+                style={{ ...inputStyleToken, minHeight: 80, resize: 'vertical' }}
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                placeholder="Review text..."
+              />
             </div>
           </div>
-        </div>
+        )}
 
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {/* Status Select */}
@@ -331,7 +769,7 @@ function ReviewStatusModal({ review, onClose, onSaved }) {
                 opacity: saving ? 0.7 : 1,
               }}
             >
-              {saving ? 'Updating…' : 'Update Status'}
+              {saving ? 'Saving…' : isEditing ? 'Save Changes' : 'Update Status'}
             </button>
           </div>
         </form>
@@ -549,6 +987,7 @@ export default function Reviews() {
   const [tab, setTab] = useState('all');
   const [search, setSearch] = useState('');
   const [statusTarget, setStatusTarget] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [actionLoading, setActionLoading] = useState({});
   const [expandedIds, setExpandedIds] = useState(new Set());
   const [inquiriesPendingCount, setInquiriesPendingCount] = useState(0);
@@ -593,6 +1032,13 @@ export default function Reviews() {
       if (c[r.status] !== undefined) c[r.status]++;
     });
     return c;
+  }, [reviews]);
+
+  const avgApprovedRating = useMemo(() => {
+    const approvedReviews = reviews.filter((r) => r.status === 'approved');
+    if (!approvedReviews.length) return '—';
+    const sum = approvedReviews.reduce((acc, r) => acc + (Number(r.stars) || 5), 0);
+    return (sum / approvedReviews.length).toFixed(1);
   }, [reviews]);
 
   // ── Filtered reviews list ─────────────────────────────────────────────────
@@ -689,7 +1135,28 @@ export default function Reviews() {
               : 'Review, manage, and reply to client inquiries and quote requests.'}
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          {activeSubTab === 'reviews' && counts.approved > 0 && (
+            <span
+              style={{
+                padding: '8px 16px',
+                borderRadius: 10,
+                fontSize: 13,
+                fontWeight: 700,
+                background: '#ecfdf5',
+                color: '#047857',
+                border: '1px solid #a7f3d0',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+              }}
+            >
+              <span style={{ color: '#f59e0b' }}>★</span>
+              <span>{avgApprovedRating} / 5.0 Rating</span>
+              <span style={{ color: '#6ee7b7' }}>•</span>
+              <span style={{ color: '#065f46', fontWeight: 600 }}>{counts.approved} Approved</span>
+            </span>
+          )}
           <span
             style={{
               padding: '8px 18px',
@@ -705,6 +1172,25 @@ export default function Reviews() {
               ? `${counts.pending} Pending Reviews`
               : `${inquiriesPendingCount} Pending Inquiries`}
           </span>
+          {activeSubTab === 'reviews' && (
+            <button
+              type="button"
+              onClick={() => setShowAddModal(true)}
+              style={{
+                ...solidBtnToken,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '8px 16px',
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              <span style={{ fontSize: 16, fontWeight: 900, lineHeight: 1 }}>+</span>
+              <span>Add Review</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -1177,7 +1663,7 @@ export default function Reviews() {
                                         ]
                                       : []),
                                     {
-                                      label: 'Set Custom Status',
+                                      label: 'Edit & Moderate',
                                       icon: (
                                         <svg
                                           width="15"
@@ -1505,7 +1991,12 @@ export default function Reviews() {
         </div>
       </div>
 
-      {/* Status Modal for Reviews */}
+      {/* Add Review Modal */}
+      {showAddModal && (
+        <AddReviewModal onClose={() => setShowAddModal(false)} onSaved={fetchReviews} />
+      )}
+
+      {/* Status & Edit Modal for Reviews */}
       {statusTarget && (
         <ReviewStatusModal
           review={statusTarget}
