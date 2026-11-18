@@ -39,9 +39,10 @@ export default function AboutPage() {
   const { settings } = useSettings();
   const { reviews } = useReviews();
 
-  const dynamicRating = reviews && reviews.length > 0
-    ? (reviews.reduce((sum, r) => sum + (Number(r.stars) || 5), 0) / reviews.length).toFixed(1)
-    : '4.9';
+  const dynamicRating =
+    reviews && reviews.length > 0
+      ? (reviews.reduce((sum, r) => sum + (Number(r.stars) || 5), 0) / reviews.length).toFixed(1)
+      : '4.9';
 
   const dynamicStats = [
     { value: '500+', label: 'Happy Clients' },

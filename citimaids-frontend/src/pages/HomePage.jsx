@@ -143,9 +143,10 @@ export default function HomePage() {
   const addressParts = settings?.business_address ? settings.business_address.split(',') : [];
   const city = addressParts.length > 1 ? addressParts[1].trim() : 'Abu Dhabi';
 
-  const dynamicRating = reviews && reviews.length > 0
-    ? (reviews.reduce((sum, r) => sum + (Number(r.stars) || 5), 0) / reviews.length).toFixed(1)
-    : '4.9';
+  const dynamicRating =
+    reviews && reviews.length > 0
+      ? (reviews.reduce((sum, r) => sum + (Number(r.stars) || 5), 0) / reviews.length).toFixed(1)
+      : '4.9';
 
   const dynamicStats = [
     { value: '500+', label: 'Homes Cleaned in UAE' },

@@ -397,7 +397,10 @@ export default function BookingPage() {
     } catch (err) {
       console.error('Booking submission failed:', err);
       setSubmitLoading(false);
-      alert(err.response?.data?.message || 'Failed to submit booking. Please check your connection and try again.');
+      alert(
+        err.response?.data?.message ||
+          'Failed to submit booking. Please check your connection and try again.'
+      );
     }
   };
 

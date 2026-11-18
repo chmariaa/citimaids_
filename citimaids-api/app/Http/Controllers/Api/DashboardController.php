@@ -125,7 +125,7 @@ class DashboardController extends Controller
 
         // ── Customer Satisfaction (Live from approved reviews) ──
         $avgStars = (float) Review::approved()->avg('stars');
-        $customer_satisfaction = $avgStars > 0 ? number_format($avgStars, 1) . ' / 5.0' : '4.9 / 5.0';
+        $customer_satisfaction = $avgStars > 0 ? number_format($avgStars, 1).' / 5.0' : '4.9 / 5.0';
 
         // ── Recent 5 Bookings (Eager-loaded) ──
         $recent = Booking::with(['client', 'service'])
