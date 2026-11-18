@@ -79,6 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Reviews (admin management)
     Route::get('/admin/reviews', [ReviewController::class, 'adminIndex']);
+    Route::post('/admin/reviews', [ReviewController::class, 'adminStore']);
     Route::put('/reviews/{id}', [ReviewController::class, 'update']);
     Route::patch('/reviews/{id}/status', [ReviewController::class, 'updateStatus']);
     Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);

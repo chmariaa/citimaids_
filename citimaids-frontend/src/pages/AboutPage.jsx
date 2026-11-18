@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useSettings } from '../hooks/useSettings';
+import { useReviews } from '../hooks/useReviews';
 import Reveal from '../components/Reveal';
 import AnimatedCounter from '../components/AnimatedCounter';
 import { AwardIcon, ShieldCheckIcon, LeafIcon, UserCheckIcon } from '../components/icons/Icons';
@@ -36,6 +37,19 @@ const stats = [
 
 export default function AboutPage() {
   const { settings } = useSettings();
+  const { reviews } = useReviews();
+
+  const dynamicRating =
+    reviews && reviews.length > 0
+      ? (reviews.reduce((sum, r) => sum + (Number(r.stars) || 5), 0) / reviews.length).toFixed(1)
+      : '4.9';
+
+  const dynamicStats = [
+    { value: '500+', label: 'Happy Clients' },
+    { value: '100%', label: 'Vetted Crew' },
+    { value: `${dynamicRating} / 5`, label: 'Average Review' },
+    { value: '7 Days', label: 'Weekly Service' },
+  ];
 
   const addressParts = settings?.business_address ? settings.business_address.split(',') : [];
   const city = addressParts.length > 1 ? addressParts[1].trim() : 'Abu Dhabi';
@@ -142,10 +156,10 @@ export default function AboutPage() {
       >
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
-            {stats.map((s) => (
+            {dynamicStats.map((s) => (
               <div key={s.label}>
                 <div className="text-3xl sm:text-4xl font-extrabold mb-1">
-                  <AnimatedCounter value={s.value} />
+                  <AnimatedCounter key={`${s.label}-${s.value}`} value={s.value} />
                 </div>
                 <div className="text-blue-200 text-xs sm:text-sm font-medium">{s.label}</div>
               </div>

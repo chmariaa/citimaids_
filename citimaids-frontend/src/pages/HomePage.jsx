@@ -143,6 +143,18 @@ export default function HomePage() {
   const addressParts = settings?.business_address ? settings.business_address.split(',') : [];
   const city = addressParts.length > 1 ? addressParts[1].trim() : 'Abu Dhabi';
 
+  const dynamicRating =
+    reviews && reviews.length > 0
+      ? (reviews.reduce((sum, r) => sum + (Number(r.stars) || 5), 0) / reviews.length).toFixed(1)
+      : '4.9';
+
+  const dynamicStats = [
+    { value: '500+', label: 'Homes Cleaned in UAE' },
+    { value: `${dynamicRating} / 5`, label: 'Average Client Rating' },
+    { value: '9+ Yrs', label: `${city} Experience` },
+    { value: '100%', label: 'Satisfaction Guarantee' },
+  ];
+
   const businessName = settings?.business_name || 'CitiMaids';
   const description =
     settings?.description ||
@@ -280,7 +292,7 @@ export default function HomePage() {
                   ),
                 },
                 {
-                  label: '4.9 / 5 Rating',
+                  label: `${dynamicRating} / 5 Rating`,
                   icon: (
                     <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
@@ -326,11 +338,11 @@ export default function HomePage() {
           className="rounded-3xl p-6 sm:p-10 shadow-2xl border border-white/10 grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8"
           style={{ background: 'linear-gradient(135deg, #0A2342 0%, #1E3A8A 100%)' }}
         >
-          {stats.map((s, i) => (
+          {dynamicStats.map((s, i) => (
             <Reveal key={s.label} delay={i * 70} direction="up">
               <div className="text-center sm:text-left border-l-0 sm:border-l sm:border-white/10 sm:pl-6 first:border-0 first:pl-0">
                 <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-white mb-1.5 tracking-tight">
-                  <AnimatedCounter value={s.value} />
+                  <AnimatedCounter key={`${s.label}-${s.value}`} value={s.value} />
                 </div>
                 <div className="text-sky-200 text-xs sm:text-sm font-medium leading-snug">
                   {s.label}

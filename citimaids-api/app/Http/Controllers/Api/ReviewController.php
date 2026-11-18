@@ -49,16 +49,45 @@ class ReviewController extends Controller
         return response()->json($query->get());
     }
 
-    // ── Admin: update review status only (client feedback is immutable) ─────────
+    // ── Admin: create a new review directly (can be approved immediately) ────────
+    public function adminStore(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:120',
+            'whatsapp' => 'nullable|string|max:30',
+            'location' => 'nullable|string|max:120',
+            'stars' => 'required|integer|min:1|max:5',
+            'body' => 'required|string|min:5|max:1500',
+            'status' => 'nullable|in:pending,approved,rejected',
+        ]);
+
+        if (empty($validated['status'])) {
+            $validated['status'] = 'approved';
+        }
+
+        $review = Review::create($validated);
+
+        return response()->json([
+            'message' => 'Review created successfully.',
+            'review' => $review,
+        ], 201);
+    }
+
+    // ── Admin: update review details & status ────────────────────────────────────
     public function update(Request $request, $id)
     {
         $review = Review::findOrFail($id);
 
         $validated = $request->validate([
-            'status' => 'required|in:pending,approved,rejected',
+            'name' => 'sometimes|required|string|max:120',
+            'whatsapp' => 'nullable|string|max:30',
+            'location' => 'nullable|string|max:120',
+            'stars' => 'sometimes|required|integer|min:1|max:5',
+            'body' => 'sometimes|required|string|min:5|max:1500',
+            'status' => 'sometimes|required|in:pending,approved,rejected',
         ]);
 
-        $review->update(['status' => $validated['status']]);
+        $review->update($validated);
 
         return response()->json($review);
     }

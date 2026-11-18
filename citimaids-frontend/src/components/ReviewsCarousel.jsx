@@ -144,18 +144,19 @@ export default function ReviewsCarousel({ reviews = [], loading = false, onWrite
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Merge loaded reviews with rich UAE defaults so carousel always has 4-6 cards
+  // Prioritize live approved reviews from the database/admin panel; fallback to defaults if offline/empty
   const allReviews = useMemo(() => {
     if (Array.isArray(reviews) && reviews.length > 0) {
-      if (reviews.length < 3) {
-        const existingIds = new Set(reviews.map((r) => r.id));
-        const fill = defaultReviews.filter((d) => !existingIds.has(d.id));
-        return [...reviews, ...fill.slice(0, 6 - reviews.length)];
-      }
       return reviews;
     }
     return defaultReviews;
   }, [reviews]);
+
+  const avgRating = useMemo(() => {
+    if (!allReviews || allReviews.length === 0) return '4.9';
+    const total = allReviews.reduce((sum, r) => sum + (Number(r.stars) || 5), 0);
+    return (total / allReviews.length).toFixed(1);
+  }, [allReviews]);
 
   const maxIndex = Math.max(0, allReviews.length - itemsPerPage);
 
@@ -371,7 +372,9 @@ export default function ReviewsCarousel({ reviews = [], loading = false, onWrite
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100">
               {/* Trust metric summary */}
               <div className="flex items-center gap-2 text-xs text-slate-500">
-                <span className="font-extrabold text-amber-500">★ 4.9 / 5.0</span>
+                <span className="font-extrabold text-amber-500">★ {avgRating} / 5.0</span>
+                <span>•</span>
+                <span>{allReviews.length} Verified Reviews</span>
                 <span>•</span>
                 <span>Abu Dhabi 5-Star Hospitality Standard</span>
                 {isPaused && (
