@@ -8,6 +8,7 @@ use App\Models\Client;
 use App\Models\Service;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ReportsController extends Controller
 {
@@ -102,7 +103,12 @@ class ReportsController extends Controller
             ->map(fn ($b) => Carbon::parse($b->created_at)->diffInDays($b->preferred_date))
             ->avg() ?? 0;
 
-        $byDow = Booking::selectRaw('DAYNAME(preferred_date) as dow, COUNT(*) as count')
+        $isPgsql = DB::getDriverName() === 'pgsql';
+        $dowExpr = $isPgsql
+            ? "TO_CHAR(preferred_date, 'Day') as dow"
+            : 'DAYNAME(preferred_date) as dow';
+
+        $byDow = Booking::selectRaw("{$dowExpr}, COUNT(*) as count")
             ->whereNotNull('preferred_date')
             ->where(function ($q) use ($from, $to) {
                 $q->whereBetween('created_at', [$from, $to])
@@ -143,7 +149,12 @@ class ReportsController extends Controller
             ->take(10)
             ->get();
 
-        $monthlyGrowth = Client::selectRaw("DATE_FORMAT(created_at,'%Y-%m') as month, COUNT(*) as new_clients")
+        $isPgsqlC = DB::getDriverName() === 'pgsql';
+        $monthExprC = $isPgsqlC
+            ? "TO_CHAR(created_at, 'YYYY-MM') as month"
+            : "DATE_FORMAT(created_at,'%Y-%m') as month";
+
+        $monthlyGrowth = Client::selectRaw("{$monthExprC}, COUNT(*) as new_clients")
             ->where('created_at', '>=', now()->subMonths(6)->startOfMonth())
             ->groupBy('month')->orderBy('month')->get();
 
@@ -167,9 +178,9 @@ class ReportsController extends Controller
 
         $services = Service::select('services.id', 'services.name', 'services.status', 'services.base_price')
             ->selectRaw('COUNT(b.id) as total_bookings')
-            ->selectRaw('SUM(CASE WHEN b.status="completed" THEN 1 ELSE 0 END) as completed_bookings')
+            ->selectRaw("SUM(CASE WHEN b.status='completed' THEN 1 ELSE 0 END) as completed_bookings")
             ->selectRaw('SUM(CASE WHEN (b.created_at BETWEEN ? AND ?) THEN 1 ELSE 0 END) as period_bookings', [$from, $to])
-            ->selectRaw('SUM(CASE WHEN b.status="completed" THEN COALESCE(b.total_amount,0) ELSE 0 END) as revenue')
+            ->selectRaw("SUM(CASE WHEN b.status='completed' THEN COALESCE(b.total_amount,0) ELSE 0 END) as revenue")
             ->leftJoin('bookings as b', 'b.service_id', '=', 'services.id')
             ->groupBy('services.id', 'services.name', 'services.status', 'services.base_price')
             ->get()
@@ -227,8 +238,13 @@ class ReportsController extends Controller
         $lost = $cancelledCnt * $avgBase;
         $avgBooking = $completedCnt > 0 ? round($gross / $completedCnt, 2) : $avgBase;
 
+        $isPgsqlR = DB::getDriverName() === 'pgsql';
+        $monthExprR = $isPgsqlR
+            ? "TO_CHAR(created_at, 'YYYY-MM') as month"
+            : "DATE_FORMAT(created_at,'%Y-%m') as month";
+
         $monthly = Booking::selectRaw("
-            DATE_FORMAT(created_at,'%Y-%m') as month,
+            {$monthExprR},
             SUM(CASE WHEN status='completed' THEN COALESCE(total_amount,{$avgBase}) ELSE 0 END) as revenue,
             COUNT(*) as bookings,
             SUM(CASE WHEN status='completed' THEN 1 ELSE 0 END) as completed
@@ -236,8 +252,8 @@ class ReportsController extends Controller
             ->groupBy('month')->orderBy('month')->get();
 
         $byService = Service::select('services.id', 'services.name', 'services.base_price')
-            ->selectRaw('COUNT(CASE WHEN b.status="completed" THEN 1 END) as completed_count')
-            ->selectRaw('SUM(CASE WHEN b.status="completed" THEN COALESCE(b.total_amount,services.base_price) ELSE 0 END) as revenue')
+            ->selectRaw('COUNT(CASE WHEN b.status=\'completed\' THEN 1 END) as completed_count')
+            ->selectRaw('SUM(CASE WHEN b.status=\'completed\' THEN COALESCE(b.total_amount,services.base_price) ELSE 0 END) as revenue')
             ->leftJoin('bookings as b', 'b.service_id', '=', 'services.id')
             ->groupBy('services.id', 'services.name', 'services.base_price')
             ->get()
