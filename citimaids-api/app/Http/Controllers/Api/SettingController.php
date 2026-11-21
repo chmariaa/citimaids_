@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Booking;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 
@@ -11,6 +12,10 @@ class SettingController extends Controller
     public function index()
     {
         $settings = Setting::pluck('value', 'key');
+
+        $completedBookings = Booking::where('status', 'completed')->count();
+        $base = isset($settings['homes_cleaned_base']) ? (int) $settings['homes_cleaned_base'] : 500;
+        $settings['completed_cleanings_count'] = (string) ($base + $completedBookings);
 
         return response()->json($settings);
     }

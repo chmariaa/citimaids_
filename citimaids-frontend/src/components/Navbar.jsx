@@ -1,10 +1,22 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useSettings } from '../hooks/useSettings';
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const { settings } = useSettings();
+
+  const brandName = settings?.business_name
+    ? settings.business_name
+        .replace(/ cleaning services/i, '')
+        .trim()
+        .toUpperCase()
+    : 'CITIMAIDS';
+  const city = settings?.business_address?.includes('Abu Dhabi')
+    ? 'Abu Dhabi'
+    : settings?.business_address?.split(',').slice(-2, -1)[0]?.trim() || 'Abu Dhabi';
 
   const isHome = location.pathname === '/';
 
@@ -61,10 +73,10 @@ export default function Navbar() {
           />
           <div>
             <span className="block font-black text-white text-xl tracking-wider leading-none">
-              CITIMAIDS
+              {brandName}
             </span>
             <span className="block text-[11px] font-semibold tracking-widest uppercase text-sky-300 mt-1">
-              Cleaning Services • Abu Dhabi
+              Cleaning Services • {city}
             </span>
           </div>
         </Link>

@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 import Reveal from '../components/Reveal';
 import { useServices } from '../hooks/useServices';
+import { useSettings } from '../hooks/useSettings';
+import { formatWhatsAppPhone } from '../utils/whatsapp';
 
 const defaultMaintenanceServices = [
   {
@@ -58,6 +60,7 @@ const defaultMaintenanceServices = [
 
 export default function MaintenancePage() {
   const { services, loading, error, refetch } = useServices();
+  const { settings } = useSettings();
 
   // Dynamic filter: active maintenance services from API or fallback to defaults
   const fromApi = services.filter((s) => s.category === 'maintenance');
@@ -223,7 +226,7 @@ export default function MaintenancePage() {
                           Book a Visit
                         </Link>
                         <a
-                          href={`https://wa.me/97150000000?text=Hi%20CitiMaids!%20I%20would%20like%20a%20quote%20for%20${encodeURIComponent(title)}.`}
+                          href={`https://wa.me/${formatWhatsAppPhone(settings?.contact_number)}?text=Hi%20CitiMaids!%20I%20would%20like%20a%20quote%20for%20${encodeURIComponent(title)}.`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="px-6 py-3 rounded-xl font-bold text-xs sm:text-sm text-slate-800 border border-slate-300 hover:bg-slate-50 transition-colors"

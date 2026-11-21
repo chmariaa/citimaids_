@@ -1,10 +1,13 @@
 import { useState } from 'react';
-
-const WA_NUMBER = '97150000000';
-const WA_URL = `https://wa.me/${WA_NUMBER}?text=Hi%20CitiMaids!%20I%20would%20like%20to%20inquire%20about%20your%20cleaning%20services%20in%20Abu%20Dhabi.`;
+import { useSettings } from '../hooks/useSettings';
+import { formatWhatsAppPhone, CITIMAIDS_WA_NUMBER } from '../utils/whatsapp';
 
 export default function FloatingWhatsApp() {
   const [tooltip, setTooltip] = useState(true);
+  const { settings } = useSettings();
+
+  const phone = formatWhatsAppPhone(settings?.contact_number || CITIMAIDS_WA_NUMBER);
+  const waUrl = `https://wa.me/${phone}?text=Hi%20CitiMaids!%20I%20would%20like%20to%20inquire%20about%20your%20cleaning%20services%20in%20Abu%20Dhabi.`;
 
   return (
     <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 flex flex-col items-end gap-2.5">
@@ -23,7 +26,7 @@ export default function FloatingWhatsApp() {
         <span className="absolute inset-0 rounded-full bg-emerald-400 wa-radar-ring pointer-events-none" />
 
         <a
-          href={WA_URL}
+          href={waUrl}
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Chat on WhatsApp"

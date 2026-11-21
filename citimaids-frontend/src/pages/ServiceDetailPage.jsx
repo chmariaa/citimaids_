@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useServices } from '../hooks/useServices';
+import { useSettings } from '../hooks/useSettings';
+import { formatWhatsAppPhone } from '../utils/whatsapp';
 
 export default function ServiceDetailPage() {
   const { serviceId } = useParams();
   const { services, loading } = useServices();
+  const { settings } = useSettings();
 
   // serviceId in the URL may be the DB integer id or slug
   const service = services.find((s) => String(s.id) === String(serviceId) || s.slug === serviceId);
@@ -151,7 +154,7 @@ export default function ServiceDetailPage() {
                 </Link>
 
                 <a
-                  href={`https://wa.me/97150000000?text=Hi%20CitiMaids!%20I%20am%20interested%20in%20${encodeURIComponent(service.title)}.`}
+                  href={`https://wa.me/${formatWhatsAppPhone(settings?.contact_number)}?text=Hi%20CitiMaids!%20I%20am%20interested%20in%20${encodeURIComponent(service.title)}.`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2.5 w-full py-4 rounded-2xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-all text-sm shadow-md hover:scale-105"

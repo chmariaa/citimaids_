@@ -34,9 +34,10 @@ export function formatWhatsAppPhone(phone) {
  * Pre-populates the message with the customer's booking reference, service, and scheduled date.
  *
  * @param {object} booking - Booking object with reference, service, and preferred_date
+ * @param {string} [fallbackNumber] - Optional override WhatsApp phone number
  * @returns {string} WhatsApp URL (https://wa.me/...)
  */
-export function getCustomerBookingWALink(booking) {
+export function getCustomerBookingWALink(booking, fallbackNumber = CITIMAIDS_WA_NUMBER) {
   const ref =
     booking?.reference || (booking?.id ? `CM-${String(booking.id).padStart(5, '0')}` : 'Inquiry');
   const service = booking?.service?.name || booking?.service?.title || 'Cleaning Service';
@@ -52,23 +53,26 @@ export function getCustomerBookingWALink(booking) {
 I am inquiring about my booking *${ref}* (${service}${date ? ` on ${date}` : ''}).
 Could you please provide an update on dispatch status?`;
 
-  return `https://wa.me/${CITIMAIDS_WA_NUMBER}?text=${encodeURIComponent(text)}`;
+  const waNum = formatWhatsAppPhone(fallbackNumber);
+  return `https://wa.me/${waNum}?text=${encodeURIComponent(text)}`;
 }
 
 /**
  * Customer-Facing: Generates a WhatsApp deep link requesting a booking reschedule.
  *
  * @param {object} booking - Booking object with reference
+ * @param {string} [fallbackNumber] - Optional override WhatsApp phone number
  * @returns {string} WhatsApp URL (https://wa.me/...)
  */
-export function getCustomerRescheduleWALink(booking) {
+export function getCustomerRescheduleWALink(booking, fallbackNumber = CITIMAIDS_WA_NUMBER) {
   const ref =
     booking?.reference || (booking?.id ? `CM-${String(booking.id).padStart(5, '0')}` : 'Booking');
   const text = `Hello CitiMaids! 📅
 I would like to request a reschedule for my booking *${ref}*.
 Please let me know available slots for an alternative date.`;
 
-  return `https://wa.me/${CITIMAIDS_WA_NUMBER}?text=${encodeURIComponent(text)}`;
+  const waNum = formatWhatsAppPhone(fallbackNumber);
+  return `https://wa.me/${waNum}?text=${encodeURIComponent(text)}`;
 }
 
 /**

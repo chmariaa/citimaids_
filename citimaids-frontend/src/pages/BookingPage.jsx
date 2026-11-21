@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useServices } from '../hooks/useServices';
+import { useSettings } from '../hooks/useSettings';
 import api from '../api/axios';
 import { formatUAEPhone } from '../utils/formatters';
 import DatePicker, { toYMD, formatFriendlyDate } from '../components/booking/DatePicker';
@@ -17,8 +18,6 @@ const STEPS = [
   { key: 'contact', label: 'Contact', icon: StepContactIcon },
   { key: 'review', label: 'Review', icon: StepReviewIcon },
 ];
-
-const timeSlots = ['7:00 AM', '9:00 AM', '11:00 AM', '1:00 PM', '3:00 PM', '5:00 PM'];
 
 const propertyTypes = [
   'Apartment',
@@ -45,6 +44,17 @@ export const uaeDistricts = {
     'Khalifa City A',
     'Mohammed Bin Zayed City',
     'Other Abu Dhabi Area',
+  ],
+  'Al Ain': [
+    'Al Jimi',
+    'Al Jahili',
+    'Al Foah',
+    'Zakher',
+    'Al Muwaiji',
+    'Hili',
+    'Al Maqam',
+    'Al Towayya',
+    'Other Al Ain Area',
   ],
   Dubai: [
     'Downtown Dubai',
@@ -79,6 +89,43 @@ export const uaeDistricts = {
     'Al Rahmaniya',
     'Other Sharjah Area',
   ],
+  Ajman: [
+    'Al Nuaimiya',
+    'Al Rashidiya',
+    'Al Jurf',
+    'Al Rawda',
+    'Al Mowaihat',
+    'Emirates City',
+    'Al Helio',
+    'Other Ajman Area',
+  ],
+  'Ras Al Khaimah': [
+    'Al Hamra Village',
+    'Mina Al Arab',
+    'Al Nakheel',
+    'Khuzam',
+    'Al Dhait',
+    'Marjan Island',
+    'Al Qusaidat',
+    'Other RAK Area',
+  ],
+  Fujairah: [
+    'Fujairah City Center',
+    'Al Faseel',
+    'Mirbah',
+    'Qidfa',
+    'Dibba Al Fujairah',
+    'Al Gurfa',
+    'Other Fujairah Area',
+  ],
+  'Umm Al Quwain': [
+    'Al Salamah',
+    'Al Raudah',
+    'Al Ramlah',
+    'Al Haditha',
+    'Hawyah',
+    'Other UAQ Area',
+  ],
 };
 
 const CATEGORY_TABS = [
@@ -112,6 +159,25 @@ export default function BookingPage() {
   const preselectedServiceId = location.state?.preselectedServiceId;
 
   const { services, loading: servicesLoading } = useServices();
+  const { settings } = useSettings();
+
+  const activeCities = useMemo(() => {
+    if (!settings?.active_cities) return Object.keys(uaeDistricts);
+    const parsed = settings.active_cities
+      .split(',')
+      .map((c) => c.trim())
+      .filter((c) => uaeDistricts[c]);
+    return parsed.length > 0 ? parsed : Object.keys(uaeDistricts);
+  }, [settings?.active_cities]);
+
+  const activeTimeSlots = useMemo(() => {
+    if (!settings?.booking_time_slots) return DEFAULT_TIME_SLOTS;
+    const parsed = settings.booking_time_slots
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    return parsed.length > 0 ? parsed : DEFAULT_TIME_SLOTS;
+  }, [settings?.booking_time_slots]);
 
   const [step, setStep] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -206,6 +272,17 @@ export default function BookingPage() {
     zipCode: '',
     notes: '',
   });
+
+  // Ensure selected city is valid within activeCities
+  useEffect(() => {
+    if (activeCities.length > 0 && !activeCities.includes(data.city)) {
+      setData((prev) => ({
+        ...prev,
+        city: activeCities[0],
+        district: uaeDistricts[activeCities[0]]?.[0] || '',
+      }));
+    }
+  }, [activeCities, data.city]);
 
   // Once services load, pick the preselected one (or first active)
   useEffect(() => {
@@ -1051,7 +1128,7 @@ export default function BookingPage() {
                   setTimeError(null);
                 }}
                 selectedDate={data.date}
-                slots={DEFAULT_TIME_SLOTS}
+                slots={activeTimeSlots}
               />
 
               {timeError && (
@@ -1118,7 +1195,7 @@ export default function BookingPage() {
                     onChange={(e) => handleCityChange(e.target.value)}
                     style={selectStyle}
                   >
-                    {Object.keys(uaeDistricts).map((city) => (
+                    {activeCities.map((city) => (
                       <option key={city} value={city}>
                         {city}
                       </option>
@@ -1133,7 +1210,13 @@ export default function BookingPage() {
                     onChange={(e) => set('district', e.target.value)}
                     style={selectStyle}
                   >
-                    {(uaeDistricts[data.city] || []).map((d) => (
+                    {(
+                      uaeDistricts[data.city] || [
+                        `Central ${data.city}`,
+                        `Downtown ${data.city}`,
+                        `Other ${data.city} Area`,
+                      ]
+                    ).map((d) => (
                       <option key={d} value={d}>
                         {d}
                       </option>
