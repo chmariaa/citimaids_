@@ -9,7 +9,10 @@ export default function Navbar() {
   const { settings } = useSettings();
 
   const brandName = settings?.business_name
-    ? settings.business_name.replace(/ cleaning services/i, '').trim().toUpperCase()
+    ? settings.business_name
+        .replace(/ cleaning services/i, '')
+        .trim()
+        .toUpperCase()
     : 'CITIMAIDS';
   const city = settings?.business_address?.includes('Abu Dhabi')
     ? 'Abu Dhabi'

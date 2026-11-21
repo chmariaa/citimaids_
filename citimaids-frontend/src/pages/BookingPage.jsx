@@ -1210,7 +1210,13 @@ export default function BookingPage() {
                     onChange={(e) => set('district', e.target.value)}
                     style={selectStyle}
                   >
-                    {(uaeDistricts[data.city] || [`Central ${data.city}`, `Downtown ${data.city}`, `Other ${data.city} Area`]).map((d) => (
+                    {(
+                      uaeDistricts[data.city] || [
+                        `Central ${data.city}`,
+                        `Downtown ${data.city}`,
+                        `Other ${data.city} Area`,
+                      ]
+                    ).map((d) => (
                       <option key={d} value={d}>
                         {d}
                       </option>

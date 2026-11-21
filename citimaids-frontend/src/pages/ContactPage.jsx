@@ -18,7 +18,8 @@ export default function ContactPage() {
   const additionalPhone = settings?.additional_number || '';
   const email = settings?.business_email || '';
   const additionalEmail = settings?.additional_email || '';
-  const address = settings?.business_address || 'Aljazeera Tower, Room 45, Hamdan St, Abu Dhabi, UAE';
+  const address =
+    settings?.business_address || 'Aljazeera Tower, Room 45, Hamdan St, Abu Dhabi, UAE';
 
   const set = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
 

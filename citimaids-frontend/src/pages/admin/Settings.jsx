@@ -1428,7 +1428,8 @@ function BookingForm({ showToast }) {
         {/* Section 1: Active Service Territories */}
         <SectionHeader>ACTIVE SERVICE TERRITORIES</SectionHeader>
         <p style={{ fontSize: 13, color: '#64748b', margin: '-6px 0 16px' }}>
-          Configure which UAE Emirates and cities CitiMaids accepts bookings in. Only active cities will appear in the customer booking dropdown.
+          Configure which UAE Emirates and cities CitiMaids accepts bookings in. Only active cities
+          will appear in the customer booking dropdown.
         </p>
 
         {/* Active Territory Badges */}
@@ -1494,7 +1495,15 @@ function BookingForm({ showToast }) {
         </div>
 
         {/* Add City Row with Dropdown & Custom Option */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center', marginBottom: 28 }}>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 10,
+            alignItems: 'center',
+            marginBottom: 28,
+          }}
+        >
           <select
             value={selectedCityToAdd}
             onChange={(e) => {
@@ -1531,7 +1540,9 @@ function BookingForm({ showToast }) {
           <button
             type="button"
             onClick={handleAddCity}
-            disabled={!selectedCityToAdd || (selectedCityToAdd === '__custom__' && !customCityInput.trim())}
+            disabled={
+              !selectedCityToAdd || (selectedCityToAdd === '__custom__' && !customCityInput.trim())
+            }
             style={{
               padding: '9px 18px',
               borderRadius: 8,
@@ -1542,7 +1553,8 @@ function BookingForm({ showToast }) {
               border: 'none',
               cursor: 'pointer',
               opacity:
-                !selectedCityToAdd || (selectedCityToAdd === '__custom__' && !customCityInput.trim())
+                !selectedCityToAdd ||
+                (selectedCityToAdd === '__custom__' && !customCityInput.trim())
                   ? 0.5
                   : 1,
             }}
@@ -1554,7 +1566,8 @@ function BookingForm({ showToast }) {
         {/* Section 2: Time Slot Presets */}
         <SectionHeader>BOOKING TIME SLOT SHORTCUTS</SectionHeader>
         <p style={{ fontSize: 13, color: '#64748b', margin: '-6px 0 16px' }}>
-          These preset shortcut pills appear on the booking portal for fast customer selection. Customers can also enter custom times within operating hours.
+          These preset shortcut pills appear on the booking portal for fast customer selection.
+          Customers can also enter custom times within operating hours.
         </p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
           {timeSlots.map((slot) => {
@@ -1619,7 +1632,15 @@ function BookingForm({ showToast }) {
           })}
         </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center', marginBottom: 6 }}>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 10,
+            alignItems: 'center',
+            marginBottom: 6,
+          }}
+        >
           <input
             type="text"
             placeholder="e.g. 8, 14, 08:30, or 2 PM"
@@ -1666,10 +1687,21 @@ function BookingForm({ showToast }) {
             Reset Default Slots
           </button>
         </div>
-        <div style={{ fontSize: 12, color: '#64748b', marginBottom: 28, display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div
+          style={{
+            fontSize: 12,
+            color: '#64748b',
+            marginBottom: 28,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+          }}
+        >
           <span>💡</span>
           <span>
-            Accepts single digits (e.g. <strong>8</strong> for 08:00, <strong>2</strong> for 14:00), 24-hour format (e.g. <strong>14</strong>, <strong>14:30</strong>, <strong>20</strong>), or 12-hour AM/PM (e.g. <strong>8am</strong>, <strong>2:30pm</strong>).
+            Accepts single digits (e.g. <strong>8</strong> for 08:00, <strong>2</strong> for 14:00),
+            24-hour format (e.g. <strong>14</strong>, <strong>14:30</strong>, <strong>20</strong>),
+            or 12-hour AM/PM (e.g. <strong>8am</strong>, <strong>2:30pm</strong>).
           </span>
         </div>
 

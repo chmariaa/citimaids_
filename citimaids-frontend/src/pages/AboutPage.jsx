@@ -83,8 +83,8 @@ export default function AboutPage() {
             About {businessName}
           </h1>
           <p className="text-blue-100 text-sm sm:text-base leading-relaxed">
-            {city} and surrounding UAE communities' trusted professional cleaning partner, delivering spotless
-            homes and commercial spaces since 2018.
+            {city} and surrounding UAE communities' trusted professional cleaning partner,
+            delivering spotless homes and commercial spaces since 2018.
           </p>
         </div>
       </div>
@@ -234,7 +234,8 @@ export default function AboutPage() {
                 <div>
                   <div className="font-bold text-slate-900 text-sm">Head Office</div>
                   <div className="text-slate-600 text-xs sm:text-sm">
-                    {settings?.business_address || 'Aljazeera Tower, Room 45, Hamdan St, Abu Dhabi, UAE'}
+                    {settings?.business_address ||
+                      'Aljazeera Tower, Room 45, Hamdan St, Abu Dhabi, UAE'}
                   </div>
                 </div>
               </div>

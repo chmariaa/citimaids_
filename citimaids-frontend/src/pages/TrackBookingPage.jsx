@@ -3,7 +3,11 @@ import { useSearchParams, Link } from 'react-router-dom';
 import api from '../api/axios';
 import Reveal from '../components/Reveal';
 import { useSettings } from '../hooks/useSettings';
-import { getCustomerBookingWALink, getCustomerRescheduleWALink, formatWhatsAppPhone } from '../utils/whatsapp';
+import {
+  getCustomerBookingWALink,
+  getCustomerRescheduleWALink,
+  formatWhatsAppPhone,
+} from '../utils/whatsapp';
 
 /**
  * TrackBookingPage Component
