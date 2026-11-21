@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { clearSettingsCache } from '../../hooks/useSettings';
 import api from '../../api/axios';
 import { formatUAEPhone } from '../../utils/formatters';
 
@@ -341,6 +342,10 @@ function GeneralSettings({ showToast }) {
     additional_email: '',
     business_address: 'Al Reem Island, Abu Dhabi, United Arab Emirates',
     description: 'Luxury residential and commercial cleaning services tailored across Abu Dhabi.',
+    operating_hours_weekdays: 'Monday – Saturday: 7:00 AM – 9:00 PM',
+    operating_hours_sunday: 'Sunday: 8:00 AM – 6:00 PM',
+    response_time: 'under 15 minutes',
+    homes_cleaned_base: '500',
     timezone: 'Asia/Dubai',
     date_format: 'MMM DD, YYYY',
     time_format: '12h',
@@ -365,6 +370,7 @@ function GeneralSettings({ showToast }) {
     setSaving(true);
     try {
       await api.put('/settings', form);
+      clearSettingsCache();
       showToast('Settings saved successfully!');
     } catch {
       showToast('Failed to save settings.', 'error');
@@ -452,6 +458,52 @@ function GeneralSettings({ showToast }) {
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit' }}
+            />
+          </Field>
+        </div>
+
+        <SectionHeader>SCHEDULE & MARKETING MILESTONES</SectionHeader>
+        <div
+          className="settings-form-row-2"
+          style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}
+        >
+          <Field label="Weekday Operating Hours">
+            <input
+              value={form.operating_hours_weekdays || ''}
+              onChange={(e) => setForm({ ...form, operating_hours_weekdays: e.target.value })}
+              style={inputStyle}
+              placeholder="e.g. Monday – Saturday: 7:00 AM – 9:00 PM"
+            />
+          </Field>
+          <Field label="Sunday / Weekend Operating Hours">
+            <input
+              value={form.operating_hours_sunday || ''}
+              onChange={(e) => setForm({ ...form, operating_hours_sunday: e.target.value })}
+              style={inputStyle}
+              placeholder="e.g. Sunday: 8:00 AM – 6:00 PM"
+            />
+          </Field>
+        </div>
+        <div
+          className="settings-form-row-2"
+          style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}
+        >
+          <Field label="Typical WhatsApp Response Time">
+            <input
+              value={form.response_time || ''}
+              onChange={(e) => setForm({ ...form, response_time: e.target.value })}
+              style={inputStyle}
+              placeholder="e.g. under 15 minutes"
+            />
+          </Field>
+          <Field label="Homes Cleaned Milestone Base (Automatic + live completed bookings)">
+            <input
+              type="number"
+              min="0"
+              value={form.homes_cleaned_base || ''}
+              onChange={(e) => setForm({ ...form, homes_cleaned_base: e.target.value })}
+              style={inputStyle}
+              placeholder="e.g. 500"
             />
           </Field>
         </div>
@@ -1116,7 +1168,106 @@ function BookingStatuses({ showToast }) {
 /* ─────────────────────────────────────────────── */
 /* TAB 5: Booking Form                              */
 /* ─────────────────────────────────────────────── */
+const ALL_PRESET_CITIES = [
+  'Abu Dhabi',
+  'Al Ain',
+  'Dubai',
+  'Sharjah',
+  'Ajman',
+  'Ras Al Khaimah',
+  'Fujairah',
+  'Umm Al Quwain',
+];
+
+function formatSlotTo24h(slot12) {
+  if (!slot12) return '';
+  const match = String(slot12).match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!match) return slot12;
+  let h = parseInt(match[1], 10);
+  const m = match[2];
+  const p = match[3].toUpperCase();
+  if (p === 'PM' && h < 12) h += 12;
+  if (p === 'AM' && h === 12) h = 0;
+  return `${String(h).padStart(2, '0')}:${m}`;
+}
+
+function parseFlexibleTime(input) {
+  if (!input) return null;
+  const str = String(input).trim().toUpperCase();
+
+  // 1. Explicit 12-hour AM/PM with or without minutes (e.g. "8 AM", "8AM", "8:30 PM", "2pm", "11:45 AM")
+  const ampmMatch = str.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/);
+  if (ampmMatch) {
+    let h = parseInt(ampmMatch[1], 10);
+    const m = ampmMatch[2] ? parseInt(ampmMatch[2], 10) : 0;
+    const period = ampmMatch[3];
+    if (h < 1 || h > 12 || m < 0 || m > 59) return null;
+    return `${h}:${String(m).padStart(2, '0')} ${period}`;
+  }
+
+  // 2. Numeric / 24-hour / single digit (e.g. "8", "14", "8:30", "14:30", "08:00", "20")
+  const numMatch = str.match(/^(\d{1,2})(?::(\d{2}))?$/);
+  if (numMatch) {
+    let h = parseInt(numMatch[1], 10);
+    const m = numMatch[2] ? parseInt(numMatch[2], 10) : 0;
+    if (h < 0 || h > 23 || m < 0 || m > 59) return null;
+
+    // 24-hour format: h >= 13
+    if (h >= 13) {
+      const pmH = h - 12;
+      return `${pmH}:${String(m).padStart(2, '0')} PM`;
+    }
+    if (h === 12) {
+      return `12:${String(m).padStart(2, '0')} PM`;
+    }
+    if (h === 0) {
+      return `12:${String(m).padStart(2, '0')} AM`;
+    }
+    // Ambiguity resolution for single numbers 1..11:
+    // In CitiMaids service hours (7:00 AM - 9:00 PM):
+    // 1..6 is standard afternoon (1 PM - 6 PM)
+    // 7..11 is morning (7 AM - 11 AM)
+    if (h >= 1 && h <= 6) {
+      return `${h}:${String(m).padStart(2, '0')} PM`;
+    } else {
+      return `${h}:${String(m).padStart(2, '0')} AM`;
+    }
+  }
+
+  return null;
+}
+
+function sortTimeSlots(slots) {
+  return [...slots].sort((a, b) => {
+    const parseMins = (t) => {
+      const match = String(t).match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+      if (!match) return 0;
+      let h = parseInt(match[1], 10);
+      const m = parseInt(match[2], 10);
+      const p = match[3].toUpperCase();
+      if (p === 'PM' && h < 12) h += 12;
+      if (p === 'AM' && h === 12) h = 0;
+      return h * 60 + m;
+    };
+    return parseMins(a) - parseMins(b);
+  });
+}
+
 function BookingForm({ showToast }) {
+  const [timeSlots, setTimeSlots] = useState([
+    '8:00 AM',
+    '10:00 AM',
+    '12:00 PM',
+    '2:00 PM',
+    '4:00 PM',
+    '6:00 PM',
+  ]);
+  const [activeCities, setActiveCities] = useState(['Abu Dhabi', 'Dubai', 'Sharjah']);
+  const [selectedCityToAdd, setSelectedCityToAdd] = useState('');
+  const [customCityInput, setCustomCityInput] = useState('');
+  const [newSlotInput, setNewSlotInput] = useState('');
+  const [saving, setSaving] = useState(false);
+
   const [fields, setFields] = useState([
     { id: 'full_name', label: 'Full Name', required: true, enabled: true, locked: true },
     { id: 'contact_number', label: 'Contact Number', required: true, enabled: true, locked: true },
@@ -1148,73 +1299,441 @@ function BookingForm({ showToast }) {
     { id: 'promo_code', label: 'Promo Code', required: false, enabled: false, locked: false },
   ]);
 
+  useEffect(() => {
+    api
+      .get('/settings')
+      .then((res) => {
+        if (res.data) {
+          if (res.data.booking_time_slots) {
+            const parsedSlots = res.data.booking_time_slots
+              .split(',')
+              .map((s) => s.trim())
+              .filter(Boolean);
+            if (parsedSlots.length > 0) setTimeSlots(sortTimeSlots(parsedSlots));
+          }
+          if (res.data.active_cities) {
+            const parsedCities = res.data.active_cities
+              .split(',')
+              .map((c) => c.trim())
+              .filter(Boolean);
+            if (parsedCities.length > 0) setActiveCities(parsedCities);
+          }
+          if (res.data.booking_form_fields) {
+            try {
+              const parsedFields = JSON.parse(res.data.booking_form_fields);
+              if (Array.isArray(parsedFields)) setFields(parsedFields);
+            } catch {}
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const toggle = (id, key) => {
     setFields((prev) => prev.map((f) => (f.id === id && !f.locked ? { ...f, [key]: !f[key] } : f)));
   };
 
+  const handleAddCity = () => {
+    let cityToAdd = '';
+    if (selectedCityToAdd === '__custom__') {
+      cityToAdd = customCityInput.trim();
+    } else {
+      cityToAdd = selectedCityToAdd.trim();
+    }
+
+    if (!cityToAdd) {
+      showToast('Please select or enter a city name.', 'error');
+      return;
+    }
+
+    if (activeCities.some((c) => c.toLowerCase() === cityToAdd.toLowerCase())) {
+      showToast(`${cityToAdd} is already in active service territories.`, 'error');
+      return;
+    }
+
+    setActiveCities((prev) => [...prev, cityToAdd]);
+    setSelectedCityToAdd('');
+    setCustomCityInput('');
+    showToast(`Added ${cityToAdd} to active service territories.`);
+  };
+
+  const removeCity = (cityToRemove) => {
+    if (activeCities.length <= 1) {
+      showToast('At least one service territory must remain active.', 'error');
+      return;
+    }
+    setActiveCities((prev) => prev.filter((c) => c !== cityToRemove));
+    showToast(`Removed ${cityToRemove} from active territories.`);
+  };
+
+  const removeTimeSlot = (slotToRemove) => {
+    setTimeSlots((prev) => {
+      if (prev.length <= 1) {
+        showToast('At least one time slot preset is required.', 'error');
+        return prev;
+      }
+      return prev.filter((s) => s !== slotToRemove);
+    });
+  };
+
+  const addTimeSlot = () => {
+    const raw = newSlotInput.trim();
+    if (!raw) return;
+
+    const parsed = parseFlexibleTime(raw);
+    if (!parsed) {
+      showToast('Invalid time format. Enter e.g. 8, 14, 08:30, 2 PM, or 14:00.', 'error');
+      return;
+    }
+
+    if (timeSlots.includes(parsed)) {
+      showToast(`Time slot ${parsed} (${formatSlotTo24h(parsed)}) already exists.`, 'error');
+      return;
+    }
+
+    setTimeSlots((prev) => sortTimeSlots([...prev, parsed]));
+    setNewSlotInput('');
+    showToast(`Added ${parsed} (${formatSlotTo24h(parsed)}) to booking shortcuts.`);
+  };
+
+  const resetDefaultSlots = () => {
+    setTimeSlots(['8:00 AM', '10:00 AM', '12:00 PM', '2:00 PM', '4:00 PM', '6:00 PM']);
+    showToast('Reset to standard CitiMaids time slots.');
+  };
+
+  const handleSave = async (e) => {
+    if (e) e.preventDefault();
+    setSaving(true);
+    try {
+      await api.put('/settings', {
+        booking_time_slots: timeSlots.join(', '),
+        active_cities: activeCities.join(', '),
+        booking_form_fields: JSON.stringify(fields),
+      });
+      clearSettingsCache();
+      showToast('Booking form configuration saved successfully!');
+    } catch {
+      showToast('Failed to save booking configuration.', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
-    <SettingsCard
-      title="Booking Form"
-      subtitle="Configure which fields appear on the customer booking form."
-    >
-      <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-        <div style={{ minWidth: 420 }}>
-          <div
+    <form onSubmit={handleSave}>
+      <SettingsCard
+        title="Booking Form & Service Territories"
+        subtitle="Manage active Emirates, appointment time slots, and form fields on the customer booking portal."
+      >
+        {/* Section 1: Active Service Territories */}
+        <SectionHeader>ACTIVE SERVICE TERRITORIES</SectionHeader>
+        <p style={{ fontSize: 13, color: '#64748b', margin: '-6px 0 16px' }}>
+          Configure which UAE Emirates and cities CitiMaids accepts bookings in. Only active cities will appear in the customer booking dropdown.
+        </p>
+
+        {/* Active Territory Badges */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
+          {activeCities.map((city) => (
+            <div
+              key={city}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 10,
+                background: city === 'Abu Dhabi' ? '#eff6ff' : '#f8fafc',
+                border: `1.5px solid ${city === 'Abu Dhabi' ? '#93c5fd' : '#cbd5e1'}`,
+                color: city === 'Abu Dhabi' ? '#1e40af' : '#334155',
+                padding: '8px 14px',
+                borderRadius: 10,
+                fontSize: 13,
+                fontWeight: 700,
+                boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+              }}
+            >
+              <span>📍 {city}</span>
+              {city === 'Abu Dhabi' && (
+                <span
+                  style={{
+                    fontSize: 10,
+                    background: '#dbeafe',
+                    color: '#1d4ed8',
+                    padding: '2px 6px',
+                    borderRadius: 6,
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  HQ
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => removeCity(city)}
+                title={`Deactivate ${city}`}
+                style={{
+                  background: city === 'Abu Dhabi' ? '#dbeafe' : '#e2e8f0',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: 18,
+                  height: 18,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: city === 'Abu Dhabi' ? '#1d4ed8' : '#64748b',
+                  fontSize: 11,
+                  fontWeight: 900,
+                  padding: 0,
+                  lineHeight: 1,
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* Add City Row with Dropdown & Custom Option */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center', marginBottom: 28 }}>
+          <select
+            value={selectedCityToAdd}
+            onChange={(e) => {
+              setSelectedCityToAdd(e.target.value);
+              if (e.target.value !== '__custom__') setCustomCityInput('');
+            }}
+            style={{ ...inputStyle, width: 230, cursor: 'pointer' }}
+          >
+            <option value="">-- Add UAE Emirate / City --</option>
+            {ALL_PRESET_CITIES.map((c) => (
+              <option key={c} value={c} disabled={activeCities.includes(c)}>
+                {c} {activeCities.includes(c) ? '(Active)' : ''}
+              </option>
+            ))}
+            <option value="__custom__">+ Other / Custom City...</option>
+          </select>
+
+          {selectedCityToAdd === '__custom__' && (
+            <input
+              type="text"
+              placeholder="Type city or region name"
+              value={customCityInput}
+              onChange={(e) => setCustomCityInput(e.target.value)}
+              style={{ ...inputStyle, width: 210 }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleAddCity();
+                }
+              }}
+            />
+          )}
+
+          <button
+            type="button"
+            onClick={handleAddCity}
+            disabled={!selectedCityToAdd || (selectedCityToAdd === '__custom__' && !customCityInput.trim())}
             style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 100px 100px',
-              gap: 0,
-              marginBottom: 8,
+              padding: '9px 18px',
+              borderRadius: 8,
+              background: '#0A2342',
+              color: '#fff',
+              fontWeight: 700,
+              fontSize: 13,
+              border: 'none',
+              cursor: 'pointer',
+              opacity:
+                !selectedCityToAdd || (selectedCityToAdd === '__custom__' && !customCityInput.trim())
+                  ? 0.5
+                  : 1,
             }}
           >
-            <span style={thStyle}>FORM FIELD</span>
-            <span style={{ ...thStyle, textAlign: 'center' }}>ENABLED</span>
-            <span style={{ ...thStyle, textAlign: 'center' }}>REQUIRED</span>
-          </div>
-          {fields.map((f) => (
+            + Add Territory
+          </button>
+        </div>
+
+        {/* Section 2: Time Slot Presets */}
+        <SectionHeader>BOOKING TIME SLOT SHORTCUTS</SectionHeader>
+        <p style={{ fontSize: 13, color: '#64748b', margin: '-6px 0 16px' }}>
+          These preset shortcut pills appear on the booking portal for fast customer selection. Customers can also enter custom times within operating hours.
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
+          {timeSlots.map((slot) => {
+            const h24 = formatSlotTo24h(slot);
+            return (
+              <div
+                key={slot}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  background: '#f0fdf4',
+                  border: '1.5px solid #bbf7d0',
+                  color: '#166534',
+                  padding: '6px 12px',
+                  borderRadius: 10,
+                  fontSize: 13,
+                  fontWeight: 700,
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+                }}
+              >
+                <span>{slot}</span>
+                <span
+                  style={{
+                    fontSize: 11,
+                    color: '#15803d',
+                    background: '#dcfce7',
+                    padding: '2px 6px',
+                    borderRadius: 6,
+                    fontFamily: 'monospace',
+                    fontWeight: 600,
+                  }}
+                >
+                  {h24}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => removeTimeSlot(slot)}
+                  title={`Remove ${slot}`}
+                  style={{
+                    background: '#dcfce7',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: 18,
+                    height: 18,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    color: '#15803d',
+                    fontSize: 11,
+                    fontWeight: 900,
+                    padding: 0,
+                    lineHeight: 1,
+                    marginLeft: 2,
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center', marginBottom: 6 }}>
+          <input
+            type="text"
+            placeholder="e.g. 8, 14, 08:30, or 2 PM"
+            value={newSlotInput}
+            onChange={(e) => setNewSlotInput(e.target.value)}
+            style={{ ...inputStyle, width: 220 }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addTimeSlot();
+              }
+            }}
+          />
+          <button
+            type="button"
+            onClick={addTimeSlot}
+            style={{
+              padding: '9px 18px',
+              borderRadius: 8,
+              background: '#0A2342',
+              color: '#fff',
+              fontWeight: 700,
+              fontSize: 13,
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            + Add Slot
+          </button>
+          <button
+            type="button"
+            onClick={resetDefaultSlots}
+            style={{
+              padding: '9px 14px',
+              borderRadius: 8,
+              background: '#f8fafc',
+              color: '#64748b',
+              fontWeight: 600,
+              fontSize: 12,
+              border: '1px solid #e2e8f0',
+              cursor: 'pointer',
+            }}
+          >
+            Reset Default Slots
+          </button>
+        </div>
+        <div style={{ fontSize: 12, color: '#64748b', marginBottom: 28, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span>💡</span>
+          <span>
+            Accepts single digits (e.g. <strong>8</strong> for 08:00, <strong>2</strong> for 14:00), 24-hour format (e.g. <strong>14</strong>, <strong>14:30</strong>, <strong>20</strong>), or 12-hour AM/PM (e.g. <strong>8am</strong>, <strong>2:30pm</strong>).
+          </span>
+        </div>
+
+        {/* Section 3: Form Fields Customization */}
+        <SectionHeader>FORM FIELD REQUIREMENTS</SectionHeader>
+        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <div style={{ minWidth: 420 }}>
             <div
-              key={f.id}
               style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 100px 100px',
                 gap: 0,
-                padding: '14px 0',
-                borderBottom: '1px solid #f1f5f9',
-                alignItems: 'center',
+                marginBottom: 8,
               }}
             >
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 500, color: '#1a1f37' }}>{f.label}</div>
-                {f.locked && (
-                  <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>
-                    Required system field
-                  </div>
-                )}
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <Toggle
-                  on={f.enabled}
-                  disabled={f.locked}
-                  onToggle={() => toggle(f.id, 'enabled')}
-                />
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <Toggle
-                  on={f.required}
-                  disabled={f.locked || !f.enabled}
-                  onToggle={() => toggle(f.id, 'required')}
-                />
-              </div>
+              <span style={thStyle}>FORM FIELD</span>
+              <span style={{ ...thStyle, textAlign: 'center' }}>ENABLED</span>
+              <span style={{ ...thStyle, textAlign: 'center' }}>REQUIRED</span>
             </div>
-          ))}
+            {fields.map((f) => (
+              <div
+                key={f.id}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 100px 100px',
+                  gap: 0,
+                  padding: '14px 0',
+                  borderBottom: '1px solid #f1f5f9',
+                  alignItems: 'center',
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 500, color: '#1a1f37' }}>{f.label}</div>
+                  {f.locked && (
+                    <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>
+                      Required system field
+                    </div>
+                  )}
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <Toggle
+                    on={f.enabled}
+                    disabled={f.locked}
+                    onToggle={() => toggle(f.id, 'enabled')}
+                  />
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <Toggle
+                    on={f.required}
+                    disabled={f.locked || !f.enabled}
+                    onToggle={() => toggle(f.id, 'required')}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 20 }}>
-        <button onClick={() => showToast('Booking form configuration saved!')} style={saveBtn}>
-          Save Changes
-        </button>
-      </div>
-    </SettingsCard>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 24 }}>
+          <button type="submit" disabled={saving} style={saveBtn}>
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
+        </div>
+      </SettingsCard>
+    </form>
   );
 }
 

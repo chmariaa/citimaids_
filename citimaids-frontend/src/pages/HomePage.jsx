@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useServices } from '../hooks/useServices';
 import { useSettings } from '../hooks/useSettings';
 import { useReviews } from '../hooks/useReviews';
+import { formatWhatsAppPhone } from '../utils/whatsapp';
 import Reveal from '../components/Reveal';
 import BeforeAfterSlider from '../components/BeforeAfterSlider';
 import ServicesMarquee from '../components/ServicesMarquee';
@@ -148,8 +149,12 @@ export default function HomePage() {
       ? (reviews.reduce((sum, r) => sum + (Number(r.stars) || 5), 0) / reviews.length).toFixed(1)
       : '4.9';
 
+  const dynamicHomesCleaned = settings?.completed_cleanings_count
+    ? `${settings.completed_cleanings_count}+`
+    : '500+';
+
   const dynamicStats = [
-    { value: '500+', label: 'Homes Cleaned in UAE' },
+    { value: dynamicHomesCleaned, label: 'Homes Cleaned in UAE' },
     { value: `${dynamicRating} / 5`, label: 'Average Client Rating' },
     { value: '9+ Yrs', label: `${city} Experience` },
     { value: '100%', label: 'Satisfaction Guarantee' },
@@ -674,7 +679,7 @@ export default function HomePage() {
                 </svg>
               </Link>
               <a
-                href="https://wa.me/97150000000"
+                href={`https://wa.me/${formatWhatsAppPhone(settings?.contact_number)}?text=${encodeURIComponent('Hi CitiMaids! I would like to inquire about your cleaning services in Abu Dhabi.')}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2.5 px-9 py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-base transition-all hover:scale-105 shadow-xl"

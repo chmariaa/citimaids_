@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import api from '../api/axios';
 import Reveal from '../components/Reveal';
-import { getCustomerBookingWALink, getCustomerRescheduleWALink } from '../utils/whatsapp';
+import { useSettings } from '../hooks/useSettings';
+import { getCustomerBookingWALink, getCustomerRescheduleWALink, formatWhatsAppPhone } from '../utils/whatsapp';
 
 /**
  * TrackBookingPage Component
@@ -20,6 +21,7 @@ import { getCustomerBookingWALink, getCustomerRescheduleWALink } from '../utils/
  * @returns {JSX.Element}
  */
 export default function TrackBookingPage() {
+  const { settings } = useSettings();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialRef = searchParams.get('ref') || searchParams.get('reference') || '';
   const initialPhone = searchParams.get('phone') || '';
@@ -282,7 +284,7 @@ export default function TrackBookingPage() {
               <p className="text-slate-600 text-sm max-w-md mx-auto mb-6">{error}</p>
               <div className="flex flex-wrap items-center justify-center gap-3">
                 <a
-                  href={`https://wa.me/97150000000?text=${encodeURIComponent(
+                  href={`https://wa.me/${formatWhatsAppPhone(settings?.contact_number)}?text=${encodeURIComponent(
                     `Hello CitiMaids dispatch! I need assistance locating my booking: ${searchValue}`
                   )}`}
                   target="_blank"
@@ -539,7 +541,7 @@ export default function TrackBookingPage() {
 
                     {/* WhatsApp Quick Link */}
                     <a
-                      href={getCustomerBookingWALink(booking)}
+                      href={getCustomerBookingWALink(booking, settings?.contact_number)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 transition-all"
@@ -552,7 +554,7 @@ export default function TrackBookingPage() {
 
                     {/* Reschedule WhatsApp Link */}
                     <a
-                      href={getCustomerRescheduleWALink(booking)}
+                      href={getCustomerRescheduleWALink(booking, settings?.contact_number)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-full py-2.5 px-4 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center gap-2 transition-colors"

@@ -44,15 +44,21 @@ export default function AboutPage() {
       ? (reviews.reduce((sum, r) => sum + (Number(r.stars) || 5), 0) / reviews.length).toFixed(1)
       : '4.9';
 
+  const dynamicHomesCleaned = settings?.completed_cleanings_count
+    ? `${settings.completed_cleanings_count}+`
+    : '500+';
+
   const dynamicStats = [
-    { value: '500+', label: 'Happy Clients' },
+    { value: dynamicHomesCleaned, label: 'Happy Clients' },
     { value: '100%', label: 'Vetted Crew' },
     { value: `${dynamicRating} / 5`, label: 'Average Review' },
     { value: '7 Days', label: 'Weekly Service' },
   ];
 
   const addressParts = settings?.business_address ? settings.business_address.split(',') : [];
-  const city = addressParts.length > 1 ? addressParts[1].trim() : 'Abu Dhabi';
+  const city = settings?.business_address?.includes('Abu Dhabi')
+    ? 'Abu Dhabi'
+    : addressParts[addressParts.length - 2]?.trim() || 'Abu Dhabi';
   const businessName = settings?.business_name || 'CitiMaids';
   const description =
     settings?.description ||
@@ -77,7 +83,7 @@ export default function AboutPage() {
             About {businessName}
           </h1>
           <p className="text-blue-100 text-sm sm:text-base leading-relaxed">
-            {city} and two other cities' trusted professional cleaning partner, delivering spotless
+            {city} and surrounding UAE communities' trusted professional cleaning partner, delivering spotless
             homes and commercial spaces since 2018.
           </p>
         </div>
@@ -91,7 +97,7 @@ export default function AboutPage() {
               Who We Are
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-2 mb-6">
-              Serving {city} and Two Other Cities' Homes & Offices with Pride
+              Serving {city} & UAE Communities with Pride
             </h2>
             <p className="text-slate-600 leading-relaxed mb-4 text-sm sm:text-base">
               {businessName} was founded in {city} with a straightforward mission: to provide UAE
@@ -141,9 +147,9 @@ export default function AboutPage() {
                   />
                   <circle cx="12" cy="11" r="3" />
                 </svg>
-                Musrif HQ
+                {settings?.business_name ? settings.business_name.split(' ')[0] : 'CitiMaids'} HQ
               </div>
-              <div className="text-xs text-slate-500">Abu Dhabi, United Arab Emirates</div>
+              <div className="text-xs text-slate-500">{city}, United Arab Emirates</div>
             </div>
           </div>
         </div>
@@ -228,7 +234,7 @@ export default function AboutPage() {
                 <div>
                   <div className="font-bold text-slate-900 text-sm">Head Office</div>
                   <div className="text-slate-600 text-xs sm:text-sm">
-                    Musrif Area, Abu Dhabi, United Arab Emirates
+                    {settings?.business_address || 'Aljazeera Tower, Room 45, Hamdan St, Abu Dhabi, UAE'}
                   </div>
                 </div>
               </div>
@@ -337,9 +343,11 @@ export default function AboutPage() {
                 <div>
                   <div className="font-bold text-slate-900 text-sm">Operation Hours</div>
                   <div className="text-slate-600 text-xs sm:text-sm">
-                    Monday – Saturday: 7:00 AM – 9:00 PM
+                    {settings?.operating_hours_weekdays || 'Monday – Saturday: 7:00 AM – 9:00 PM'}
                   </div>
-                  <div className="text-slate-600 text-xs sm:text-sm">Sunday: 8:00 AM – 6:00 PM</div>
+                  <div className="text-slate-600 text-xs sm:text-sm">
+                    {settings?.operating_hours_sunday || 'Sunday: 8:00 AM – 6:00 PM'}
+                  </div>
                 </div>
               </div>
               <div className="flex items-start gap-4 p-4.5 bg-slate-50 rounded-2xl border border-slate-100">

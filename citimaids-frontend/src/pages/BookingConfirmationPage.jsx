@@ -1,8 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useSettings } from '../hooks/useSettings';
+import { formatWhatsAppPhone } from '../utils/whatsapp';
 
 export default function BookingConfirmationPage() {
   const { state } = useLocation();
   const { data, bookingId, service, estimate } = state || {};
+  const { settings } = useSettings();
 
   if (!data) {
     return (
@@ -120,7 +123,7 @@ export default function BookingConfirmationPage() {
           </Link>
 
           <a
-            href={`https://wa.me/97150000000?text=${waText}`}
+            href={`https://wa.me/${formatWhatsAppPhone(settings?.contact_number)}?text=${waText}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-sm text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-md shadow-emerald-600/20"

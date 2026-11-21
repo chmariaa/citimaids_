@@ -11,12 +11,24 @@ const DEFAULT_SETTINGS = {
   facebook_url: 'https://web.facebook.com/people/CitiMaids-Cleaning-Services/61550129471847/',
   tiktok_url: 'https://www.tiktok.com/@citimaids?_t=8pO7VCQjaUy&_r=1',
   description: 'Premier residential, commercial, and maintenance services across Abu Dhabi.',
+  operating_hours_weekdays: 'Monday – Saturday: 7:00 AM – 9:00 PM',
+  operating_hours_sunday: 'Sunday: 8:00 AM – 6:00 PM',
+  response_time: 'under 15 minutes',
+  homes_cleaned_base: '500',
+  completed_cleanings_count: '504',
+  booking_time_slots: '8:00 AM, 10:00 AM, 12:00 PM, 2:00 PM, 4:00 PM, 6:00 PM',
+  active_cities: 'Abu Dhabi, Dubai, Sharjah',
   timezone: 'Asia/Dubai',
   currency: 'AED',
 };
 
 let globalSettings = DEFAULT_SETTINGS;
 let globalSettingsPromise = null;
+
+export function clearSettingsCache() {
+  globalSettings = DEFAULT_SETTINGS;
+  globalSettingsPromise = null;
+}
 
 export function useSettings() {
   const [settings, setSettings] = useState(globalSettings);

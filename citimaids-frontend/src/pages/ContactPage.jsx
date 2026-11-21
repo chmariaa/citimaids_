@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import api from '../api/axios';
 import { useSettings } from '../hooks/useSettings';
+import { formatWhatsAppPhone } from '../utils/whatsapp';
 import { formatUAEPhone } from '../utils/formatters';
 
 export default function ContactPage() {
@@ -17,7 +18,7 @@ export default function ContactPage() {
   const additionalPhone = settings?.additional_number || '';
   const email = settings?.business_email || '';
   const additionalEmail = settings?.additional_email || '';
-  const address = settings?.business_address || 'Musrif Area, Abu Dhabi, UAE';
+  const address = settings?.business_address || 'Aljazeera Tower, Room 45, Hamdan St, Abu Dhabi, UAE';
 
   const set = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
 
@@ -166,6 +167,24 @@ export default function ContactPage() {
                       stroke="#1E3A8A"
                       strokeWidth="2"
                     >
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 6v6l4 2" />
+                    </svg>
+                  ),
+                  label: 'Operation Hours',
+                  value: `${settings?.operating_hours_weekdays || 'Mon – Sat: 7:00 AM – 9:00 PM'} • ${settings?.operating_hours_sunday || 'Sun: 8:00 AM – 6:00 PM'}`,
+                  href: null,
+                },
+                {
+                  icon: (
+                    <svg
+                      width="18"
+                      height="18"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="#1E3A8A"
+                      strokeWidth="2"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -213,7 +232,7 @@ export default function ContactPage() {
 
             {/* Direct WhatsApp CTA */}
             <a
-              href="https://wa.me/97150000000"
+              href={`https://wa.me/${formatWhatsAppPhone(phone)}?text=${encodeURIComponent('Hi CitiMaids! I would like to inquire about your cleaning services in Abu Dhabi.')}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 w-full justify-center py-4 rounded-2xl text-white font-bold bg-emerald-500 hover:bg-emerald-600 transition-all text-sm shadow-md hover:scale-[1.02]"
@@ -225,7 +244,7 @@ export default function ContactPage() {
               Chat on WhatsApp for Fast Quotes
             </a>
             <p className="text-center text-xs text-slate-400 mt-2">
-              Typical response time: under 15 minutes.
+              Typical response time: {settings?.response_time || 'under 15 minutes'}.
             </p>
           </div>
 
